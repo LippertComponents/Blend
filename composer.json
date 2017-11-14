@@ -1,0 +1,19 @@
+{
+  "name": "lci/blend",
+  "description": "This project aims to import/export resources and elements from MODX to another MODX install to allow dev to prod git workflows.",
+  "license": "GPL-2.0+",
+  "keywords": [
+    "modx"
+  ],
+  "autoload": {
+    "psr-4": {
+      "LCI\\Blend\\": "src/"
+    }
+  },
+  "require": {
+    "league/climate": "^3.2"
+  },
+  "bin": [
+    "bin/BlenderCLi.php"
+  ]
+}
