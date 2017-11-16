@@ -14,6 +14,6 @@
     "league/climate": "^3.2"
   },
   "bin": [
-    "bin/BlenderCLi.php"
+    "bin/blend"
   ]
 }
