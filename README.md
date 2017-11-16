@@ -41,12 +41,17 @@ your public or www directory. Or if you prefer the traditional MODX extras path 
 Via composer
 1. Add to your projects composer.json file:
 ```
-"repositories": [
-    {
-        "type": "vcs",
-        "url": "https://github.com/LippertComponents/Blend"
+{
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/LippertComponents/Blend.git"
+        }
+    ],
+    "require": {
+        "lci/blend": "dev-master"
     }
-]
+}
 ```
 2. Then do ```composer install``` or ```composer update```
 
