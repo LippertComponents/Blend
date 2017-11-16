@@ -1,23 +1,64 @@
 <?php
 use LCI\Blend\Blender;
+use League\CLImate\CLImate;
 
 ini_set('display_errors', 1);
 
-require_once dirname(__DIR__).'/vendor/autoload.php';
+$autoloader_possible_paths = [
+    // if cloned from git:
+    dirname(__DIR__).'/vendor/autoload.php',
+    // if installed via composer:
+    dirname(dirname(dirname(__DIR__))).'/autoload.php',
+];
+foreach ($autoloader_possible_paths as $autoloader_path) {
+    if (file_exists($autoloader_path)) {
+        require_once $autoloader_path;
+    }
+}
 
 /** @var string $blend_modx_migration_dir ~ Blend data migration directory */
 $blend_modx_migration_dir = dirname(__DIR__).'/core/components/blend/';
 
 /** @var string $local_config ~ path to allow you to override/set the MODX include paths */
 $local_config = __DIR__.'/config.php';
-echo PHP_EOL.$local_config.PHP_EOL;
-//echo $blend_modx_migration_dir.PHP_EOL;exit();
 
 if (file_exists($local_config)) {
     require_once $local_config;
 
 } else {
-    require_once dirname(dirname(dirname(dirname(dirname(__FILE__))))) . DIRECTORY_SEPARATOR . 'config.core.php';
+    $found = false;
+    // search for MODX:
+    $modx_possible_paths = [
+        // if cloned from git, up from /www like /home/blend in MODXCloud
+        dirname(dirname(dirname(__FILE__))) . DIRECTORY_SEPARATOR . 'www' . DIRECTORY_SEPARATOR . 'config.core.php',
+        // if cloned from git, up from /www like /home/ in MODXCloud
+        dirname(dirname(__FILE__)) . DIRECTORY_SEPARATOR . 'www' . DIRECTORY_SEPARATOR . 'config.core.php',
+        // if cloned from git, into /
+        dirname(dirname(__FILE__)) . DIRECTORY_SEPARATOR . 'config.core.php',
+        // if cloned from git, into /core/components/blend/
+        dirname(dirname(dirname(dirname(dirname(__FILE__))))) . DIRECTORY_SEPARATOR . 'config.core.php',
+
+        // if installed via composer, up from /www like /home/blend in MODXCloud
+        dirname(dirname(dirname(dirname(dirname(dirname(__FILE__)))))) . DIRECTORY_SEPARATOR . 'www' . DIRECTORY_SEPARATOR . 'config.core.php',
+        // if installed via composer, up from /www like /home in MODXCloud
+        dirname(dirname(dirname(dirname(dirname(__FILE__))))) . DIRECTORY_SEPARATOR . 'www' . DIRECTORY_SEPARATOR . 'config.core.php',
+        // if installed via composer, into /
+        dirname(dirname(dirname(dirname(dirname(__FILE__))))) . DIRECTORY_SEPARATOR . 'config.core.php',
+        // if installed via composer, into /core/components/blend/
+        dirname(dirname(dirname(dirname(dirname(dirname(dirname(dirname(__FILE__)))))))) . DIRECTORY_SEPARATOR . 'config.core.php',
+    ];
+    foreach ($modx_possible_paths as $modx_path) {
+        if (file_exists($modx_path)) {
+            $found = true;
+            require_once $modx_path;
+        }
+    }
+    if (!$found) {
+        $climate = new CLImate;
+        $climate->error('Blend could not find MODX, searched the following directories:');
+        $climate->error(print_r($modx_possible_paths, true));
+        exit();
+    }
     require_once MODX_CORE_PATH . 'model/modx/modx.class.php';
     $blend_modx_migration_dir = MODX_CORE_PATH.'components/blend/';
 }
@@ -31,6 +72,7 @@ class BlenderCli
     /** @var bool  */
     protected $run = false;
 
+    /** @var \League\CLImate\CLImate  */
     protected $climate;
 
     /** @var Blender  */
@@ -49,7 +91,7 @@ class BlenderCli
 
         $this->modx->initialize('mgr');
 
-        $this->climate = new League\CLImate\CLImate;
+        $this->climate = new CLImate;
 
         $this->climate->description('Blend Data Management for MODX Revolution');
         $this->buildAllowableArgs();
