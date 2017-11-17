@@ -61,14 +61,18 @@ Go the bin directory, you may need to copy the sample.config.php file to just co
 ### Step 3
 CD to the bin directory and try 
 
-```php BlenderCli.php```
+If you used git: ```php BlenderCli.php```
 
-You should see a help menu, then do ```php BlenderCli.php -i``` to install.
+If you used composer ```php blend```
+
+You should see a help menu, then do ```php blend -i``` to install. 
+
+Migration help & usage info ```php blend -m -h``` and for seeds ```php blend -s -h```
 
 
 ## Examples
 
-1. Create a blank migration file: ```php BlenderCli.php -b -n MyChunks```
+1. Generate an empty migration file: ```php blend -m -g -n MyChunks```
 2. There will now be a file: ```MODX~core/components/blend/database/migrations/MyChunks.php``` open in your IDE
 3. You will want to something like below for the up method. The up method creates or updates:
 
@@ -113,17 +117,17 @@ if ($myChunk instanceof \modChunk) {
 
 5. Now save your file and then you can test is out by running all migrations:
 
-```php BlenderCli.php -m```
+```php blend -m```
 
 And then roll it back:
 
-```php BlenderCli.php -m -x down```
+```php blend -m -x down```
 
 ---
 
 In this example you want to export some templates and the related TVs.
 
-1. Run ```php BlenderCli.php -t``` you will then be prompted for enter in a comma separated list of template IDs or names
+1. Run ```php blend -s -o t``` you will then be prompted for enter in a comma separated list of template IDs or names
 Yes you can mix and match.
 
 2. Something like ```MODX~core/components/blend/database/migrations/m2017_11_14_160105_Template.php``` will be created along 
@@ -146,7 +150,7 @@ should now show there.
 
 In this example export some resources
 
-1. Run ```php BlenderCli.php -r``` you will then be prompted for enter in a comma separated list of resource IDs to 
+1. Run ```php blend -s``` you will then be prompted for enter in a comma separated list of resource IDs to 
 include.
 
 2. Something like ```MODX~core/components/blend/database/migrations/m2017_11_14_162358_Resource.php``` will be created along 
