@@ -67,6 +67,7 @@ define('BLEND_MODX_MIGRATION_PATH', $blend_modx_migration_dir);
 
 class BlenderCli
 {
+    /** @var modX */
     public $modx;
 
     /** @var bool  */
@@ -91,15 +92,16 @@ class BlenderCli
 
         $this->modx->initialize('mgr');
 
+        /** @var CLImate climate */
         $this->climate = new CLImate;
-
         $this->climate->description('Blend Data Management for MODX Revolution');
-        $this->buildAllowableArgs();
-        //$this->climate->arguments->parse();
 
         /** @var Blender */
         $this->blend = new Blender($this->modx, ['blend_modx_migration_dir' => BLEND_MODX_MIGRATION_PATH]);
         $this->blend->setClimate($this->climate);
+
+        $this->buildExeArgList();
+        //$this->climate->arguments->parse();
     }
 
     /**
@@ -108,51 +110,66 @@ class BlenderCli
     public function run()
     {
         //$this->climate->out('Cache path: '.$this->stockpile->getCachePath());
-        $name = (string)$this->climate->arguments->get('name');
-        $type = (string)$this->climate->arguments->get('type');
 
-        if ( $this->climate->arguments->defined('migrate') ) {
-            $method = $this->climate->arguments->get('method');
-            $this->blend->runMigration($method, $type);
+        if ($this->climate->arguments->defined('help')) {
+            $this->getUsage();
 
+        } elseif ( $this->climate->arguments->defined('migrate') ) {
+            $name = (string)$this->climate->arguments->get('name');
+            $type = (string)$this->climate->arguments->get('type');
 
-        }  elseif ( $this->climate->arguments->defined('blank') ) {
-            // create a blank migration class
-            $this->blend->createBlankMigrationClassFile((string)$name, $type);
+            if ( $this->climate->arguments->defined('generate') ) {
+                $this->climate->flank('Name: '.$name);
+                // create a blank migration class
+                $this->blend->createBlankMigrationClassFile((string)$name, $type);
 
+            } else {
+                $method = $this->climate->arguments->get('method');
+                $this->blend->runMigration($method, $type);
 
-        } elseif ( $this->climate->arguments->defined('resource') ) {
+            }
 
-            $id = $this->climate->arguments->get('resource');
-            if (empty($id) || !is_numeric($id)) {
+        } elseif ( $this->climate->arguments->defined('seeds') ) {
+            // what seeds script to run?
+            $name = (string)$this->climate->arguments->get('name');
+            $type = $this->climate->arguments->get('type');
+            $object = $this->climate->arguments->get('object');
+            $id = $this->climate->arguments->get('id');
 
-                $input = $this->climate->input('Enter in a comma separated list of resource IDs, will get children as well ');
-                $input->defaultTo('2');
-                $resource_ids = $input->prompt();
-                $ids = explode(',', $resource_ids);
-                foreach ($ids as $id) {
-                    $this->blend->makeResourceSeedsFromParent($id, true, $type, $name);
+            if ( $object == 'r' || $object == 'resource' ) {
+
+                if (empty($id) || !is_numeric($id)) {
+                    $input = $this->climate->input('Enter in a comma separated list of resource IDs, will get children as well ');
+                    $input->defaultTo('2');
+                    $resource_ids = $input->prompt();
+                    $ids = explode(',', $resource_ids);
+                    foreach ($ids as $id) {
+                        $this->blend->makeResourceSeedsFromParent($id, true, $type, $name);
+                    }
+
+                } else {
+
                 }
 
-            } else {
+            }  elseif ( $object == 't' || $object == 'template'  ) {
+
+                if (is_numeric($id) && $id > 0) {
+                    $templates = $id;
+                } else {
+                    $input = $this->climate->input('Enter in a comma separated list of template names or IDs ');
+                    $input->defaultTo('');
+                    $templates = $input->prompt();
+                }
+
+                $this->blend->makeTemplateSeeds(explode(',', $templates), $type, $name);
 
             }
-
-        }  elseif ( $this->climate->arguments->defined('templates') ) {
-            $id = $this->climate->arguments->get('templates');
-            if (is_numeric($id) && $id > 0) {
-                $templates = $id;
-            } else {
-                $input = $this->climate->input('Enter in a comma separated list of template names or IDs ');
-                $input->defaultTo('');
-                $templates = $input->prompt();
-            }
-
-            $this->blend->makeTemplateSeeds(explode(',', $templates), $type, $name);
 
         } elseif ( $this->climate->arguments->defined('install') ) {
-            $method = $this->climate->arguments->get('method');
-            $this->blend->install($method);
+            $this->blend->install();
+
+        } elseif ( $this->climate->arguments->defined('uninstall') ) {
+            $this->blend->install('down');
 
         } else {
             $this->getUsage();
@@ -161,64 +178,32 @@ class BlenderCli
         $this->climate->out('Completed in '.(microtime(true)-$this->begin_time).' seconds')->br();
     }
 
-    /**
-     *
-     */
-    protected function buildAllowableArgs()
+    protected function buildExeArgList()
     {
         // Help menu:
-        $this->climate->arguments->add([
-            /*
-            'all' => [
-                'prefix'      => 'a',
-                'longPrefix'  => 'all',
-                'description' => '(re)Cache all resources',
-                'noValue'     => true,
-            ],*/
-            'migrate' => [
-                'prefix'      => 'm',
-                'longPrefix'  => 'migrate',
-                'description' => 'Run migration',
-                'noValue'     => true,
-            ],
-            'blank' => [
-                'prefix'      => 'b',
-                'longPrefix'  => 'blank',
-                'description' => 'Create a blank migration class',
-                'noValue'     => true,
-            ],
-            'name' => [
-                'prefix'      => 'n',
-                'longPrefix'  => 'name',
-                'description' => 'Name parameter to send with blank to name the migration file',
-                'defaultValue' => null
-            ],
-            'method' => [
-                'prefix'      => 'x',
-                'longPrefix'  => 'method',
-                'description' => 'Up or down, default is up',
-                'defaultValue' => 'up'
-            ],
-            'type' => [
-                'prefix'      => 't',
-                'longPrefix'  => 'type',
-                'description' => 'Server type to run migrations as, default is master. Possible master, staging, dev and local',
-                'defaultValue' => 'master'
-            ],
-            'resource' => [
-                'prefix'      => 'r',
-                'longPrefix'  => 'resource',
-                'description' => 'Seed resources',
-            ],
-            'templates' => [
-                'prefix'      => 't',
-                'longPrefix'  => 'templates',
-                'description' => 'Seed templates and TVs',
-            ],
+        $exe_args = [
             'install' => [
                 'prefix'      => 'i',
                 'longPrefix'  => 'install',
-                'description' => 'Install Stockpile in MODX',
+                'description' => 'Install Blend in MODX',
+                'noValue'     => true,
+            ],
+            'migrate' => [
+                'prefix'      => 'm',
+                'longPrefix'  => 'migrate',
+                'description' => 'Run migration, add -h for help info',
+                'noValue'     => true,
+            ],
+            'seeds' => [
+                'prefix'      => 's',
+                'longPrefix'  => 'seed',
+                'description' => 'Create migration seeds, add -h for help info',
+                'noValue'     => true,
+            ],
+            'uninstall' => [
+                'prefix'      => 'u',
+                'longPrefix'  => 'uninstall',
+                'description' => 'Uninstall Blend from MODX',
                 'noValue'     => true,
             ],
             'help' => [
@@ -227,12 +212,135 @@ class BlenderCli
                 'description' => 'Prints a usage statement',
                 'noValue'     => true,
             ]
-        ]);
+        ];
 
-        $this->climate->arguments->parse();
-        if ( $this->climate->arguments->get('promote')) {
-            $this->run = true;
+        if ($this->blend->isBlendInstalledInModx()) {
+            unset($exe_args['install']);
+        } else {
+            unset($exe_args['uninstall']);
         }
+
+        $this->climate->arguments->add($exe_args);
+        $this->climate->arguments->parse($exe_args);
+
+        if ( $this->climate->arguments->defined('migrate') ) {
+            $this->climate->out('migrate');
+            $this->climate->description('Run Blend Data migrations');
+            $this->buildAllowableArgs('migrate');
+
+        } elseif ( $this->climate->arguments->defined('seeds') ) {
+            $this->climate->out('seed');
+            $this->climate->description('Create Blend Data seeds');
+            $this->buildAllowableArgs('seed');
+
+        } elseif ( $this->climate->arguments->defined('install') ) {
+            $this->climate->out('install');
+            $this->climate->description('Install Blend Data Management for MODX Revolution');
+
+        } else {
+            $this->climate->arguments->add($exe_args);
+
+        }
+
+
+    }
+
+    /**
+     * @param string $exe
+     */
+    protected function buildAllowableArgs($exe='')
+    {
+        $this->climate = null;
+        $this->climate = new CLImate();
+
+        $command_args = [];
+        // unique args:
+        switch ($exe) {
+            case 'migrate':
+                $command_args = [
+                    'migrate' => [
+                        'prefix'      => 'm',
+                        'longPrefix'  => 'migrate',
+                        'description' => 'Run migration, add -h for help info',
+                        'noValue'     => true,
+                        'required'    => true
+                    ],
+                    'generate' => [
+                        'prefix'      => 'g',
+                        'longPrefix'  => 'generate',
+                        'description' => 'Generate/create an empty migration class that you can build out a custom migration',
+                        'noValue'     => true,
+                    ],
+                    'method' => [
+                        'prefix'      => 'x',
+                        'longPrefix'  => 'method',
+                        'description' => 'Up or down(rollback), default is up',
+                        'defaultValue' => 'up'
+                    ],
+                    'id' => [
+                        'prefix'      => 'i',
+                        'longPrefix'  => 'id',
+                        'description' => 'ID of migration to run'
+                    ],
+                    'count' => [
+                        'prefix'      => 'c',
+                        'longPrefix'  => 'count',
+                        'description' => 'How many to rollback, default is 1',
+                        'defaultValue' => '1'
+                    ],
+
+                ];
+                break;
+            case 'seed':
+                $command_args = [
+                    'seeds' => [
+                        'prefix'      => 's',
+                        'longPrefix'  => 'seed',
+                        'description' => 'Create migration seeds, add -h for help info',
+                        'noValue'     => true,
+                        'required'    => true
+                    ],
+                    'object' => [
+                        'prefix'      => 'o',
+                        'longPrefix'  => 'object',
+                        'description' => 'Seed object, default is r, can be r(resource), t(template)',
+                        'default'     => 'r',
+                        'required'    => true
+                    ],
+                    'id' => [
+                        'prefix'      => 'i',
+                        'longPrefix'  => 'id',
+                        'description' => 'ID of migration to run'
+                    ]
+                ];
+                break;
+        }
+
+        // shared args:
+        $command_args = $command_args + [
+            'name' => [
+                'prefix'      => 'n',
+                'longPrefix'  => 'name',
+                'description' => 'Name parameter to send with blank to name the migration file',
+                'defaultValue' => null
+            ],
+            'type' => [
+                'prefix'      => 't',
+                'longPrefix'  => 'type',
+                'description' => 'Server type to run migrations as, default is master. Possible master, staging, dev and local',
+                'defaultValue' => 'master'
+            ],
+            'help' => [
+                'prefix'      => 'h',
+                'longPrefix'  => 'help',
+                'description' => 'Prints a usage statement',
+                'noValue'     => true,
+            ]
+        ];
+
+        $this->climate->arguments->add($command_args);
+        $this->climate->arguments->parse();
+
     }
 
     /**

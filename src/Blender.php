@@ -440,6 +440,26 @@ class Blender
 
         }
     }
+
+    /**
+     * @return bool
+     */
+    public function isBlendInstalledInModx()
+    {
+        /** @var \xPDOQuery $query */
+        $query = $this->modx->newQuery('BlendMigrations');
+        $query->sortBy('name');
+
+        $installMigration = $this->modx->getObject('BlendMigrations', [
+            'name' => 'install_blender',
+            'status' => 'up_complete'
+        ]);
+        if ($installMigration instanceof \BlendMigrations) {
+            return true;
+        }
+
+        return false;
+    }
     /**
      * @param string $method
      * @param string $type
