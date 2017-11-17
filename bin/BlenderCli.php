@@ -304,8 +304,7 @@ class BlenderCli
                         'prefix'      => 'o',
                         'longPrefix'  => 'object',
                         'description' => 'Seed object, default is r, can be r(resource), t(template)',
-                        'default'     => 'r',
-                        'required'    => true
+                        'default'     => 'r'
                     ],
                     'id' => [
                         'prefix'      => 'i',
