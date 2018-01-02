@@ -160,7 +160,7 @@ class Blender
      */
     public function blendOneRawChunk($name)
     {
-        /** @var Element $chunk */
+        /** @var Chunk $chunk */
         $chunk =  new Chunk($this->modx, $this);
         return $chunk
             ->init()

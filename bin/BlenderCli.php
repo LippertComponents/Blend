@@ -309,7 +309,7 @@ class BlenderCli
                     'id' => [
                         'prefix'      => 'i',
                         'longPrefix'  => 'id',
-                        'description' => 'ID of migration to run'
+                        'description' => 'ID of object to run'
                     ]
                 ];
                 break;
