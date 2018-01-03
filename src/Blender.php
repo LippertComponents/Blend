@@ -90,18 +90,29 @@ class Blender
 
     /**
      * @param bool $reload
+     * @param string $dir
+     * @param int $count
+     * @param int $id
      *
      * @return array ~ array of \BlendMigrations
      */
-    public function getBlendMigrationCollection($reload=false)
+    public function getBlendMigrationCollection($reload=false, $dir='ASC', $count=0, $id=0)
     {
         if (!$this->blendMigrations || $reload) {
             $blendMigrations = [];
 
             /** @var \xPDOQuery $query */
             $query = $this->modx->newQuery('BlendMigrations');
-            $query->sortBy('name');
-
+            if ($id > 0 ) {
+                $query->where(['id' => $id]);
+            }
+            // @TODO need a ran sequence column to better order of down
+            $query->sortBy('name', $dir);
+            if ($count > 0 ) {
+                $query->limit($count);
+            }
+            $query->prepare();
+            echo 'SQL: '.$query->toSQL();
             $migrationCollection = $this->modx->getCollection('BlendMigrations');
 
             /** @var \BlendMigrations $migration */
@@ -569,22 +580,34 @@ class Blender
     /**
      * @param string $method
      * @param string $type
+     * @param int $count
+     * @param int $id
      */
-    public function runMigration($method='up', $type='master')
+    public function runMigration($method='up', $type='master', $count=0, $id=0)
     {
+        $dir = 'ASC';
+        if ($method == 'down') {
+            $dir = 'DESC';
+        } else {
+            $count = 0;
+        }
         // 1. Get all migrations currently in DB:
-        $blendMigrations = $this->getBlendMigrationCollection();
+        $blendMigrations = $this->getBlendMigrationCollection(false, $dir, $count, $id);
 
         // 2. Load migration files:
-        if ($this->retrieveMigrationFiles($blendMigrations)) {
-            // this is needed just to insure that the order is correct and any new files
-            $blendMigrations = $this->getBlendMigrationCollection(true);
+        if ($method == 'up') {
+            if ($this->retrieveMigrationFiles($blendMigrations)) {
+                // this is needed just to insure that the order is correct and any new files
+                $blendMigrations = $this->getBlendMigrationCollection(true);
+            }
         }
 
         // 3. now run migration if proper
         /** @var \BlendMigrations $migration */
         foreach ($blendMigrations as $name => $migration) {
-
+            if ($id > 0 && $migration->get('id') != $id) {
+                continue;
+            }
             /** @var string $name */
             $name = $migration->get('name');
 

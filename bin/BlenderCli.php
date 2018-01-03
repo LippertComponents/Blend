@@ -117,6 +117,8 @@ class BlenderCli
         } elseif ( $this->climate->arguments->defined('migrate') ) {
             $name = (string)$this->climate->arguments->get('name');
             $type = (string)$this->climate->arguments->get('type');
+            $id = $this->climate->arguments->get('id');
+            $count = $this->climate->arguments->get('count');
 
             if ( $this->climate->arguments->defined('generate') ) {
                 $this->climate->flank('Name: '.$name);
@@ -125,7 +127,7 @@ class BlenderCli
 
             } else {
                 $method = $this->climate->arguments->get('method');
-                $this->blend->runMigration($method, $type);
+                $this->blend->runMigration($method, $type, $count, $id);
 
             }
 
