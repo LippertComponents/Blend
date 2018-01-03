@@ -42,6 +42,7 @@ abstract class Migrations
         $this->assignDescription();
         $this->assignVersion();
         $this->assignType();
+        $this->assignTimestamp();
     }
     /**
      * Run the migrations.
