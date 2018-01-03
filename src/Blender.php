@@ -288,6 +288,84 @@ class Blender
     }
 
     /**
+     * @param array $settings ~ [ ['name' => 'mySystemSetting', 'value' => 'myValue'], ..]
+     * @param string $timestamp
+     */
+    public function blendManySystemSettings($settings=[], $timestamp='')
+    {
+        // will update if system setting does exist or create new
+        foreach ($settings as $setting) {
+            $systemSetting = new SystemSetting($this->modx, $this);
+            if (!empty($timestamp)) {
+                $systemSetting->setSeedTimeDir($timestamp);
+            }
+            if (isset($setting['key'])) {
+                $systemSetting->setName($setting['key']);
+
+            } elseif (isset($setting['name'])) {
+                $systemSetting->setName($setting['key']);
+
+            } else {
+                // Error: no name/key
+                continue;
+            }
+
+            if (isset($setting['namespace'])) {
+                $systemSetting->setNamespace($setting['namespace']);
+            }
+            if (isset($setting['area'])) {
+                $systemSetting->setArea($setting['area']);
+            }
+            if (isset($setting['value'])) {
+                $systemSetting->setValue($setting['value']);
+            }
+
+            if (isset($setting['xtype'])) {
+                $systemSetting->setType($setting['xtype']);
+
+            } elseif (isset($setting['type'])) {
+                $systemSetting->setType($setting['type']);
+            }
+
+            if ( $systemSetting->blend() ) {
+                $this->out($systemSetting->getName().' setting has been blended');
+            }
+        }
+    }
+
+    /**
+     * @param array $settings ~ [ ['name' => 'mySystemSetting', 'value' => 'myValue'], ..]
+     * @param string $timestamp
+     */
+    public function revertBlendManySystemSettings($settings=[], $timestamp='')
+    {
+        // will update if system setting does exist or create new
+        foreach ($settings as $setting) {
+            $systemSetting = new SystemSetting($this->modx, $this);
+            if (!empty($timestamp)) {
+                $systemSetting->setSeedTimeDir($timestamp);
+            }
+            if (isset($setting['key'])) {
+                $systemSetting->setName($setting['key']);
+
+            } elseif (isset($setting['name'])) {
+                $systemSetting->setName($setting['key']);
+
+            } else {
+                // Error: no name/key
+                continue;
+            }
+
+            if ( $systemSetting->revertBlend() ) {
+                $this->out($systemSetting->getName().' setting has been reverted to '.$timestamp);
+
+            } else {
+                $this->out($systemSetting->getName().' setting was not reverted', true);
+            }
+        }
+    }
+
+    /**
      * @param string $question
      * @param string $default
      *
@@ -352,6 +430,34 @@ class Blender
         }
 
         $this->writeMigrationClassFile('resource', $keys, $server_type, $name);
+        //$this->out($this->getMigrationName('resource'));
+    }
+
+    /**
+     * @param \xPDOQuery|array|null $criteria
+     * @param string $server_type
+     * @param string $name
+     */
+    public function makeSystemSettingSeeds($criteria, $server_type='master', $name=null)
+    {
+        $collection = $this->modx->getCollection('modSystemSetting', $criteria);
+
+        $setting_data = [];
+        foreach ($collection as $setting) {
+            // @TODO transform all values that are IDs, templates, resources, ect.
+            $setting_data[] = $setting->toArray();
+        }
+
+        // https://docs.modx.com/revolution/2.x/developing-in-modx/other-development-resources/class-reference/modx/modx.invokeevent
+        $this->modx->invokeEvent(
+            'OnBlendSeedSystemSettings',
+            [
+                'blender' => $this,
+                'data' => &$setting_data
+            ]
+        );
+
+        $this->writeMigrationClassFile('systemSettings', $setting_data, $server_type, $name);
         //$this->out($this->getMigrationName('resource'));
     }
 
@@ -594,11 +700,11 @@ class Blender
 
     /**
      * @param string $type
-     * @param array $class_properties
+     * @param array $class_data
      * @param string $server_type
      * @param string $name
      */
-    protected function writeMigrationClassFile($type, $class_properties=[], $server_type='master', $name=null)
+    protected function writeMigrationClassFile($type, $class_data=[], $server_type='master', $name=null)
     {
         if (!empty($name)) {
             $class_name = $name = preg_replace('/[^A-Za-z0-9\_\.]/', '', str_replace(['/', ' '], '_', $name));
@@ -621,14 +727,21 @@ class Blender
 
             case 'resource':
                 $migration_template = 'resource.txt';
-                $placeholders['resourceData'] = var_export($class_properties, true);
-                $placeholders['classUpInners'] = '$this->blender->blendResources($this->resources, $this->getTimestamp());';
+                $placeholders['resourceData'] = var_export($class_data, true);
+                $placeholders['classUpInners'] = '$this->blender->blendManyResources($this->resources, $this->getTimestamp());';
                 $placeholders['classDownInners'] = '//@TODO';
+                break;
+
+            case 'systemSettings':
+                $migration_template = 'systemSettings.txt';
+                $placeholders['settingsData'] = $this->prettyVarExport($class_data);
+                $placeholders['classUpInners'] = '$this->blender->blendManySystemSettings($this->settings, $this->getTimestamp());';
+                $placeholders['classDownInners'] = '$this->blender->revertBlendManySystemSettings($this->settings, $this->getTimestamp());';
                 break;
 
             case 'template':
                 $migration_template = 'template.txt';
-                $placeholders['templateData'] = var_export($class_properties, true);
+                $placeholders['templateData'] = var_export($class_data, true);
                 $placeholders['classUpInners'] = '$this->blender->blendManyTemplates($this->templates, $this->getTimestamp());';
                 $placeholders['classDownInners'] = '//@TODO';
                 break;
@@ -728,6 +841,28 @@ class Blender
     public function getElementSeedKeyFromName($name, $type)
     {
         return $type.'_'.str_replace('/', '#', $name);
+    }
+
+    /**
+     * @param mixed|array $data
+     * @param int $tabs
+     *
+     * @return string
+     */
+    protected function prettyVarExport($data, $tabs=1)
+    {
+        $spacing = str_repeat(' ', 4*$tabs);
+
+        $string = '';
+        $parts = preg_split('/\R/', var_export($data, true));
+        foreach ($parts as $k => $part) {
+            if ($k > 0) {
+                $string .= $spacing;
+            }
+            $string .= $part.PHP_EOL;
+        }
+
+        return trim($string);
     }
 }
 /**

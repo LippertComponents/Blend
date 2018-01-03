@@ -135,6 +135,7 @@ class BlenderCli
             $type = $this->climate->arguments->get('type');
             $object = $this->climate->arguments->get('object');
             $id = $this->climate->arguments->get('id');
+            $date = $this->climate->arguments->get('date');
 
             if ( $object == 'r' || $object == 'resource' ) {
 
@@ -151,7 +152,7 @@ class BlenderCli
 
                 }
 
-            }  elseif ( $object == 't' || $object == 'template'  ) {
+            } elseif ( $object == 't' || $object == 'template'  ) {
 
                 if (is_numeric($id) && $id > 0) {
                     $templates = $id;
@@ -162,6 +163,25 @@ class BlenderCli
                 }
 
                 $this->blend->makeTemplateSeeds(explode(',', $templates), $type, $name);
+
+            } elseif ( $object == 's' || $object == 'systemSettings'  ) {
+                /** @var \xPDOQuery $criteria */
+                $criteria = $this->modx->newQuery('modSystemSetting');
+
+                if (isset($date) && !empty($date)) {
+                    $criteria->where([
+                        'editedon:>=' => $date
+                    ]);
+
+                } else {
+                    $input = $this->climate->input('Enter in a comma separated list of system settings');
+                    $input->defaultTo('');
+                    $names = $input->prompt();
+                    $criteria->where([
+                        'key:IN' => explode(',', $names)
+                    ]);
+                }
+                $this->blend->makeSystemSettingSeeds($criteria, $type, $name);
 
             }
 
@@ -303,13 +323,18 @@ class BlenderCli
                     'object' => [
                         'prefix'      => 'o',
                         'longPrefix'  => 'object',
-                        'description' => 'Seed object, default is r, can be r(resource), t(template)',
+                        'description' => 'Seed object, default is r, can be r(resource), s(systemSettings), or t(template)',
                         'default'     => 'r'
                     ],
                     'id' => [
                         'prefix'      => 'i',
                         'longPrefix'  => 'id',
                         'description' => 'ID of object to run'
+                    ],
+                    'date' => [
+                        'prefix'      => 'd',
+                        'longPrefix'  => 'date',
+                        'description' => 'Date since created or modified, ex: 2018-01-31'
                     ]
                 ];
                 break;

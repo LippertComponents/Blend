@@ -21,7 +21,8 @@ class install_blender extends Migrations
         'OnBlendSeedResource',
         'OnBlendSeedElement',
         'OnBlendElementBeforeSave',
-        'OnBlendElementAfterSave'
+        'OnBlendElementAfterSave',
+        'OnBlendSeedSystemSettings'
     ];
 
     /**
