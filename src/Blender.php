@@ -177,6 +177,61 @@ class Blender
             ->init()
             ->setName($name);
     }
+    /**
+     * @param array $chunks
+     * @param string $timestamp
+     */
+    public function blendManyChunks($chunks=[], $timestamp='')
+    {
+        // will update if element does exist or create new
+        foreach ($chunks as $seed_key) {
+            $blendChunk = new Chunk($this->modx, $this);
+            $blendChunk
+                ->init();
+            if (!empty($timestamp)) {
+                $blendChunk->setSeedTimeDir($timestamp);
+            }
+            if ($blendChunk->blend($seed_key)) {
+                $this->out($seed_key.' has been blended into ID: ');
+
+            } elseif($blendChunk->isExists()) {
+                // @TODO prompt Do you want to blend Y/N/Compare
+                $this->out($seed_key.' chunk already exists', true);
+                if ($this->prompt('Would you like to update?', 'Y') === 'Y') {
+                    if ($blendChunk->blendTemplate($seed_key, true)) {
+                        $this->out($seed_key.' has been blended');
+                    }
+                }
+            } else {
+                $this->out('There was an error saving '.$seed_key, true);
+            }
+        }
+    }
+
+    /**
+     * @param array $chunks
+     * @param string $timestamp
+     */
+    public function revertBlendManyChunks($chunks=[], $timestamp='')
+    {
+        // will update if system setting does exist or create new
+        foreach ($chunks as $seed_key) {
+            /** @var Chunk $systemSetting */
+            $blendChunk = new Chunk($this->modx, $this);
+            $blendChunk
+                ->init();
+            if (!empty($timestamp)) {
+                $blendChunk->setSeedTimeDir($timestamp);
+            }
+
+            if ( $blendChunk->revertBlend($seed_key) ) {
+                $this->out($blendChunk->getName().' chunk has been reverted to '.$timestamp);
+
+            } else {
+                $this->out($blendChunk->getName().' chunk was not reverted', true);
+            }
+        }
+    }
 
     /**
      * Use this method with your IDE to help manually build a Snippet with PHP
@@ -409,6 +464,32 @@ class Blender
     public function createBlankMigrationClassFile($name, $server_type='master')
     {
         $this->writeMigrationClassFile('blank', [], $server_type, $name);
+    }
+
+    /**
+     * @param \xPDOQuery|array|null $criteria
+     * @param string $server_type
+     * @param string $name
+     */
+    public function makeChunkSeeds($criteria, $server_type='master', $name=null)
+    {
+        $keys = [];
+        $collection = $this->modx->getCollection('modChunk', $criteria);
+
+        foreach ($collection as $chunk) {
+            /** @var Chunk $blendTemplate */
+            $blendTemplate = new Chunk($this->modx, $this);
+            $seed_key = $blendTemplate
+                ->init()
+                ->setSeedTimeDir($this->timestamp)
+                ->seedElement($chunk);
+            $this->out("Chunk ID: ".$chunk->get('id').' Key: '.$seed_key);
+            $keys[] = $seed_key;
+
+        }
+
+        $this->writeMigrationClassFile('chunk', $keys, $server_type, $name);
+        //$this->out($this->getMigrationName('template'));
     }
 
     /**
@@ -733,6 +814,13 @@ class Blender
         ];
 
         switch ($type) {
+
+            case 'chunk':
+                $migration_template = 'chunk.txt';
+                $placeholders['chunkData'] = $this->prettyVarExport($class_data);
+                $placeholders['classUpInners'] = '$this->blender->blendManyChunks($this->chunks, $this->getTimestamp());';
+                $placeholders['classDownInners'] = '$this->blender->revertBlendManyChunks($this->chunks, $this->getTimestamp());';
+                break;
 
             case 'resource':
                 $migration_template = 'resource.txt';

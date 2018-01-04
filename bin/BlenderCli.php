@@ -139,7 +139,10 @@ class BlenderCli
             $id = $this->climate->arguments->get('id');
             $date = $this->climate->arguments->get('date');
 
-            if ( $object == 'r' || $object == 'resource' ) {
+            if ( $object == 'c' || $object == 'chunk' ) {
+                $this->seedChunks($type, $name, $id, $date);
+
+            } elseif ( $object == 'r' || $object == 'resource' ) {
                 $this->seedResources($type, $name, $id, $date);
 
             } elseif ( $object == 't' || $object == 'template'  ) {
@@ -161,6 +164,38 @@ class BlenderCli
         }
 
         $this->climate->out('Completed in '.(microtime(true)-$this->begin_time).' seconds')->br();
+    }
+
+    /**
+     * @param string $type
+     * @param string $name
+     * @param int $id
+     * @param string $date
+     */
+    protected function seedChunks($type, $name, $id)
+    {
+        /** @var \xPDOQuery $criteria */
+        $criteria = $this->modx->newQuery('modChunk');
+
+        if (!empty($id) && is_numeric($id)) {
+            $criteria->where([
+                'id' => $id
+            ]);
+
+        } else {
+            $input = $this->climate->input('Enter in a comma separated list of chunk names or IDs ');
+            $input->defaultTo('');
+            $ids = explode(',', $input->prompt());
+
+            $criteria->where([
+                'id:IN' => $ids
+            ]);
+            $criteria->orCondition(array(
+                'name:IN' => $ids
+            ));
+        }
+
+        $this->blend->makeChunkSeeds($criteria, $type, $name);
     }
 
     /**
@@ -289,6 +324,10 @@ class BlenderCli
             $criteria->where([
                 'id:IN' => $ids
             ]);
+            $criteria->orCondition(array(
+                'templatename:IN' => $ids
+            ));
+
         }
 
         $this->blend->makeTemplateSeeds($criteria, $type, $name);

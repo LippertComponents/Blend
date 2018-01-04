@@ -28,12 +28,14 @@ abstract class Element
     /** @var int $cache_life in seconds, 0 is forever */
     protected $cache_life = 0;
 
+    /** @var string ~ xPDOObject class name, example: modChunk */
     protected $element_class;
+
     /** @var string  */
     protected $name_column_name = 'name';
 
     /** @var  string */
-    protected  $name;
+    protected $name;
 
     /** @var  string */
     protected $description;
@@ -53,16 +55,22 @@ abstract class Element
     /** @var null|Properties  */
     protected $properties = null;
 
+    /** @var bool  */
     protected $error = false;
 
+    /** @var array  */
     protected $error_messages = [];
 
+    /** @var array  */
     protected $category_names = [];
 
+    /** @var null|\xPDOObject  */
     protected $element = null;
 
+    /** @var array  */
     protected $element_data = [];
 
+    /** @var bool  */
     protected $exists = false;
 
     /**
@@ -284,8 +292,11 @@ abstract class Element
         }
 
         foreach ($data as $column => $value) {
-
             $method_name = 'set'.$this->makeStudyCase($column);
+            if ($column == 'category') {
+                $method_name = 'setCategoryFromNames';
+            }
+
             if (method_exists($this, $method_name) && !is_null($value)) {
                 if ($method_name == 'setProperties' && !is_array($value)) {
                     continue;
@@ -313,6 +324,11 @@ abstract class Element
         return $this->element->save();
     }
 
+    /**
+     * @param bool $overwrite
+     *
+     * @return bool
+     */
     public function save($overwrite=false)
     {
         $saved = false;
@@ -363,6 +379,9 @@ abstract class Element
         return $saved;
     }
 
+    /**
+     * @return int
+     */
     protected function getCategoryIDFromNames()
     {
         $category_id = 0;
@@ -387,6 +406,12 @@ abstract class Element
         return $category_id;
     }
 
+    /**
+     * @param int $category_id
+     * @param string $string
+     *
+     * @return string
+     */
     public function getCategoryAsString($category_id=0, $string='')
     {
         $categories = $this->blender->getCategoryMap();
@@ -449,6 +474,112 @@ abstract class Element
     {
         return $this->modx->getObject($this->element_class, [$this->name_column_name => $name]);
     }
+
+    /**
+     * @param string $seed_key
+     * @param bool $overwrite
+     *
+     * @return bool
+     */
+    public function blend($seed_key, $overwrite=false)
+    {
+        $save = false;
+        $this->loadElementDataFromSeed($seed_key);
+
+        // does it exist
+        $name = '';
+        if (isset($this->element_data[$this->name_column_name])) {
+            $this->setName($this->element_data[$this->name_column_name]);
+            $name = $this->element_data[$this->name_column_name];
+        }
+
+        $down = false;
+        $element = $this->getElementFromName($name);
+        if ($element) {
+            $this->exists = true;
+            if (!$overwrite) {
+                return $save;
+            }
+            $down = $element->toArray();
+        } else {
+            $this->exists = false;
+        }
+
+        unset($this->element_data['id']);
+
+        // get template
+        $this->modx->invokeEvent(
+            'OnBlendElementBeforeSave',
+            [
+                'blender' => $this->blender,
+                'blendResource' => $this,
+                'element' => &$this->element,
+                'data' => &$this->element_data
+            ]
+        );
+
+        // load from array:
+        $this->loadFromArray($this->element_data);
+        $save = $this->save();
+
+        if ($save) {
+            // write old version to disk:
+            $this->modx->cacheManager->set(
+                'down-'.$seed_key,
+                $down,
+                $this->cache_life,
+                $this->cacheOptions
+            );
+            $this->modx->invokeEvent(
+                'OnBlendElementAfterSave',
+                [
+                    'blender' => $this->blender,
+                    'blendResource' => $this,
+                    'element' => &$this->element,
+                    'data' => &$this->element_data
+                ]
+            );
+        } else {
+            $this->blender->out('Error did not save ', true);
+        }
+        return $save;
+    }
+
+    /**
+     * @param string $seed_key
+     *
+     * @return bool
+     */
+    public function revertBlend($seed_key)
+    {
+        $this->loadElementDataFromSeed($seed_key);
+
+        // does it exist
+        $name = '';
+        if (isset($this->element_data[$this->name_column_name])) {
+            $this->setName($this->element_data[$this->name_column_name]);
+            $name = $this->element_data[$this->name_column_name];
+        }
+
+        $element = $this->getElementFromName($name);
+        if (!is_object($element)) {
+            $element = $this->modx->getObject($this->element_class);
+        }
+        // 1. get previous data from cache:
+        $data = $this->modx->cacheManager->get('down-'.$seed_key, $this->cacheOptions);
+
+        if (!$data) {
+            return $element->remove();
+
+        } elseif (is_array($data)) {
+            // load old data:
+            $element->fromArray($data);
+            return $element->save();
+        }
+
+        return false;
+    }
+
     /**
      * @param string $seed_key
      *
