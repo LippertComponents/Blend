@@ -140,19 +140,71 @@ class BlenderCli
             $date = $this->climate->arguments->get('date');
 
             if ( $object == 'r' || $object == 'resource' ) {
+                /** @var \xPDOQuery $criteria */
+                $criteria = $this->modx->newQuery('modResource');
 
-                if (empty($id) || !is_numeric($id)) {
-                    $input = $this->climate->input('Enter in a comma separated list of resource IDs, will get children as well ');
+                if (isset($date) && !empty($date)) {
+                    $date = strtotime($date);
+                    $criteria->where([
+                        'editedon:>=' => $date
+                    ]);
+                    $criteria->orCondition(array(
+                        'createdon:>=' => $date
+                    ));
+
+                } elseif (!empty($id) && is_numeric($id)) {
+                    $criteria->where([
+                        'id' => $id
+                    ]);
+
+                } else {
+                    $input = $this->climate->input('Enter in a comma separated list of resource IDs ');
                     $input->defaultTo('2');
                     $resource_ids = $input->prompt();
                     $ids = explode(',', $resource_ids);
-                    foreach ($ids as $id) {
-                        $this->blend->makeResourceSeedsFromParent($id, true, $type, $name);
+
+                    $criteria->where([
+                        'id:IN' => $ids
+                    ]);
+
+                    $include_parent_input = $this->climate->input('Would you like to include the parents? (y/n default is y) ');
+                    $include_parent_input->defaultTo('y');
+                    if (strtolower(trim($include_parent_input->prompt())) == 'y') {
+                        // get parents:
+                        $query = $this->modx->newQuery('modResource', ['id:IN' => $ids]);
+                        $query->select(['modResource.parent']);
+                        $query->prepare();
+                        $criteria->orCondition('`modResource`.`id` IN(' . $query->toSQL() . ')');
                     }
 
-                } else {
+                    $include_children_input = $this->climate->input('Would you like to include direct children? (y/n default is y) ');
+                    $include_children_input->defaultTo('y');
+                    if (strtolower(trim($include_children_input->prompt())) == 'y') {
+                        // get direct children:
+                        $query = $this->modx->newQuery('modResource', ['parent:IN' => $ids]);
+                        $query->select(['modResource.id']);
+                        $query->prepare();
+                        $children_sql = $query->toSQL();
+                        $criteria->orCondition('`modResource`.`id` IN(' . $children_sql . ')');
+
+                        $include_grand_children_input = $this->climate->input('Would you like to include direct grand children? (y/n default is y) ');
+                        $include_grand_children_input->defaultTo('y');
+                        if (strtolower(trim($include_grand_children_input->prompt())) == 'y') {
+                            // get grand children
+                            $query = $this->modx->newQuery('modResource');
+                            $query->select(['modResource.parent']);
+                            $query->where('`modResource`.`id` IN('.$children_sql.')');
+                            $query->prepare();
+                            $criteria->orCondition('`modResource`.`id` IN('.$query->toSQL().')');
+                        }
+                    }
+
 
                 }
+                $criteria->prepare();
+                $this->climate->out($criteria->toSQL());
+
+                $this->blend->makeResourceSeeds($criteria, $type, $name);
 
             } elseif ( $object == 't' || $object == 'template'  ) {
 

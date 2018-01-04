@@ -412,25 +412,15 @@ class Blender
     }
 
     /**
-     * @param $parent_id
-     * @param bool $include_parent
+     * @param \xPDOQuery|array|null $criteria
      * @param string $server_type
      * @param string $name
      */
-    public function makeResourceSeedsFromParent($parent_id, $include_parent=true, $server_type='master', $name=null)
+    public function makeResourceSeeds($criteria, $server_type='master', $name=null)
     {
         $keys = [];
-        if ($include_parent) {
-            $parent = $this->modx->getObject('modResource', $parent_id);
-            $blendResource = new Resource($this->modx, $this);
-            $seed_key = $blendResource
-                ->setSeedTimeDir($this->timestamp)
-                ->seedResource($parent);
-            $this->out("ID: " . $parent->get('id') . ' Key: ' . $seed_key);
-            $keys[] = $seed_key;
-        }
 
-        $collection = $this->modx->getCollection('modResource', ['parent' => $parent_id]);
+        $collection = $this->modx->getCollection('modResource', $criteria);
         foreach ($collection as $resource) {
             $blendResource = new Resource($this->modx, $this);
             $seed_key = $blendResource
@@ -750,7 +740,7 @@ class Blender
 
             case 'resource':
                 $migration_template = 'resource.txt';
-                $placeholders['resourceData'] = var_export($class_data, true);
+                $placeholders['resourceData'] = $this->prettyVarExport($class_data);
                 $placeholders['classUpInners'] = '$this->blender->blendManyResources($this->resources, $this->getTimestamp());';
                 $placeholders['classDownInners'] = '//@TODO';
                 break;
