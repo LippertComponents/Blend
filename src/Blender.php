@@ -463,28 +463,24 @@ class Blender
     }
 
     /**
-     * @param array $templates
+     * @param \xPDOQuery|array|null $criteria
      * @param string $server_type
      * @param string $name
      */
-    public function makeTemplateSeeds($templates=[], $server_type='master', $name=null)
+    public function makeTemplateSeeds($criteria, $server_type='master', $name=null)
     {
         $keys = [];
-        foreach ($templates as $key) {
-            $template = $this->modx->getObject('modTemplate', $key);
-            if ($template) {
+        $collection = $this->modx->getCollection('modTemplate', $criteria);
 
-                $blendTemplate = new Template($this->modx, $this);
-                $seed_key = $blendTemplate
-                    ->init()
-                    ->setSeedTimeDir($this->timestamp)
-                    ->seedElement($template);
-                $this->out("Template ID: ".$template->get('id').' Key: '.$seed_key);
-                $keys[] = $seed_key;
+        foreach ($collection as $template) {
+            $blendTemplate = new Template($this->modx, $this);
+            $seed_key = $blendTemplate
+                ->init()
+                ->setSeedTimeDir($this->timestamp)
+                ->seedElement($template);
+            $this->out("Template ID: ".$template->get('id').' Key: '.$seed_key);
+            $keys[] = $seed_key;
 
-            } else {
-                $this->out('Template: '.$key.' was not found', true);
-            }
         }
 
         $this->writeMigrationClassFile('template', $keys, $server_type, $name);
@@ -754,7 +750,7 @@ class Blender
 
             case 'template':
                 $migration_template = 'template.txt';
-                $placeholders['templateData'] = var_export($class_data, true);
+                $placeholders['templateData'] = $this->prettyVarExport($class_data);
                 $placeholders['classUpInners'] = '$this->blender->blendManyTemplates($this->templates, $this->getTimestamp());';
                 $placeholders['classDownInners'] = '//@TODO';
                 break;

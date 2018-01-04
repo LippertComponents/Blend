@@ -208,15 +208,25 @@ class BlenderCli
 
             } elseif ( $object == 't' || $object == 'template'  ) {
 
+                /** @var \xPDOQuery $criteria */
+                $criteria = $this->modx->newQuery('modTemplate');
+
                 if (is_numeric($id) && $id > 0) {
-                    $templates = $id;
+                    $criteria->where([
+                        'id' => $id
+                    ]);
+
                 } else {
                     $input = $this->climate->input('Enter in a comma separated list of template names or IDs ');
                     $input->defaultTo('');
-                    $templates = $input->prompt();
+                    $ids = explode(',', $input->prompt());
+
+                    $criteria->where([
+                        'id:IN' => $ids
+                    ]);
                 }
 
-                $this->blend->makeTemplateSeeds(explode(',', $templates), $type, $name);
+                $this->blend->makeTemplateSeeds($criteria, $type, $name);
 
             } elseif ( $object == 's' || $object == 'systemSettings'  ) {
                 /** @var \xPDOQuery $criteria */
