@@ -140,112 +140,13 @@ class BlenderCli
             $date = $this->climate->arguments->get('date');
 
             if ( $object == 'r' || $object == 'resource' ) {
-                /** @var \xPDOQuery $criteria */
-                $criteria = $this->modx->newQuery('modResource');
-
-                if (isset($date) && !empty($date)) {
-                    $date = strtotime($date);
-                    $criteria->where([
-                        'editedon:>=' => $date
-                    ]);
-                    $criteria->orCondition(array(
-                        'createdon:>=' => $date
-                    ));
-
-                } elseif (!empty($id) && is_numeric($id)) {
-                    $criteria->where([
-                        'id' => $id
-                    ]);
-
-                } else {
-                    $input = $this->climate->input('Enter in a comma separated list of resource IDs ');
-                    $input->defaultTo('2');
-                    $resource_ids = $input->prompt();
-                    $ids = explode(',', $resource_ids);
-
-                    $criteria->where([
-                        'id:IN' => $ids
-                    ]);
-
-                    $include_parent_input = $this->climate->input('Would you like to include the parents? (y/n default is y) ');
-                    $include_parent_input->defaultTo('y');
-                    if (strtolower(trim($include_parent_input->prompt())) == 'y') {
-                        // get parents:
-                        $query = $this->modx->newQuery('modResource', ['id:IN' => $ids]);
-                        $query->select(['modResource.parent']);
-                        $query->prepare();
-                        $criteria->orCondition('`modResource`.`id` IN(' . $query->toSQL() . ')');
-                    }
-
-                    $include_children_input = $this->climate->input('Would you like to include direct children? (y/n default is y) ');
-                    $include_children_input->defaultTo('y');
-                    if (strtolower(trim($include_children_input->prompt())) == 'y') {
-                        // get direct children:
-                        $query = $this->modx->newQuery('modResource', ['parent:IN' => $ids]);
-                        $query->select(['modResource.id']);
-                        $query->prepare();
-                        $children_sql = $query->toSQL();
-                        $criteria->orCondition('`modResource`.`id` IN(' . $children_sql . ')');
-
-                        $include_grand_children_input = $this->climate->input('Would you like to include direct grand children? (y/n default is y) ');
-                        $include_grand_children_input->defaultTo('y');
-                        if (strtolower(trim($include_grand_children_input->prompt())) == 'y') {
-                            // get grand children
-                            $query = $this->modx->newQuery('modResource');
-                            $query->select(['modResource.parent']);
-                            $query->where('`modResource`.`id` IN('.$children_sql.')');
-                            $query->prepare();
-                            $criteria->orCondition('`modResource`.`id` IN('.$query->toSQL().')');
-                        }
-                    }
-
-
-                }
-                $criteria->prepare();
-                $this->climate->out($criteria->toSQL());
-
-                $this->blend->makeResourceSeeds($criteria, $type, $name);
+                $this->seedResources($type, $name, $id, $date);
 
             } elseif ( $object == 't' || $object == 'template'  ) {
-
-                /** @var \xPDOQuery $criteria */
-                $criteria = $this->modx->newQuery('modTemplate');
-
-                if (is_numeric($id) && $id > 0) {
-                    $criteria->where([
-                        'id' => $id
-                    ]);
-
-                } else {
-                    $input = $this->climate->input('Enter in a comma separated list of template names or IDs ');
-                    $input->defaultTo('');
-                    $ids = explode(',', $input->prompt());
-
-                    $criteria->where([
-                        'id:IN' => $ids
-                    ]);
-                }
-
-                $this->blend->makeTemplateSeeds($criteria, $type, $name);
+                $this->seedTemplates($type, $name, $id);
 
             } elseif ( $object == 's' || $object == 'systemSettings'  ) {
-                /** @var \xPDOQuery $criteria */
-                $criteria = $this->modx->newQuery('modSystemSetting');
-
-                if (isset($date) && !empty($date)) {
-                    $criteria->where([
-                        'editedon:>=' => $date
-                    ]);
-
-                } else {
-                    $input = $this->climate->input('Enter in a comma separated list of system settings');
-                    $input->defaultTo('');
-                    $names = $input->prompt();
-                    $criteria->where([
-                        'key:IN' => explode(',', $names)
-                    ]);
-                }
-                $this->blend->makeSystemSettingSeeds($criteria, $type, $name);
+                $this->seedSystemSettings($type, $name, $id, $date);
 
             }
 
@@ -260,6 +161,137 @@ class BlenderCli
         }
 
         $this->climate->out('Completed in '.(microtime(true)-$this->begin_time).' seconds')->br();
+    }
+
+    /**
+     * @param string $type
+     * @param string $name
+     * @param int $id
+     * @param string $date
+     */
+    protected function seedResources($type, $name, $id, $date)
+    {
+        /** @var \xPDOQuery $criteria */
+        $criteria = $this->modx->newQuery('modResource');
+
+        if (isset($date) && !empty($date)) {
+            $date = strtotime($date);
+            $criteria->where([
+                'editedon:>=' => $date
+            ]);
+            $criteria->orCondition(array(
+                'createdon:>=' => $date
+            ));
+
+        } elseif (!empty($id) && is_numeric($id)) {
+            $criteria->where([
+                'id' => $id
+            ]);
+
+        } else {
+            $input = $this->climate->input('Enter in a comma separated list of resource IDs ');
+            $input->defaultTo('2');
+            $resource_ids = $input->prompt();
+            $ids = explode(',', $resource_ids);
+
+            $criteria->where([
+                'id:IN' => $ids
+            ]);
+
+            $include_parent_input = $this->climate->input('Would you like to include the parents? (y/n default is y) ');
+            $include_parent_input->defaultTo('y');
+            if (strtolower(trim($include_parent_input->prompt())) == 'y') {
+                // get parents:
+                $query = $this->modx->newQuery('modResource', ['id:IN' => $ids]);
+                $query->select(['modResource.parent']);
+                $query->prepare();
+                $criteria->orCondition('`modResource`.`id` IN(' . $query->toSQL() . ')');
+            }
+
+            $include_children_input = $this->climate->input('Would you like to include direct children? (y/n default is y) ');
+            $include_children_input->defaultTo('y');
+            if (strtolower(trim($include_children_input->prompt())) == 'y') {
+                // get direct children:
+                $query = $this->modx->newQuery('modResource', ['parent:IN' => $ids]);
+                $query->select(['modResource.id']);
+                $query->prepare();
+                $children_sql = $query->toSQL();
+                $criteria->orCondition('`modResource`.`id` IN(' . $children_sql . ')');
+
+                $include_grand_children_input = $this->climate->input('Would you like to include direct grand children? (y/n default is y) ');
+                $include_grand_children_input->defaultTo('y');
+                if (strtolower(trim($include_grand_children_input->prompt())) == 'y') {
+                    // get grand children
+                    $query = $this->modx->newQuery('modResource');
+                    $query->select(['modResource.parent']);
+                    $query->where('`modResource`.`id` IN('.$children_sql.')');
+                    $query->prepare();
+                    $criteria->orCondition('`modResource`.`id` IN('.$query->toSQL().')');
+                }
+            }
+        }
+
+        $this->blend->makeResourceSeeds($criteria, $type, $name);
+    }
+
+    /**
+     * @param string $type
+     * @param string $name
+     * @param string $key
+     * @param string $date
+     */
+    protected function seedSystemSettings($type, $name, $key, $date)
+    {
+        /** @var \xPDOQuery $criteria */
+        $criteria = $this->modx->newQuery('modSystemSetting');
+
+        if (isset($date) && !empty($date)) {
+            $criteria->where([
+                'editedon:>=' => $date
+            ]);
+
+        } elseif (!empty($key) && strlen($key) > 1) {
+            $criteria->where([
+                'key' => $key
+            ]);
+
+        } else {
+            $input = $this->climate->input('Enter in a comma separated list of system settings');
+            $input->defaultTo('');
+            $names = $input->prompt();
+            $criteria->where([
+                'key:IN' => explode(',', $names)
+            ]);
+        }
+        $this->blend->makeSystemSettingSeeds($criteria, $type, $name);
+    }
+
+    /**
+     * @param string $type
+     * @param string $name
+     * @param int $id
+     */
+    protected function seedTemplates($type, $name, $id)
+    {
+        /** @var \xPDOQuery $criteria */
+        $criteria = $this->modx->newQuery('modTemplate');
+
+        if (is_numeric($id) && $id > 0) {
+            $criteria->where([
+                'id' => $id
+            ]);
+
+        } else {
+            $input = $this->climate->input('Enter in a comma separated list of template names or IDs ');
+            $input->defaultTo('');
+            $ids = explode(',', $input->prompt());
+
+            $criteria->where([
+                'id:IN' => $ids
+            ]);
+        }
+
+        $this->blend->makeTemplateSeeds($criteria, $type, $name);
     }
 
     protected function buildExeArgList()
