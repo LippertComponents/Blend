@@ -58,12 +58,11 @@ class Template extends Element
     {
         $save = false;
         $this->loadElementDataFromSeed($seed_key);
-        echo '----------- '.PHP_EOL;
-        print_r($this->element_data);
-        $this->setName($this->element_data[$this->name_column_name]);
+
         // does it exist
         $name = '';
         if (isset($this->element_data[$this->name_column_name])) {
+            $this->setName($this->element_data[$this->name_column_name]);
             $name = $this->element_data[$this->name_column_name];
         }
         $template = $this->getElementFromName($name);
