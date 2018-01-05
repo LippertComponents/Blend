@@ -29,15 +29,19 @@ class TemplateVariable extends Element
 
     protected $output_properties = '';
 
-    /**
-     * @return $this
-     */
-    public function init()
-    {
-        parent::init();
-        $this->setElementClass('modTemplateVariable');
+    /** @var string ~ the xPDO class name */
+    protected $element_class = 'modTemplateVariable';
 
-        return $this;
+    /**
+     * @param string $name
+     *
+     * @return TemplateVariable
+     */
+    public function loadCurrentVersion($name)
+    {
+        /** @var TemplateVariable $element */
+        $element = new self($this->modx, $this->blender);
+        return $element->loadElementFromName($name);
     }
 
     /**

@@ -11,20 +11,27 @@ namespace LCI\Blend;
 
 class Plugin extends Element
 {
+    /** @var string ~ the xPDO class name */
+    protected $element_class = 'modPlugin';
+
+    /** @var array  */
     protected $on_event_names = [];
 
+    /** @var array  */
     protected $remove_on_event_names = [];
 
     /**
-     * @return $this
+     * @param string $name
+     *
+     * @return Plugin
      */
-    public function init()
+    public function loadCurrentVersion($name)
     {
-        parent::init();
-        $this->setElementClass('modPlugin');
-
-        return $this;
+        /** @var Plugin $element */
+        $element = new self($this->modx, $this->blender);
+        return $element->loadElementFromName($name);
     }
+
     /**
      * @param string $event_name
      * @param int $priority
@@ -51,6 +58,23 @@ class Plugin extends Element
         $this->remove_on_event_names = $event_name;
         return $event_name;
     }
+    /**
+     * Override in child classes
+     */
+    protected function loadRelatedData()
+    {
+        // get all related Events:
+        $events = [];
+        if ($this->element instanceof \modPlugin) {
+            $pluginEvents = $this->element->getMany('PluginEvents');
+            /** @var \modPluginEvent $event */
+            foreach ($pluginEvents as $event) {
+                $events[] = $event->toArray();
+            }
+            // will be loaded via setOnEvents from blend()
+            $this->related_data = $events;
+        }
+    }
 
     protected function relatedPieces()
     {
@@ -65,5 +89,48 @@ class Plugin extends Element
             $this->element->addMany($events, 'PluginEvents');
         }
         // @TODO remove
+    }
+
+    /**
+     * Called from loadFromArray(), for build from seeds
+     *
+     * @param mixed|array $data
+     *
+     * @return $this
+     */
+    protected function setRelatedData($data)
+    {
+        if (is_array($data)) {
+            foreach ($data as $event) {
+                if (isset($event['remove']) && $event['remove']) {
+                    $this->removeOnEvent($event['event']);
+
+                } else {
+                    $this->attachOnEvent($event['event'], $event['priority'], $event['propertyset']);
+                }
+            }
+        }
+
+        return $this;
+    }
+    /**
+     * @param \modPlugin $plugin
+     *
+     * @return \modPlugin
+     */
+    protected function seedRelated($plugin)
+    {
+        // get all related Events:
+        $events = [];
+        $pluginEvents = $plugin->getMany('PluginEvents');
+        /** @var \modPluginEvent $event */
+        foreach ($pluginEvents as $event) {
+            $events[] = $event->toArray();
+
+        }
+        // will be loaded via setOnEvents from blend()
+        $this->related_data = $events;
+
+        return $plugin;
     }
 }

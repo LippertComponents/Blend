@@ -174,7 +174,6 @@ class Blender
         /** @var Chunk $chunk */
         $chunk =  new Chunk($this->modx, $this);
         return $chunk
-            ->init()
             ->setName($name);
     }
     /**
@@ -186,8 +185,6 @@ class Blender
         // will update if element does exist or create new
         foreach ($chunks as $seed_key) {
             $blendChunk = new Chunk($this->modx, $this);
-            $blendChunk
-                ->init();
             if (!empty($timestamp)) {
                 $blendChunk->setSeedTimeDir($timestamp);
             }
@@ -198,7 +195,7 @@ class Blender
                 // @TODO prompt Do you want to blend Y/N/Compare
                 $this->out($seed_key.' chunk already exists', true);
                 if ($this->prompt('Would you like to update?', 'Y') === 'Y') {
-                    if ($blendChunk->blendTemplate($seed_key, true)) {
+                    if ($blendChunk->blend($seed_key, true)) {
                         $this->out($seed_key.' has been blended');
                     }
                 }
@@ -218,8 +215,6 @@ class Blender
         foreach ($chunks as $seed_key) {
             /** @var Chunk $systemSetting */
             $blendChunk = new Chunk($this->modx, $this);
-            $blendChunk
-                ->init();
             if (!empty($timestamp)) {
                 $blendChunk->setSeedTimeDir($timestamp);
             }
@@ -243,7 +238,6 @@ class Blender
         /** @var Element $snippet */
         $snippet =  new Snippet($this->modx, $this);
         return $snippet
-            ->init()
             ->setName($name);
     }
 
@@ -257,8 +251,59 @@ class Blender
         /** @var Plugin $plugin */
         $plugin =  new Plugin($this->modx, $this);
         return $plugin
-            ->init()
             ->setName($name);
+    }
+
+    /**
+     * @param array $plugins
+     * @param string $timestamp
+     */
+    public function blendManyPlugins($plugins=[], $timestamp='')
+    {
+        // will update if element does exist or create new
+        foreach ($plugins as $seed_key) {
+            $blendPlugin = new Plugin($this->modx, $this);
+            if (!empty($timestamp)) {
+                $blendPlugin->setSeedTimeDir($timestamp);
+            }
+            if ($blendPlugin->blend($seed_key)) {
+                $this->out($seed_key.' has been blended into ID: ');
+
+            } elseif($blendPlugin->isExists()) {
+                // @TODO prompt Do you want to blend Y/N/Compare
+                $this->out($seed_key.' plugin already exists', true);
+                if ($this->prompt('Would you like to update?', 'Y') === 'Y') {
+                    if ($blendPlugin->blend($seed_key, true)) {
+                        $this->out($seed_key.' has been blended');
+                    }
+                }
+            } else {
+                $this->out('There was an error saving '.$seed_key, true);
+            }
+        }
+    }
+
+    /**
+     * @param array $plugins
+     * @param string $timestamp
+     */
+    public function revertBlendManyPlugins($plugins=[], $timestamp='')
+    {
+        // will update if system setting does exist or create new
+        foreach ($plugins as $seed_key) {
+            /** @var Chunk $systemSetting */
+            $blendPlugin = new Plugin($this->modx, $this);
+            if (!empty($timestamp)) {
+                $blendPlugin->setSeedTimeDir($timestamp);
+            }
+
+            if ( $blendPlugin->revertBlend($seed_key) ) {
+                $this->out($blendPlugin->getName().' plugin has been reverted to '.$timestamp);
+
+            } else {
+                $this->out($blendPlugin->getName().' plugin was not reverted', true);
+            }
+        }
     }
 
     /**
@@ -268,10 +313,9 @@ class Blender
      */
     public function blendOneRawTemplate($name)
     {
-        /** @var Element $template */
+        /** @var Template $template */
         $template =  new Template($this->modx, $this);
         return $template
-            ->init()
             ->setSeedTimeDir($this->timestamp)
             ->setName($name);
     }
@@ -283,8 +327,6 @@ class Blender
     public function blendManyTemplates($templates=[], $timestamp='')
     {
         $blendTemplate = new Template($this->modx, $this);
-        $blendTemplate
-            ->init();
         if (!empty($timestamp)) {
             $blendTemplate->setSeedTimeDir($timestamp);
         }
@@ -318,7 +360,6 @@ class Blender
         /** @var Element $tv */
         $tv =  new TemplateVariable($this->modx, $this);
         return $tv
-            ->init()
             ->setSeedTimeDir($this->timestamp)
             ->setName($name);
     }
@@ -477,10 +518,9 @@ class Blender
         $collection = $this->modx->getCollection('modChunk', $criteria);
 
         foreach ($collection as $chunk) {
-            /** @var Chunk $blendTemplate */
-            $blendTemplate = new Chunk($this->modx, $this);
-            $seed_key = $blendTemplate
-                ->init()
+            /** @var Chunk $blendChunk */
+            $blendChunk = new Chunk($this->modx, $this);
+            $seed_key = $blendChunk
                 ->setSeedTimeDir($this->timestamp)
                 ->seedElement($chunk);
             $this->out("Chunk ID: ".$chunk->get('id').' Key: '.$seed_key);
@@ -489,7 +529,30 @@ class Blender
         }
 
         $this->writeMigrationClassFile('chunk', $keys, $server_type, $name);
-        //$this->out($this->getMigrationName('template'));
+    }
+
+    /**
+     * @param \xPDOQuery|array|null $criteria
+     * @param string $server_type
+     * @param string $name
+     */
+    public function makePluginSeeds($criteria, $server_type='master', $name=null)
+    {
+        $keys = [];
+        $collection = $this->modx->getCollection('modPlugin', $criteria);
+
+        foreach ($collection as $plugin) {
+            /** @var Plugin $blendPlugin */
+            $blendPlugin = new Plugin($this->modx, $this);
+            $seed_key = $blendPlugin
+                ->setSeedTimeDir($this->timestamp)
+                ->seedElement($plugin);
+            $this->out("Plugin ID: ".$plugin->get('id').' Key: '.$seed_key);
+            $keys[] = $seed_key;
+
+        }
+
+        $this->writeMigrationClassFile('plugin', $keys, $server_type, $name);
     }
 
     /**
@@ -556,7 +619,6 @@ class Blender
         foreach ($collection as $template) {
             $blendTemplate = new Template($this->modx, $this);
             $seed_key = $blendTemplate
-                ->init()
                 ->setSeedTimeDir($this->timestamp)
                 ->seedElement($template);
             $this->out("Template ID: ".$template->get('id').' Key: '.$seed_key);
@@ -820,6 +882,13 @@ class Blender
                 $placeholders['chunkData'] = $this->prettyVarExport($class_data);
                 $placeholders['classUpInners'] = '$this->blender->blendManyChunks($this->chunks, $this->getTimestamp());';
                 $placeholders['classDownInners'] = '$this->blender->revertBlendManyChunks($this->chunks, $this->getTimestamp());';
+                break;
+
+            case 'plugin':
+                $migration_template = 'plugin.txt';
+                $placeholders['pluginData'] = $this->prettyVarExport($class_data);
+                $placeholders['classUpInners'] = '$this->blender->blendManyPlugins($this->plugins, $this->getTimestamp());';
+                $placeholders['classDownInners'] = '$this->blender->revertBlendManyPlugins($this->plugins, $this->getTimestamp());';
                 break;
 
             case 'resource':

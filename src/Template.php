@@ -19,18 +19,22 @@ class Template extends Element
 
     protected $template_type = 0;
 
+    /** @var string ~ the xPDO class name */
+    protected $element_class = 'modTemplate';
+
     /** @var string */
     protected $name_column_name = 'templatename';
 
     /**
-     * @return $this
+     * @param string $name
+     *
+     * @return Template
      */
-    public function init()
+    public function loadCurrentVersion($name)
     {
-        parent::init();
-        $this->setElementClass('modTemplate');
-
-        return $this;
+        /** @var Template $element */
+        $element = new self($this->modx, $this->blender);
+        return $element->loadElementFromName($name);
     }
 
     /**
@@ -83,7 +87,6 @@ class Template extends Element
             // seed the TV:
             $tvSeed = new TemplateVariable($this->modx, $this->blender);
             $tvSeed
-                ->init()
                 ->setSeedTimeDir($this->getTimestamp())
                 ->loadElementDataFromSeed($tv['seed_key']);
             $tvSeed->save(true);
@@ -173,7 +176,6 @@ class Template extends Element
 
             $tvSeed = new TemplateVariable($this->modx, $this->blender);
             $seed_key = $tvSeed
-                ->init()
                 ->setSeedTimeDir($this->getTimestamp())
                 ->seedElement($tv);
             $tv_keys[] = [

@@ -11,14 +11,18 @@ namespace LCI\Blend;
 
 class Snippet extends Element
 {
-    /**
-     * @return $this
-     */
-    public function init()
-    {
-        parent::init();
-        $this->setElementClass('modSnippet');
+    /** @var string ~ the xPDO class name */
+    protected $element_class = 'modSnippet';
 
-        return $this;
+    /**
+     * @param string $name
+     *
+     * @return Snippet
+     */
+    public function loadCurrentVersion($name)
+    {
+        /** @var Snippet $element */
+        $element = new self($this->modx, $this->blender);
+        return $element->loadElementFromName($name);
     }
 }

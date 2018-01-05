@@ -70,6 +70,9 @@ abstract class Element
     /** @var array  */
     protected $element_data = [];
 
+    /** @var array  */
+    protected $related_data = [];
+
     /** @var bool  */
     protected $exists = false;
 
@@ -91,11 +94,11 @@ abstract class Element
     }
 
     /**
+     * @deprecated
      * @return $this
      */
     public function init()
     {
-        $this->setElementClass('');
         return $this;
     }
 
@@ -157,7 +160,7 @@ abstract class Element
      *
      * @return $this
      */
-    public function setElementClass($element_class)
+    protected function setElementClass($element_class)
     {
         switch ($element_class) {
             case 'modChunk':
@@ -435,13 +438,15 @@ abstract class Element
      */
     public function seedElement(\modElement $element)
     {
+        $this->element = $element;
         // No IDs! must get the alias and get a seed key,
-        $seed_key = $this->blender->getElementSeedKeyFromName($element->get($this->name_column_name), $this->element_class);
-        $this->element_data = $element->toArray();
+        $seed_key = $this->blender->getElementSeedKeyFromName($this->element->get($this->name_column_name), $this->element_class);
+        $this->element_data = $this->element->toArray();
 
         $this->element_data['category'] = $this->getCategoryAsString($this->element_data['category']);
 
-        $element = $this->seedRelated($element);
+        $this->seedRelated($this->element);
+        $this->element_data['related_data'] = $this->related_data;
 
         // https://docs.modx.com/revolution/2.x/developing-in-modx/other-development-resources/class-reference/modx/modx.invokeevent
         $this->modx->invokeEvent(
@@ -450,7 +455,7 @@ abstract class Element
                 'blender' => $this->blender,
                 'blendElement' => $this,
                 'element_class' => $this->element_class,
-                'element' => &$element,
+                'element' => &$this->element,
                 'data' => &$this->element_data
             ]
         );
@@ -476,6 +481,44 @@ abstract class Element
     }
 
     /**
+     * Will load an existing modElement into element
+     * @param string $name
+     *
+     * @return $this
+     */
+    public function loadElementFromName($name)
+    {
+        $this->element = $this->getElementFromName($name);
+        if (is_object($this->element)) {
+            $this->exists = true;
+            $this->element_data = $this->element->toArray();
+            $this->loadFromArray($this->element_data);
+            // load related data:
+            $this->loadRelatedData();
+        }
+
+        return $this;
+    }
+
+    /**
+     * Override in child classes
+     */
+    protected function loadRelatedData()
+    {
+
+    }
+
+    /**
+     * @return array
+     */
+    public function getArrayForCopy()
+    {
+        $copy = $this->element_data;
+        $copy['related_data'] = $this->related_data;
+        return $copy;
+    }
+
+    /**
      * @param string $seed_key
      * @param bool $overwrite
      *
@@ -494,20 +537,21 @@ abstract class Element
         }
 
         $down = false;
-        $element = $this->getElementFromName($name);
-        if ($element) {
+        /** @var Element $currentVersion */
+        $currentVersion = $this->loadCurrentVersion($name);
+        if ($currentVersion->isExists()) {
+            //$previous = new self($this->modx, $this->blender);
             $this->exists = true;
             if (!$overwrite) {
                 return $save;
             }
-            $down = $element->toArray();
+            $down = $currentVersion->getArrayForCopy();
         } else {
             $this->exists = false;
         }
 
         unset($this->element_data['id']);
 
-        // get template
         $this->modx->invokeEvent(
             'OnBlendElementBeforeSave',
             [
@@ -581,6 +625,17 @@ abstract class Element
     }
 
     /**
+     * Must implement in child class
+     * @param string $name
+     *
+     * @return Element
+     */
+    protected function loadCurrentVersion($name)
+    {
+        return $this;
+    }
+
+    /**
      * @param string $seed_key
      *
      * @return $this
@@ -612,4 +667,14 @@ abstract class Element
         return $element;
     }
 
+    /**
+     * Called from loadFromArray(), for build from seeds, override in child classes
+     * @param mixed $data
+     *
+     * @return $this
+     */
+    protected function setRelatedData($data)
+    {
+        return $this;
+    }
 }
