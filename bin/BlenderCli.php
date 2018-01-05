@@ -148,11 +148,14 @@ class BlenderCli
             } elseif ( $object == 'r' || $object == 'resource' ) {
                 $this->seedResources($type, $name, $id, $date);
 
+            }  elseif ( $object == 's' || $object == 'snippet' ) {
+                $this->seedSnippets($type, $name, $id);
+
+            } elseif ( $object == 'x' || $object == 'systemSettings'  ) {
+                $this->seedSystemSettings($type, $name, $id, $date);
+
             } elseif ( $object == 't' || $object == 'template'  ) {
                 $this->seedTemplates($type, $name, $id);
-
-            } elseif ( $object == 's' || $object == 'systemSettings'  ) {
-                $this->seedSystemSettings($type, $name, $id, $date);
 
             }
 
@@ -306,6 +309,40 @@ class BlenderCli
         }
 
         $this->blend->makeResourceSeeds($criteria, $type, $name);
+    }
+
+    /**
+     * @param string $type
+     * @param string $name
+     * @param int $id
+     */
+    protected function seedSnippets($type, $name, $id)
+    {
+        /** @var \xPDOQuery $criteria */
+        $criteria = $this->modx->newQuery('modSnippet');
+
+        if (!empty($id) && is_numeric($id)) {
+            $criteria->where([
+                'id' => $id
+            ]);
+            $criteria->orCondition(array(
+                'name' => $id
+            ));
+
+        } else {
+            $input = $this->climate->input('Enter in a comma separated list of snippet names or IDs ');
+            $input->defaultTo('');
+            $ids = explode(',', $input->prompt());
+
+            $criteria->where([
+                'id:IN' => $ids
+            ]);
+            $criteria->orCondition(array(
+                'name:IN' => $ids
+            ));
+        }
+
+        $this->blend->makeSnippetSeeds($criteria, $type, $name);
     }
 
     /**
@@ -497,7 +534,7 @@ class BlenderCli
                     'object' => [
                         'prefix'      => 'o',
                         'longPrefix'  => 'object',
-                        'description' => 'Seed object, default is r, can be r(resource), s(systemSettings), or t(template)',
+                        'description' => 'Seed object, default is r, can be r(resource), c(chunk), p(plugin), s(snippet), x(systemSettings), or t(template)',
                         'default'     => 'r'
                     ],
                     'id' => [

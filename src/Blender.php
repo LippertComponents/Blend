@@ -229,19 +229,6 @@ class Blender
     }
 
     /**
-     * Use this method with your IDE to help manually build a Snippet with PHP
-     * @param string $name
-     * @return Snippet
-     */
-    public function blendOneRawSnippet($name)
-    {
-        /** @var Element $snippet */
-        $snippet =  new Snippet($this->modx, $this);
-        return $snippet
-            ->setName($name);
-    }
-
-    /**
      * Use this method with your IDE to help manually build a Plugin with PHP
      * @param string $name
      * @return Plugin
@@ -291,7 +278,7 @@ class Blender
     {
         // will update if system setting does exist or create new
         foreach ($plugins as $seed_key) {
-            /** @var Chunk $systemSetting */
+            /** @var Plugin $systemSetting */
             $blendPlugin = new Plugin($this->modx, $this);
             if (!empty($timestamp)) {
                 $blendPlugin->setSeedTimeDir($timestamp);
@@ -302,6 +289,71 @@ class Blender
 
             } else {
                 $this->out($blendPlugin->getName().' plugin was not reverted', true);
+            }
+        }
+    }
+
+    /**
+     * Use this method with your IDE to help manually build a Snippet with PHP
+     * @param string $name
+     * @return Snippet
+     */
+    public function blendOneRawSnippet($name)
+    {
+        /** @var Snippet $snippet */
+        $snippet =  new Snippet($this->modx, $this);
+        return $snippet
+            ->setName($name);
+    }
+
+    /**
+     * @param array $snippets
+     * @param string $timestamp
+     */
+    public function blendManySnippets($snippets=[], $timestamp='')
+    {
+        // will update if element does exist or create new
+        foreach ($snippets as $seed_key) {
+            /** @var Snippet $blendSnippet */
+            $blendSnippet = new Snippet($this->modx, $this);
+            if (!empty($timestamp)) {
+                $blendSnippet->setSeedTimeDir($timestamp);
+            }
+            if ($blendSnippet->blend($seed_key)) {
+                $this->out($seed_key.' has been blended');
+
+            } elseif($blendSnippet->isExists()) {
+                // @TODO prompt Do you want to blend Y/N/Compare
+                $this->out($seed_key.' snippet already exists', true);
+                if ($this->prompt('Would you like to update?', 'Y') === 'Y') {
+                    if ($blendSnippet->blend($seed_key, true)) {
+                        $this->out($seed_key.' has been blended');
+                    }
+                }
+            } else {
+                $this->out('There was an error saving '.$seed_key, true);
+            }
+        }
+    }
+    /**
+     * @param array $snippets
+     * @param string $timestamp
+     */
+    public function revertBlendManySnippets($snippets=[], $timestamp='')
+    {
+        // will update if system setting does exist or create new
+        foreach ($snippets as $seed_key) {
+            /** @var Snippet $systemSetting */
+            $blendSnippet = new Snippet($this->modx, $this);
+            if (!empty($timestamp)) {
+                $blendSnippet->setSeedTimeDir($timestamp);
+            }
+
+            if ( $blendSnippet->revertBlend($seed_key) ) {
+                $this->out($blendSnippet->getName().' snippet has been reverted to '.$timestamp);
+
+            } else {
+                $this->out($blendSnippet->getName().' snippet was not reverted', true);
             }
         }
     }
@@ -523,9 +575,8 @@ class Blender
             $seed_key = $blendChunk
                 ->setSeedTimeDir($this->timestamp)
                 ->seedElement($chunk);
-            $this->out("Chunk ID: ".$chunk->get('id').' Key: '.$seed_key);
+            $this->out("Chunk: ".$chunk->get('name').' Key: '.$seed_key);
             $keys[] = $seed_key;
-
         }
 
         $this->writeMigrationClassFile('chunk', $keys, $server_type, $name);
@@ -547,9 +598,8 @@ class Blender
             $seed_key = $blendPlugin
                 ->setSeedTimeDir($this->timestamp)
                 ->seedElement($plugin);
-            $this->out("Plugin ID: ".$plugin->get('id').' Key: '.$seed_key);
+            $this->out("Plugin: ".$plugin->get('name').' Key: '.$seed_key);
             $keys[] = $seed_key;
-
         }
 
         $this->writeMigrationClassFile('plugin', $keys, $server_type, $name);
@@ -576,6 +626,29 @@ class Blender
 
         $this->writeMigrationClassFile('resource', $keys, $server_type, $name);
         //$this->out($this->getMigrationName('resource'));
+    }
+
+    /**
+     * @param \xPDOQuery|array|null $criteria
+     * @param string $server_type
+     * @param string $name
+     */
+    public function makeSnippetSeeds($criteria, $server_type='master', $name=null)
+    {
+        $keys = [];
+        $collection = $this->modx->getCollection('modSnippet', $criteria);
+
+        foreach ($collection as $snippet) {
+            /** @var Snippet $blendSnippet */
+            $blendSnippet = new Snippet($this->modx, $this);
+            $seed_key = $blendSnippet
+                ->setSeedTimeDir($this->timestamp)
+                ->seedElement($snippet);
+            $this->out("Snippet: ".$snippet->get('name').' Key: '.$seed_key);
+            $keys[] = $seed_key;
+        }
+
+        $this->writeMigrationClassFile('snippet', $keys, $server_type, $name);
     }
 
     /**
@@ -896,6 +969,13 @@ class Blender
                 $placeholders['resourceData'] = $this->prettyVarExport($class_data);
                 $placeholders['classUpInners'] = '$this->blender->blendManyResources($this->resources, $this->getTimestamp());';
                 $placeholders['classDownInners'] = '//@TODO';
+                break;
+
+            case 'snippet':
+                $migration_template = 'snippet.txt';
+                $placeholders['snippetData'] = $this->prettyVarExport($class_data);
+                $placeholders['classUpInners'] = '$this->blender->blendManySnippets($this->snippets, $this->getTimestamp());';
+                $placeholders['classDownInners'] = '$this->blender->revertBlendManySnippets($this->snippets, $this->getTimestamp());';
                 break;
 
             case 'systemSettings':
