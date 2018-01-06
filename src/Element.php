@@ -76,6 +76,9 @@ abstract class Element
     /** @var bool  */
     protected $exists = false;
 
+    /** @var bool  */
+    protected $debug = false;
+
     /**
      * Element constructor.
      *
@@ -94,13 +97,25 @@ abstract class Element
     }
 
     /**
-     * @deprecated
-     * @return $this
+     * @return bool
      */
-    public function init()
+    public function isDebug()
     {
+        return $this->debug;
+    }
+
+    /**
+     * @param bool $debug
+     *
+     * @return Element
+     */
+    public function setDebug(bool $debug)
+    {
+        $this->debug = $debug;
         return $this;
     }
+
+
 
     /**
      * @return string
@@ -221,10 +236,28 @@ abstract class Element
     }
 
     /**
+     * @return string
+     */
+    public function getCode()
+    {
+        return $this->code;
+    }
+
+    /**
      * @param string $code ~ if not doing static file then set the Elements code here
      * @return $this
      */
     public function setCode(string $code)
+    {
+        $this->code = $code;
+        return $this;
+    }
+
+    /**
+     * @param string $code ~ if not doing static file then set the Elements code here
+     * @return $this
+     */
+    public function setContent(string $code)
     {
         $this->code = $code;
         return $this;
@@ -304,7 +337,13 @@ abstract class Element
                 if ($method_name == 'setProperties' && !is_array($value)) {
                     continue;
                 }
+                if ($this->isDebug()) {
+                    $this->blender->out(__METHOD__.' call: '.$method_name.' V: '.$value);
+                }
                 $this->$method_name($value);
+
+            } elseif($this->isDebug()) {
+                $this->blender->out(__METHOD__.' missing: '.$method_name.' V: '.$value, tru);
             }
         }
         return $this;
@@ -337,10 +376,12 @@ abstract class Element
         $saved = false;
 
         $this->element = $this->modx->getObject($this->element_class, [$this->name_column_name => $this->name]);
-        if (is_object($this->element) && !$overwrite) {
-            $this->error = true;
-            $this->error_messages['exits'] = 'Element: '.$this->name . ' of type '.$this->element_class.' already exists ';
-            return $saved;
+        if (is_object($this->element)) {
+            if (!$overwrite) {
+                $this->error = true;
+                $this->error_messages['exits'] = 'Element: ' . $this->name . ' of type ' . $this->element_class . ' already exists ';
+                return $saved;
+            }
         } else {
             $this->element = $this->modx->newObject($this->element_class);
         }
@@ -371,10 +412,14 @@ abstract class Element
         $this->setAdditionalElementColumns();
         $this->relatedPieces();
         if ($this->element->save()) {
-            //$this->climate->out($name.' plugin has been installed');
+            if ($this->isDebug()) {
+                $this->blender->out($this->getName() . ' has been installed/saved');
+            }
             $saved = true;
         } else {
-            //$this->climate->error($name.' plugin did not install');
+            if ($this->isDebug()) {
+                $this->blender->out($this->getName() . ' did not install/update', true);
+            }
 
         }
         //sync?
@@ -489,6 +534,7 @@ abstract class Element
     public function loadElementFromName($name)
     {
         $this->element = $this->getElementFromName($name);
+
         if (is_object($this->element)) {
             $this->exists = true;
             $this->element_data = $this->element->toArray();
@@ -524,23 +570,27 @@ abstract class Element
      *
      * @return bool
      */
-    public function blend($seed_key, $overwrite=false)
+    public function blendFromSeed($seed_key, $overwrite=false)
+    {
+        $this->loadElementDataFromSeed($seed_key);
+        return $this->blend($overwrite);
+    }
+
+    /**
+     * @param bool $overwrite
+     *
+     * @return bool
+     */
+    public function blend($overwrite=false)
     {
         $save = false;
-        $this->loadElementDataFromSeed($seed_key);
-
         // does it exist
-        $name = '';
-        if (isset($this->element_data[$this->name_column_name])) {
-            $this->setName($this->element_data[$this->name_column_name]);
-            $name = $this->element_data[$this->name_column_name];
-        }
+        $name = $this->getName();
 
         $down = false;
         /** @var Element $currentVersion */
         $currentVersion = $this->loadCurrentVersion($name);
         if ($currentVersion->isExists()) {
-            //$previous = new self($this->modx, $this->blender);
             $this->exists = true;
             if (!$overwrite) {
                 return $save;
@@ -550,6 +600,7 @@ abstract class Element
             $this->exists = false;
         }
 
+        // @TODO manual loading does not load the element_data property
         unset($this->element_data['id']);
 
         $this->modx->invokeEvent(
@@ -563,13 +614,15 @@ abstract class Element
         );
 
         // load from array:
-        $this->loadFromArray($this->element_data);
-        $save = $this->save();
+        if (count($this->element_data)) {
+            $this->loadFromArray($this->element_data);
+        }
+        $save = $this->save($overwrite);
 
         if ($save) {
             // write old version to disk:
             $this->modx->cacheManager->set(
-                'down-'.$seed_key,
+                'down-'.$this->blender->getElementSeedKeyFromName($this->getName(), $this->element_class),
                 $down,
                 $this->cache_life,
                 $this->cacheOptions
@@ -594,28 +647,34 @@ abstract class Element
      *
      * @return bool
      */
-    public function revertBlend($seed_key)
+    public function revertBlendFromSeed($seed_key)
     {
         $this->loadElementDataFromSeed($seed_key);
+        return $this->revertBlend();
+    }
 
-        // does it exist
-        $name = '';
-        if (isset($this->element_data[$this->name_column_name])) {
-            $this->setName($this->element_data[$this->name_column_name]);
-            $name = $this->element_data[$this->name_column_name];
-        }
-
-        $element = $this->getElementFromName($name);
+    /**
+     * @return bool
+     */
+    public function revertBlend()
+    {
+        $element = $this->getElementFromName($this->getName());
         if (!is_object($element)) {
             $element = $this->modx->getObject($this->element_class);
         }
         // 1. get previous data from cache:
-        $data = $this->modx->cacheManager->get('down-'.$seed_key, $this->cacheOptions);
+        $data = $this->modx->cacheManager->get('down-'.$this->blender->getElementSeedKeyFromName($this->getName(), $this->element_class), $this->cacheOptions);
 
         if (!$data) {
+            if ($this->isDebug()) {
+                $this->blender->out('Remove old' . $this->getName());
+            }
             return $element->remove();
 
         } elseif (is_array($data)) {
+            if ($this->isDebug()) {
+                $this->blender->out('Restore to old ' . $this->getName());
+            }
             // load old data:
             $element->fromArray($data);
             return $element->save();

@@ -188,14 +188,14 @@ class Blender
             if (!empty($timestamp)) {
                 $blendChunk->setSeedTimeDir($timestamp);
             }
-            if ($blendChunk->blend($seed_key)) {
+            if ($blendChunk->blendFromSeed($seed_key)) {
                 $this->out($seed_key.' has been blended into ID: ');
 
             } elseif($blendChunk->isExists()) {
                 // @TODO prompt Do you want to blend Y/N/Compare
                 $this->out($seed_key.' chunk already exists', true);
                 if ($this->prompt('Would you like to update?', 'Y') === 'Y') {
-                    if ($blendChunk->blend($seed_key, true)) {
+                    if ($blendChunk->blendFromSeed($seed_key, true)) {
                         $this->out($seed_key.' has been blended');
                     }
                 }
@@ -219,7 +219,7 @@ class Blender
                 $blendChunk->setSeedTimeDir($timestamp);
             }
 
-            if ( $blendChunk->revertBlend($seed_key) ) {
+            if ( $blendChunk->revertBlendFromSeed($seed_key) ) {
                 $this->out($blendChunk->getName().' chunk has been reverted to '.$timestamp);
 
             } else {
@@ -253,14 +253,14 @@ class Blender
             if (!empty($timestamp)) {
                 $blendPlugin->setSeedTimeDir($timestamp);
             }
-            if ($blendPlugin->blend($seed_key)) {
+            if ($blendPlugin->blendFromSeed($seed_key)) {
                 $this->out($seed_key.' has been blended into ID: ');
 
             } elseif($blendPlugin->isExists()) {
                 // @TODO prompt Do you want to blend Y/N/Compare
                 $this->out($seed_key.' plugin already exists', true);
                 if ($this->prompt('Would you like to update?', 'Y') === 'Y') {
-                    if ($blendPlugin->blend($seed_key, true)) {
+                    if ($blendPlugin->blendFromSeed($seed_key, true)) {
                         $this->out($seed_key.' has been blended');
                     }
                 }
@@ -284,7 +284,7 @@ class Blender
                 $blendPlugin->setSeedTimeDir($timestamp);
             }
 
-            if ( $blendPlugin->revertBlend($seed_key) ) {
+            if ( $blendPlugin->revertBlendFromSeed($seed_key) ) {
                 $this->out($blendPlugin->getName().' plugin has been reverted to '.$timestamp);
 
             } else {
@@ -319,14 +319,14 @@ class Blender
             if (!empty($timestamp)) {
                 $blendSnippet->setSeedTimeDir($timestamp);
             }
-            if ($blendSnippet->blend($seed_key)) {
+            if ($blendSnippet->blendFromSeed($seed_key)) {
                 $this->out($seed_key.' has been blended');
 
             } elseif($blendSnippet->isExists()) {
                 // @TODO prompt Do you want to blend Y/N/Compare
                 $this->out($seed_key.' snippet already exists', true);
                 if ($this->prompt('Would you like to update?', 'Y') === 'Y') {
-                    if ($blendSnippet->blend($seed_key, true)) {
+                    if ($blendSnippet->blendFromSeed($seed_key, true)) {
                         $this->out($seed_key.' has been blended');
                     }
                 }
@@ -349,7 +349,7 @@ class Blender
                 $blendSnippet->setSeedTimeDir($timestamp);
             }
 
-            if ( $blendSnippet->revertBlend($seed_key) ) {
+            if ( $blendSnippet->revertBlendFromSeed($seed_key) ) {
                 $this->out($blendSnippet->getName().' snippet has been reverted to '.$timestamp);
 
             } else {

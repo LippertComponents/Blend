@@ -29,6 +29,7 @@ class Plugin extends Element
     {
         /** @var Plugin $element */
         $element = new self($this->modx, $this->blender);
+        $element->setSeedTimeDir($this->getTimestamp());
         return $element->loadElementFromName($name);
     }
 

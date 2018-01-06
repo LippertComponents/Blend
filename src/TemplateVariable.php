@@ -41,6 +41,7 @@ class TemplateVariable extends Element
     {
         /** @var TemplateVariable $element */
         $element = new self($this->modx, $this->blender);
+        $element->setSeedTimeDir($this->getTimestamp());
         return $element->loadElementFromName($name);
     }
 

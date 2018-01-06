@@ -34,6 +34,7 @@ class Template extends Element
     {
         /** @var Template $element */
         $element = new self($this->modx, $this->blender);
+        $element->setSeedTimeDir($this->getTimestamp());
         return $element->loadElementFromName($name);
     }
 
@@ -188,5 +189,15 @@ class Template extends Element
         $this->element_data['tvs'] = $tv_keys;
 
         return $template;
+    }
+
+    /**
+     * @param string $name
+     * @return $this
+     */
+    public function setTemplateName(string $name)
+    {
+        $this->name = $name;
+        return $this;
     }
 }
