@@ -1,0 +1,110 @@
+<?php
+
+/**
+ * Auto Generated from Blender
+ * Date: [[+classCreateDate]] at [[+classCreateTime]]
+ */
+
+use \LCI\Blend\Migrations;
+
+class [[+className]] extends Migrations
+{
+    /** @var array */
+    protected $site_data = [[+siteData]];
+
+    /**
+     * Run the migrations.
+     *
+     * @return void
+     */
+    public function up()
+    {
+        if (isset($this->site_data['chunks'])) {
+            $this->blender->blendManyChunks($this->site_data['chunks'], $this->getTimestamp());
+        }
+
+        if (isset($this->site_data['plugins'])) {
+            $this->blender->blendManyPlugins($this->site_data['plugins'], $this->getTimestamp());
+        }
+
+        if (isset($this->site_data['resources'])) {
+            $this->blender->blendManyResources($this->site_data['resources'], $this->getTimestamp());
+        }
+
+        if (isset($this->site_data['snippets'])) {
+            $this->blender->blendManySnippets($this->site_data['snippets'], $this->getTimestamp());
+        }
+
+        if (isset($this->site_data['systemSettings'])) {
+            $this->blender->blendManySystemSettings($this->site_data['systemSettings'], $this->getTimestamp());
+        }
+
+        if (isset($this->site_data['templates'])) {
+            $this->blender->blendManyTemplates($this->site_data['templates'], $this->getTimestamp());
+        }
+    }
+
+    /**
+     * Reverse the migrations.
+     *
+     * @return void
+     */
+    public function down()
+    {
+        if (isset($this->site_data['chunks'])) {
+            $this->blender->revertBlendManyChunks($this->site_data['chunks'], $this->getTimestamp());
+        }
+
+        if (isset($this->site_data['plugins'])) {
+            $this->blender->revertBlendManyPlugins($this->site_data['plugins'], $this->getTimestamp());
+        }
+
+        if (isset($this->site_data['resources']) && method_exists($this->blender, 'revertBlendManyResources')) {
+            $this->blender->revertBlendManyResources($this->site_data['resources'], $this->getTimestamp());
+        }
+
+        if (isset($this->site_data['snippets'])) {
+            $this->blender->revertBlendManySnippets($this->site_data['snippets'], $this->getTimestamp());
+        }
+
+        if (isset($this->site_data['systemSettings'])) {
+            $this->blender->revertBlendManySystemSettings($this->site_data['systemSettings'], $this->getTimestamp());
+        }
+
+        if (isset($this->site_data['templates']) && method_exists($this->blender, 'revertBlendManyResources')) {
+            $this->blender->revertBlendManyTemplates($this->site_data['templates'], $this->getTimestamp());
+        }
+    }
+
+    /**
+     * Method is called on construct, please fill me in
+     */
+    protected function assignDescription()
+    {
+        $this->description = '';
+    }
+
+    /**
+     * Method is called on construct, please fill me in
+     */
+    protected function assignVersion()
+    {
+
+    }
+
+    /**
+     * Method is called on construct, can change to only run this migration for those types
+     */
+    protected function assignType()
+    {
+        $this->type = '[[+serverType]]';
+    }
+
+    /**
+     * Method is called on construct, Child class can override and implement this
+     */
+    protected function assignTimestamp()
+    {
+        $this->timestamp = '[[+timestamp]]';
+    }
+}

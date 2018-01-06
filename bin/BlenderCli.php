@@ -157,6 +157,9 @@ class BlenderCli
             } elseif ( $object == 't' || $object == 'template'  ) {
                 $this->seedTemplates($type, $name, $id);
 
+            } elseif ( $object == 'a' || $object == 'site'  ) {
+                $this->blend->makeSiteSeed($type, $name);
+
             }
 
         } elseif ( $this->climate->arguments->defined('install') ) {
@@ -534,7 +537,7 @@ class BlenderCli
                     'object' => [
                         'prefix'      => 'o',
                         'longPrefix'  => 'object',
-                        'description' => 'Seed object, default is r, can be r(resource), c(chunk), p(plugin), s(snippet), x(systemSettings), or t(template)',
+                        'description' => 'Seed object, default is r, can be r(resource), c(chunk), p(plugin), s(snippet), x(systemSettings), t(template) or a(site)',
                         'default'     => 'r'
                     ],
                     'id' => [

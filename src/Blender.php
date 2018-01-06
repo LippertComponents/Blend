@@ -563,8 +563,11 @@ class Blender
      * @param \xPDOQuery|array|null $criteria
      * @param string $server_type
      * @param string $name
+     * @param bool $create_migration_file
+     *
+     * @return array
      */
-    public function makeChunkSeeds($criteria, $server_type='master', $name=null)
+    public function makeChunkSeeds($criteria, $server_type='master', $name=null, $create_migration_file)
     {
         $keys = [];
         $collection = $this->modx->getCollection('modChunk', $criteria);
@@ -579,15 +582,21 @@ class Blender
             $keys[] = $seed_key;
         }
 
-        $this->writeMigrationClassFile('chunk', $keys, $server_type, $name);
+        if ($create_migration_file) {
+            $this->writeMigrationClassFile('chunk', $keys, $server_type, $name);
+        }
+        return $keys;
     }
 
     /**
      * @param \xPDOQuery|array|null $criteria
      * @param string $server_type
      * @param string $name
+     * @param bool $create_migration_file
+     *
+     * @return array
      */
-    public function makePluginSeeds($criteria, $server_type='master', $name=null)
+    public function makePluginSeeds($criteria, $server_type='master', $name=null, $create_migration_file=true)
     {
         $keys = [];
         $collection = $this->modx->getCollection('modPlugin', $criteria);
@@ -602,15 +611,21 @@ class Blender
             $keys[] = $seed_key;
         }
 
-        $this->writeMigrationClassFile('plugin', $keys, $server_type, $name);
+        if ($create_migration_file) {
+            $this->writeMigrationClassFile('plugin', $keys, $server_type, $name);
+        }
+        return $keys;
     }
 
     /**
      * @param \xPDOQuery|array|null $criteria
      * @param string $server_type
      * @param string $name
+     * @param bool $create_migration_file
+     *
+     * @return array
      */
-    public function makeResourceSeeds($criteria, $server_type='master', $name=null)
+    public function makeResourceSeeds($criteria, $server_type='master', $name=null, $create_migration_file=true)
     {
         $keys = [];
 
@@ -624,16 +639,21 @@ class Blender
             $keys[] = $seed_key;
         }
 
-        $this->writeMigrationClassFile('resource', $keys, $server_type, $name);
-        //$this->out($this->getMigrationName('resource'));
+        if ($create_migration_file) {
+            $this->writeMigrationClassFile('resource', $keys, $server_type, $name);
+        }
+        return $keys;
     }
 
     /**
      * @param \xPDOQuery|array|null $criteria
      * @param string $server_type
      * @param string $name
+     * @param bool $create_migration_file
+     *
+     * @return array
      */
-    public function makeSnippetSeeds($criteria, $server_type='master', $name=null)
+    public function makeSnippetSeeds($criteria, $server_type='master', $name=null, $create_migration_file=true)
     {
         $keys = [];
         $collection = $this->modx->getCollection('modSnippet', $criteria);
@@ -648,15 +668,21 @@ class Blender
             $keys[] = $seed_key;
         }
 
-        $this->writeMigrationClassFile('snippet', $keys, $server_type, $name);
+        if($create_migration_file) {
+            $this->writeMigrationClassFile('snippet', $keys, $server_type, $name);
+        }
+        return $keys;
     }
 
     /**
      * @param \xPDOQuery|array|null $criteria
      * @param string $server_type
      * @param string $name
+     * @param bool $create_migration_file
+     *
+     * @return array
      */
-    public function makeSystemSettingSeeds($criteria, $server_type='master', $name=null)
+    public function makeSystemSettingSeeds($criteria, $server_type='master', $name=null, $create_migration_file=true)
     {
         $collection = $this->modx->getCollection('modSystemSetting', $criteria);
 
@@ -674,17 +700,21 @@ class Blender
                 'data' => &$setting_data
             ]
         );
-
-        $this->writeMigrationClassFile('systemSettings', $setting_data, $server_type, $name);
-        //$this->out($this->getMigrationName('resource'));
+        if ($create_migration_file) {
+            $this->writeMigrationClassFile('systemSettings', $setting_data, $server_type, $name);
+        }
+        return $setting_data;
     }
 
     /**
      * @param \xPDOQuery|array|null $criteria
      * @param string $server_type
      * @param string $name
+     * @param bool $create_migration_file
+     *
+     * @return array
      */
-    public function makeTemplateSeeds($criteria, $server_type='master', $name=null)
+    public function makeTemplateSeeds($criteria, $server_type='master', $name=null, $create_migration_file=true)
     {
         $keys = [];
         $collection = $this->modx->getCollection('modTemplate', $criteria);
@@ -696,11 +726,29 @@ class Blender
                 ->seedElement($template);
             $this->out("Template ID: ".$template->get('id').' Key: '.$seed_key);
             $keys[] = $seed_key;
-
         }
+        if ($create_migration_file) {
+            $this->writeMigrationClassFile('template', $keys, $server_type, $name);
+        }
+        return $keys;
+    }
 
-        $this->writeMigrationClassFile('template', $keys, $server_type, $name);
-        //$this->out($this->getMigrationName('template'));
+    /**
+     * @param string $server_type
+     * @param null|string $name
+     */
+    public function makeSiteSeed($server_type='master', $name=null)
+    {
+        $site_data = [
+            'chunks' => $this->makeChunkSeeds(null, $server_type, null, false),
+            'plugins' => $this->makePluginSeeds(null, $server_type, null, false),
+            'resources' => $this->makeResourceSeeds(null, $server_type, null, false),
+            'snippets' => $this->makeSnippetSeeds(null, $server_type, null, false),
+            'systemSettings' => $this->makeSystemSettingSeeds(null, $server_type, null, false),
+            'templates' => $this->makeTemplateSeeds(null, $server_type, null, false)
+        ];
+
+        $this->writeMigrationClassFile('site', $site_data, $server_type, $name);
     }
 
     /**
@@ -928,8 +976,9 @@ class Blender
      * @param array $class_data
      * @param string $server_type
      * @param string $name
+     * @param bool $log
      */
-    protected function writeMigrationClassFile($type, $class_data=[], $server_type='master', $name=null)
+    protected function writeMigrationClassFile($type, $class_data=[], $server_type='master', $name=null, $log=true)
     {
         if (!empty($name)) {
             $class_name = $name = preg_replace('/[^A-Za-z0-9\_\.]/', '', str_replace(['/', ' '], '_', $name));
@@ -991,6 +1040,12 @@ class Blender
                 $placeholders['classUpInners'] = '$this->blender->blendManyTemplates($this->templates, $this->getTimestamp());';
                 $placeholders['classDownInners'] = '//@TODO';
                 break;
+
+
+            case 'site':
+                $migration_template = 'site.txt';
+                $placeholders['siteData'] = $this->prettyVarExport($class_data);
+                break;
         }
 
         $file_contents = '';
@@ -1008,6 +1063,17 @@ class Blender
 
         try {
             $write = file_put_contents($this->getMigrationDirectory().$class_name.'.php', $file_contents);
+            $migration = $this->modx->newObject('BlendMigrations');
+            if ($migration && $log) {
+                $this->out('Blender loaded', true);
+                $migration->set('name', $class_name);
+                $migration->set('type', 'master');
+                $migration->set('description', '');// @TODO
+                $migration->set('version', '');
+                $migration->set('status', 'seed export');
+                $migration->set('created_at', date('Y-m-d H:i:s'));
+                $migration->save();
+            }
         } catch (Exception $exception) {
             $write = false;
             $this->out($exception->getMessage(), true);
