@@ -75,6 +75,26 @@ class Blender
     /**
      * @return string
      */
+    public function getTimestamp()
+    {
+        return $this->timestamp;
+    }
+
+    /**
+     * @param string $timestamp
+     *
+     * @return Blender
+     */
+    public function setTimestamp(string $timestamp)
+    {
+        $this->timestamp = $timestamp;
+        return $this;
+    }
+
+
+    /**
+     * @return string
+     */
     public function getSeedsDirectory()
     {
         return $this->config['seeds_dir'];
@@ -93,10 +113,11 @@ class Blender
      * @param string $dir
      * @param int $count
      * @param int $id
+     * @param string $name
      *
      * @return array ~ array of \BlendMigrations
      */
-    public function getBlendMigrationCollection($reload=false, $dir='ASC', $count=0, $id=0)
+    public function getBlendMigrationCollection($reload=false, $dir='ASC', $count=0, $id=0, $name=null)
     {
         if (!$this->blendMigrations || $reload) {
             $blendMigrations = [];
@@ -105,6 +126,8 @@ class Blender
             $query = $this->modx->newQuery('BlendMigrations');
             if ($id > 0 ) {
                 $query->where(['id' => $id]);
+            } elseif (!empty($name)) {
+                $query->where(['name' => $name]);
             }
             // @TODO need a ran sequence column to better order of down
             $query->sortBy('name', $dir);
@@ -112,8 +135,8 @@ class Blender
                 $query->limit($count);
             }
             $query->prepare();
-            echo 'SQL: '.$query->toSQL();
-            $migrationCollection = $this->modx->getCollection('BlendMigrations');
+            //echo 'SQL: '.$query->toSQL();
+            $migrationCollection = $this->modx->getCollection('BlendMigrations', $query);
 
             /** @var \BlendMigrations $migration */
             foreach ($migrationCollection as $migration) {
@@ -553,10 +576,12 @@ class Blender
     /**
      * @param string $name
      * @param string $server_type
+     *
+     * @return bool
      */
     public function createBlankMigrationClassFile($name, $server_type='master')
     {
-        $this->writeMigrationClassFile('blank', [], $server_type, $name);
+        return $this->writeMigrationClassFile('blank', [], $server_type, $name);
     }
 
     /**
@@ -567,7 +592,7 @@ class Blender
      *
      * @return array
      */
-    public function makeChunkSeeds($criteria, $server_type='master', $name=null, $create_migration_file)
+    public function makeChunkSeeds($criteria, $server_type='master', $name=null, $create_migration_file=true)
     {
         $keys = [];
         $collection = $this->modx->getCollection('modChunk', $criteria);
@@ -772,7 +797,8 @@ class Blender
             $this->out('File is not an instance of LCI\Blend\Migrations: '.$name, true);
             $this->out('Did not process, verify it is in the proper directory', true);
 
-        } elseif ($method == 'up') {
+        } elseif ($method == 'up' && !$this->isBlendInstalledInModx()) {
+
             $migrationProcessClass->up();
 
             /** @var \BlendMigrations $migration */
@@ -832,8 +858,9 @@ class Blender
      * @param string $type
      * @param int $count
      * @param int $id
+     * @param string $name
      */
-    public function runMigration($method='up', $type='master', $count=0, $id=0)
+    public function runMigration($method='up', $type='master', $count=0, $id=0, $name=null)
     {
         $dir = 'ASC';
         if ($method == 'down') {
@@ -842,13 +869,13 @@ class Blender
             $count = 0;
         }
         // 1. Get all migrations currently in DB:
-        $blendMigrations = $this->getBlendMigrationCollection(false, $dir, $count, $id);
+        $blendMigrations = $this->getBlendMigrationCollection(false, $dir, $count, $id, $name);
 
         // 2. Load migration files:
         if ($method == 'up') {
-            if ($this->retrieveMigrationFiles($blendMigrations)) {
+            if ($this->retrieveMigrationFiles()) {
                 // this is needed just to insure that the order is correct and any new files
-                $blendMigrations = $this->getBlendMigrationCollection(true);
+                $blendMigrations = $this->getBlendMigrationCollection(true, $dir, $count, $id, $name);
             }
         }
 
@@ -879,7 +906,7 @@ class Blender
             $migrationProcessClass = $this->loadMigrationClass($name, $blender);
 
             if ($migrationProcessClass instanceof Migrations) {
-                $this->out('Load Class: '.$name);
+                $this->out('Load Class: '.$name.' M: '.$method);
                 if ($method == 'up') {
                     $migrationProcessClass->up();
                     $this->out('Run up: '.$name);
@@ -903,11 +930,20 @@ class Blender
     }
 
     /**
-     * @param array $blendMigrations
-     * @return bool
+     * @return bool ~ true if new migrations were found
      */
-    protected function retrieveMigrationFiles($blendMigrations)
+    public function retrieveMigrationFiles()
     {
+        // 1. Get all migrations currently in DB:
+        $migrationCollection = $this->modx->getCollection('BlendMigrations');
+
+        $blendMigrations = [];
+
+        /** @var \BlendMigrations $migration */
+        foreach ($migrationCollection as $migration) {
+            $blendMigrations[$migration->get('name')] = $migration;
+        }
+
         $migration_dir = $this->getMigrationDirectory();
         $this->climate->out('Searching '.$migration_dir);
 
@@ -917,6 +953,7 @@ class Blender
             if ($file->isFile() && $file->getExtension() == 'php') {
 
                 $name = $file->getBasename('.php');
+                // @TODO query DB! and test this method
                 if (!isset($blendMigrations[$name])) {
                     $this->out('Create new '.$name);
                     /** @var Migrations $migrationProcessClass */
@@ -930,7 +967,9 @@ class Blender
                         $migration->set('description', $migrationProcessClass->getDescription());
                         $migration->set('version', $migrationProcessClass->getVersion());
                     }
-                    $migration->save();
+                    if (!$migration->save()) {
+                        exit();
+                    };
 
                     $reload = true;
                 }
@@ -977,6 +1016,8 @@ class Blender
      * @param string $server_type
      * @param string $name
      * @param bool $log
+     *
+     * @return bool
      */
     protected function writeMigrationClassFile($type, $class_data=[], $server_type='master', $name=null, $log=true)
     {
@@ -1061,27 +1102,72 @@ class Blender
 
         $this->out($this->getMigrationDirectory().$class_name.'.php');
 
-        try {
-            $write = file_put_contents($this->getMigrationDirectory().$class_name.'.php', $file_contents);
-            $migration = $this->modx->newObject('BlendMigrations');
-            if ($migration && $log) {
-                $this->out('Blender loaded', true);
-                $migration->set('name', $class_name);
-                $migration->set('type', 'master');
-                $migration->set('description', '');// @TODO
-                $migration->set('version', '');
-                $migration->set('status', 'seed export');
-                $migration->set('created_at', date('Y-m-d H:i:s'));
-                $migration->save();
+        $write = false;
+        if (file_exists($this->getMigrationDirectory().$class_name.'.php')) {
+            $this->out($this->getMigrationDirectory() . $class_name . '.php migration file already exists', true);
+
+        } elseif (is_object($this->modx->getObject('BlendMigrations', ['name' => $class_name]))) {
+            $this->out($class_name . ' migration already has been created in the blend_migrations table', true);
+
+        } else {
+            try {
+                $write = file_put_contents($this->getMigrationDirectory() . $class_name . '.php', $file_contents);
+                $migration = $this->modx->newObject('BlendMigrations');
+                if ($migration && $log) {
+                    $this->out('Blender loaded', true);
+                    $migration->set('name', $class_name);
+                    $migration->set('type', 'master');
+                    $migration->set('description', '');// @TODO
+                    $migration->set('version', '');
+                    $migration->set('status', 'seed export');
+                    $migration->set('created_at', date('Y-m-d H:i:s'));
+                    $migration->save();
+                }
+            } catch (Exception $exception) {
+                $this->out($exception->getMessage(), true);
             }
-        } catch (Exception $exception) {
-            $write = false;
-            $this->out($exception->getMessage(), true);
+            if (!$write) {
+                $this->out($this->getMigrationDirectory() . $class_name . '.php Did not write to file', true);
+                $this->out('Verify that the folders exists and are writable by PHP', true);
+            }
         }
-        if(!$write) {
-            $this->out($this->getMigrationDirectory().$class_name.'.php Did not write to file', true);
-            $this->out('Verify that the folders exists and are writable by PHP', true);
+
+        return $write;
+    }
+
+    /**
+     * @param string $name
+     * @param string $type ~ chunk, plugin, resource, snippet, systemSettings, template, site
+     *
+     * @return bool
+     */
+    public function removeMigrationFile($name, $type)
+    {
+        if (!empty($name)) {
+            $class_name = $name = preg_replace('/[^A-Za-z0-9\_\.]/', '', str_replace(['/', ' '], '_', $name));
+        } else {
+            $class_name = $this->getMigrationName($type);
         }
+
+        $removed = false;
+        $migration_file = $this->getMigrationDirectory() . $class_name . '.php';
+        if (file_exists($migration_file)) {
+            if (unlink($migration_file)) {
+                $removed = true;
+                $migration = $this->modx->getObject('BlendMigrations', ['name' => $class_name]);
+                if (is_object($migration) && $migration->remove()) {
+                    $this->out($class_name . ' migration has been removed from the blend_migrations table');
+
+                }
+            } else {
+                $this->out($class_name . ' migration has not been removed from the blend_migrations table');
+            }
+
+        } else {
+            $this->out($this->getMigrationDirectory() . $class_name . '.php migration could not be found to remove', true);
+        }
+
+        return $removed;
     }
     /**
      * @param int $id

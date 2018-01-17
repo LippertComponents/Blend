@@ -10,7 +10,7 @@ final class BlendTest extends BaseBlend
 {
     public function testCanBeInstalledBlend()
     {
-        $this->loadDependentClasses();
+        //$this->loadDependentClasses();
 
         $this->blender->install();
 
@@ -20,9 +20,51 @@ final class BlendTest extends BaseBlend
         );
     }
 
+    public function testCreateBlankMigrationClassFile()
+    {
+        //$this->loadDependentClasses();
+        $migration_class_name = 'BlankMigration';
+
+        $actual_timestamp = $this->blender->getTimestamp();
+        $this->blender->setTimestamp(BLEND_TEST_TIMESTAMP);
+
+        $this->assertEquals(
+            true,
+            $this->blender->createBlankMigrationClassFile($migration_class_name),
+            'Create blank migration file'
+        );
+
+        $this->assertEquals(
+            $this->removeStringLineEndings($this->getStringAfterFirstComment(file_get_contents(BLEND_COMPARE_DIRECTORY.'BlankMigration.php'))),
+            $this->removeStringLineEndings($this->getStringAfterFirstComment(file_get_contents($this->blender->getMigrationDirectory().'BlankMigration.php'))),
+            'Comparing existing blank migration file with generated file'
+        );
+
+        $this->blender->setTimestamp($actual_timestamp);
+    }
+
+    public function testCleanUpCreateBlankMigrationClassFile()
+    {
+        //$this->loadDependentClasses();
+        $migration_class_name = 'BlankMigration';
+
+        $actual_timestamp = $this->blender->getTimestamp();
+        $this->blender->setTimestamp(BLEND_TEST_TIMESTAMP);
+
+        // Clean up
+        if (BLEND_CLEAN_UP) {
+            $this->assertEquals(
+                true,
+                $this->blender->removeMigrationFile($migration_class_name, 'blank'),
+                'Remove created blank migration file'
+            );
+        }
+        $this->blender->setTimestamp($actual_timestamp);
+    }
+
     public function testBlendOneRawChunk()
     {
-        $this->loadDependentClasses();
+        //$this->loadDependentClasses();
 
         $chunk_name = 'testChunk1';
         $chunk_description = 'This is my test chunk, note this is limited to 255 or something and no HTML';
@@ -81,4 +123,151 @@ final class BlendTest extends BaseBlend
         }
     }
 
+    public function testMakeChunkSeeds()
+    {
+        $chunk_name = 'testChunk2';
+        $chunk_description = 'This is my 2nd test chunk, note this is limited to 255 or something and no HTML';
+        $chunk_code = 'Hi [[+testPlaceholder2]]!';
+
+        // Make test chunk:
+        $testChunk2 = $this->modx->getObject('modChunk', ['name' => $chunk_name]);
+        if (is_object($testChunk2)) {
+            $this->assertEquals(
+                false,
+                $testChunk2,
+                $chunk_name.' already exists'
+            );
+
+        } else {
+            $testChunk2 = $this->modx->newObject('modChunk');
+            $testChunk2->fromArray([
+                'name' => $chunk_name,
+                'description' => $chunk_description,
+                'content' => $chunk_code
+            ]);
+            $testChunk2->save();
+        }
+
+        $actual_timestamp = $this->blender->getTimestamp();
+        $this->blender->setTimestamp(BLEND_TEST_TIMESTAMP);
+
+        $this->blender->makeChunkSeeds(['name' => $chunk_name]);
+
+        $this->assertEquals(
+            $this->removeStringLineEndings($this->getStringAfterFirstComment(file_get_contents(BLEND_COMPARE_DIRECTORY.$chunk_name.'.php'))),
+            $this->removeStringLineEndings($this->getStringAfterFirstComment(file_get_contents($this->blender->getMigrationDirectory().'m2018_01_10_093000_Chunk.php'))),
+            'Comparing existing testChunk2 migration file with generated file'
+        );
+
+        $fixed_data = require_once BLEND_COMPARE_DIRECTORY.'testChunk2.seed.php';
+        $generated_data = false;
+        $seed_file = $this->blender->getSeedsDirectory().BLEND_TEST_TIMESTAMP.DIRECTORY_SEPARATOR.'elements'.DIRECTORY_SEPARATOR.'modChunk_testChunk2.cache.php';
+        if (file_exists($seed_file)) {
+            $generated_data = require_once $seed_file;
+        }
+        unset($generated_data['id']);
+
+        $this->assertEquals(
+            $fixed_data,
+            $generated_data,
+            'Comparing existing testChunk2 seed file with generated seed file'
+        );
+
+        $this->blender->setTimestamp($actual_timestamp);
+    }
+
+    public function testCleanUpMakeChunkSeeds()
+    {
+        $actual_timestamp = $this->blender->getTimestamp();
+        $this->blender->setTimestamp(BLEND_TEST_TIMESTAMP);
+
+        $chunk_name = 'testChunk2';
+
+        if (BLEND_CLEAN_UP) {
+            // Remove created test chunk:
+            $testChunk2 = $this->modx->getObject('modChunk', ['name' => $chunk_name]);
+            if (is_object($testChunk2)) {
+                $testChunk2->remove();
+
+            }
+
+            $this->assertEquals(
+                true,
+                $this->blender->removeMigrationFile('', 'chunk'),
+                'Remove created chunk2 migration seed file'
+            );
+        }
+        $this->blender->setTimestamp($actual_timestamp);
+    }
+
+    public function testChunkMigration()
+    {
+        $migration = 'ChunkMigrationExample';
+        $chunk_name = 'testChunk3';
+        $chunk_description = 'This is my 3rd test chunk, note this is limited to 255 or something and no HTML';
+        $chunk_code = 'Hi [[+testPlaceholder3]], ...';
+
+        $this->blender->runMigration('up', 'master', 0, 0, $migration);
+
+        $testChunk3 = $this->modx->getObject('modChunk', ['name' => $chunk_name]);
+        $this->assertInstanceOf(
+            '\modChunk',
+            $testChunk3,
+            'Validate testChunkMigration that chunk was created '.$chunk_name
+        );
+
+        if ($testChunk3 instanceof \modChunk) {
+            $this->assertEquals(
+                $chunk_name,
+                $testChunk3->get('name'),
+                'Compare chunk name'
+            );
+
+            $this->assertEquals(
+                $chunk_description,
+                $testChunk3->get('description'),
+                'Compare chunk description'
+            );
+
+            $this->assertEquals(
+                $chunk_code,
+                $testChunk3->getContent(),
+                'Compare chunk code'
+            );
+        }
+    }
+
+    public function testChunkRevertMigration()
+    {
+        $migration = 'ChunkMigrationExample';
+        $chunk_name = 'testChunk3';
+
+        $testChunk3 = $this->modx->getObject('modChunk', ['name' => $chunk_name]);
+
+        $this->assertInstanceOf(
+            '\modChunk',
+            $testChunk3,
+            'Validate testChunkMigration that chunk was created '.$chunk_name
+        );
+
+        $this->blender->runMigration('down', 'master', 0, 0, $migration);
+
+        $testChunk4 = $this->modx->getObject('modChunk', ['name' => $chunk_name]);
+
+        $this->assertEquals(
+            false,
+            $testChunk4,
+            'Compare testChunkRevertMigration, should be empty/false'
+        );
+    }
+
+    public function testCanBeUninstalledBlend()
+    {
+        $this->blender->install('down');
+
+        $this->assertEquals(
+            false,
+            $this->blender->isBlendInstalledInModx()
+        );
+    }
 }

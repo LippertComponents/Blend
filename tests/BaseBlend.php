@@ -9,7 +9,7 @@ require_once 'config.php';
 
 class BaseBlend extends TestCase
 {
-    /** @var \MODx */
+    /** @var \MODx  An xPDO instance for this TestCase. */
     protected $modx;
 
     /** @var Blender */
@@ -18,21 +18,101 @@ class BaseBlend extends TestCase
     /** @var CLImate */
     protected $climate;
 
+    /**
+     * @var modX A static modX fixture.
+     */
+    public static $fixture = null;
+
+    /**
+     * Setup static properties when loading the test cases.
+     */
+    public static function setUpBeforeClass()
+    {
+
+    }
+
+    /**
+     * Grab a persistent instance of the xPDO class to share sample model data
+     * across multiple tests and test suites.
+     *
+     * @param bool $new Indicate if a new singleton should be created
+     *
+     * @return xPDO An xPDO object instance.
+     */
+    public static function getInstance($new = false)
+    {
+        if ($new || !is_object(self::$fixture)) {
+            $modx = new modX();
+
+            $modx->initialize('mgr');
+
+            if (is_object($modx)) {
+                self::$fixture = $modx;
+            }
+        }
+        return self::$fixture;
+    }
+
+    /**
+     * Set up the xPDO(modx) fixture for each test case.
+     */
+    protected function setUp()
+    {
+        $this->modx = self::getInstance();
+
+        $this->climate = new CLImate;
+
+        $this->blender = new Blender($this->modx, ['blend_modx_migration_dir' => BLEND_MODX_MIGRATION_PATH]);
+        $this->blender->setClimate($this->climate);
+    }
+
+    /**
+     * Tear down the xPDO(modx) fixture after each test case.
+     */
+    protected function tearDown()
+    {
+        $this->modx = null;
+    }
+
+
+
+
     protected function loadDependentClasses()
     {
         if (!is_object($this->modx)) {
             $this->modx = new modX();
 
             $this->modx->initialize('mgr');
-        }
-        if (!is_object($this->climate)) {
-            /** @var CLImate climate */
-            $this->climate = new CLImate;
-        }
-        if (!is_object($this->blender)) {
+
+            if (!is_object($this->climate)) {
+                /** @var CLImate climate */
+                $this->climate = new CLImate;
+            }
+            $this->climate->out('LOAD loadDependentClasses()');
             /** @var Blender */
-            $this->blender = new Blender($this->modx, ['blend_modx_migration_dir' => BLEND_MODX_MIGRATION_PATH]);
-            $this->blender->setClimate($this->climate);
+                $this->blender = new Blender($this->modx, ['blend_modx_migration_dir' => BLEND_MODX_MIGRATION_PATH]);
+                $this->blender->setClimate($this->climate);
+
         }
+    }
+
+    /**
+     * @param $string
+     *
+     * @return bool|string
+     */
+    protected function getStringAfterFirstComment($string)
+    {
+        return substr($string, (int)strpos($string, '*/') );
+    }
+
+    /**
+     * @param $string
+     *
+     * @return mixed
+     */
+    protected function removeStringLineEndings($string)
+    {
+        return str_replace(["\r",  "\n", "\r\n"], '', $string);
     }
 }
