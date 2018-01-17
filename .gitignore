@@ -137,3 +137,4 @@ fabric.properties
 /bin/config.php
 /vendor/
 /composer.lock
+/tests/config.php
