@@ -412,6 +412,7 @@ abstract class Element
         $this->setAdditionalElementColumns();
         $this->relatedPieces();
         if ($this->element->save()) {
+            $this->relatedPiecesAfterSave();
             if ($this->isDebug()) {
                 $this->blender->out($this->getName() . ' has been installed/saved');
             }
@@ -716,6 +717,11 @@ abstract class Element
 
     }
 
+    protected function relatedPiecesAfterSave()
+    {
+
+    }
+
     /**
      * @param \modElement $element
      *
@@ -724,6 +730,14 @@ abstract class Element
     protected function seedRelated($element)
     {
         return $element;
+    }
+
+    /**
+     * @return array
+     */
+    public function getRelatedData()
+    {
+        return $this->related_data;
     }
 
     /**

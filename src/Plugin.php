@@ -80,6 +80,8 @@ class Plugin extends Element
     protected function relatedPieces()
     {
         if (count($this->on_event_names) > 0) {
+            /*
+            @TODO this fails testing? MODX bug?
             $events = [];
             foreach ($this->on_event_names as $event_data) {
                 $event = $this->modx->newObject('modPluginEvent');
@@ -88,8 +90,30 @@ class Plugin extends Element
                 $events[] = $event;
             }
             $this->element->addMany($events, 'PluginEvents');
+            */
         }
         // @TODO remove
+    }
+
+    protected function relatedPiecesAfterSave()
+    {
+        if (count($this->on_event_names) > 0) {
+            $events = [];
+            foreach ($this->on_event_names as $event_data) {
+
+                $pluginEvent = $this->modx->newObject('modPluginEvent');
+                $pluginEvent->set('event', $event_data['event']);
+                $pluginEvent->set('pluginid', $this->element->get('id'));
+                $priority = (!empty($event_data['priority']) ? $event_data['priority'] : 0);
+                $pluginEvent->set('priority', (int)$priority);
+                $pluginEvent->set('propertyset', (int)(!empty($event_data['propertyset']) ? $event_data['propertyset'] : 0));
+
+                if (!$pluginEvent->save()) {
+                    $this->blender->out('Plugin did not attached the event: '.$event_data['event']);
+                }
+            }
+            $this->element->addMany($events, 'PluginEvents');
+        }
     }
 
     /**
