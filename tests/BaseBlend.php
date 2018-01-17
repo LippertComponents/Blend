@@ -99,4 +99,9 @@ class BaseBlend extends TestCase
     {
         return str_replace(["\r",  "\n", "\r\n"], '', $string);
     }
+
+    protected function removePHPtags($string)
+    {
+        return trim(ltrim($string, '<?php'));
+    }
 }
