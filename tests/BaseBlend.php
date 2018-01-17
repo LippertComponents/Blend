@@ -5,8 +5,6 @@ use PHPUnit\Framework\TestCase;
 use LCI\Blend\Blender;
 use League\CLImate\CLImate;
 
-require_once 'config.php';
-
 class BaseBlend extends TestCase
 {
     /** @var \MODx  An xPDO instance for this TestCase. */
@@ -17,6 +15,9 @@ class BaseBlend extends TestCase
 
     /** @var CLImate */
     protected $climate;
+
+    /** @var bool  */
+    protected $install_blend = false;
 
     /**
      * @var modX A static modX fixture.
@@ -64,36 +65,19 @@ class BaseBlend extends TestCase
 
         $this->blender = new Blender($this->modx, ['blend_modx_migration_dir' => BLEND_MODX_MIGRATION_PATH]);
         $this->blender->setClimate($this->climate);
+
+        if ($this->install_blend) {
+            $this->blender->install();
+        }
     }
 
     /**
      * Tear down the xPDO(modx) fixture after each test case.
+     * This method is called after a test is executed.
      */
     protected function tearDown()
     {
         $this->modx = null;
-    }
-
-
-
-
-    protected function loadDependentClasses()
-    {
-        if (!is_object($this->modx)) {
-            $this->modx = new modX();
-
-            $this->modx->initialize('mgr');
-
-            if (!is_object($this->climate)) {
-                /** @var CLImate climate */
-                $this->climate = new CLImate;
-            }
-            $this->climate->out('LOAD loadDependentClasses()');
-            /** @var Blender */
-                $this->blender = new Blender($this->modx, ['blend_modx_migration_dir' => BLEND_MODX_MIGRATION_PATH]);
-                $this->blender->setClimate($this->climate);
-
-        }
     }
 
     /**
