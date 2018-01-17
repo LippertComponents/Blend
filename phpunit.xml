@@ -3,6 +3,7 @@
         <testsuite name="blend">
             <file>tests/BlendTest.php</file>
             <file>tests/ChunkTest.php</file>
+            <file>tests/PluginTest.php</file>
             <file>tests/SnippetTest.php</file>
         </testsuite>
     </testsuites>
