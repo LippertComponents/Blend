@@ -1,0 +1,221 @@
+<?php
+declare(strict_types=1);
+
+use PHPUnit\Framework\TestCase;
+use LCI\Blend\Blender;
+use League\CLImate\CLImate;
+
+final class SystemSettingsTest extends BaseBlend
+{
+    /** @var bool  */
+    protected $install_blend = true;
+
+    protected $test_system_settings = [
+        0 => [
+            'key' => 'site_name',
+            'value' => 'Blend Site',
+            'xtype' => 'textfield',
+            'namespace' => 'core',
+            'area' => 'site',
+        ],
+        1 => [
+            'key' => 'blend_system_setting_test',
+            'value' => 'This is only a test, I am safe to delete',
+            'xtype' => 'textfield',
+            'namespace' => 'core',
+            'area' => 'site',
+        ],
+        2 => [
+            'key' => 'site_status',
+            'value' => '0',
+            'xtype' => 'combo-boolean',
+            'namespace' => 'core',
+            'area' => 'site',
+        ]
+    ];
+
+    public function testBlendManySystemSettings()
+    {
+        $this->assertEquals(
+            true,
+            $this->blender->blendManySystemSettings($this->test_system_settings),
+            'blendManySystemSettings attempted '
+        );
+
+        foreach ($this->test_system_settings as $count => $setting) {
+            $systemSetting = $this->modx->getObject('modSystemSetting', $setting['key']);
+
+            $this->assertInstanceOf(
+                '\modSystemSetting',
+                $systemSetting,
+                'Validate system setting exists that was attempted to be blended '.$setting['key']
+            );
+            $actual = $systemSetting->toArray();
+            unset($actual['editedon']);
+            $this->assertEquals(
+                $setting,
+                $actual,
+                $setting['key'].' blend compared'
+            );
+        }
+    }
+
+    public function testRevertBlendManySystemSettings()
+    {
+        // @TODO validate the reverted data
+        $this->assertEquals(
+            true,
+            $this->blender->revertBlendManySystemSettings($this->test_system_settings),
+            'Revert system settings attempted '
+        );
+    }
+
+
+    public function testMakeSystemSettingsSeeds()
+    {
+        $setting = [
+            'key' => 'testSystemSetting2',
+            'value' => 'Blend Site',
+            'xtype' => 'textfield',
+            'namespace' => 'core',
+            'area' => 'site',
+        ];
+
+        // Make test setting:
+        $testSystemSetting2 = $this->modx->getObject('modSystemSetting', $setting['key']);
+
+        if (is_object($testSystemSetting2)) {
+            $this->assertEquals(
+                false,
+                $testSystemSetting2,
+                $setting['key'].' already exists'
+            );
+
+        } else {
+            $testSystemSetting2 = $this->modx->newObject('modSystemSetting');
+            $testSystemSetting2->fromArray($setting);
+            $testSystemSetting2->set('key', $setting['key']);
+
+            $this->assertEquals(
+                true,
+                $testSystemSetting2->save(),
+                $setting['key'].' attempt to save system setting'
+            );
+        }
+
+        $actual_timestamp = $this->blender->getTimestamp();
+        $this->blender->setTimestamp(BLEND_TEST_TIMESTAMP);
+
+        $seed_data = $this->blender->makeSystemSettingSeeds(['key' => $setting['key']]);
+
+        $this->assertEquals(
+            $this->removeStringLineEndings($this->getStringAfterFirstComment(file_get_contents(BLEND_COMPARE_DIRECTORY.$setting['key'].'.migration.php'))),
+            $this->removeStringLineEndings($this->getStringAfterFirstComment(file_get_contents($this->blender->getMigrationDirectory().'m2018_01_10_093000_Systemsettings.php'))),
+            'Comparing existing testSystemSetting2 migration file with generated file'
+        );
+
+        $this->blender->setTimestamp($actual_timestamp);
+    }
+
+    public function testCleanUpMakeSystemSettingsSeeds()
+    {
+        $actual_timestamp = $this->blender->getTimestamp();
+        $this->blender->setTimestamp(BLEND_TEST_TIMESTAMP);
+
+        $setting_name = 'testSystemSetting2';
+
+        if (BLEND_CLEAN_UP) {
+            // Remove created test snippet:
+            $testSystemSetting2 = $this->modx->getObject('modSystemSetting', ['key' => $setting_name]);
+            if (is_object($testSystemSetting2)) {
+                $testSystemSetting2->remove();
+
+            }
+
+            $this->assertEquals(
+                true,
+                $this->blender->removeMigrationFile('', 'systemSettings'),
+                'Remove created testSystemSetting2 migration seed file'
+            );
+        }
+        $this->blender->setTimestamp($actual_timestamp);
+    }
+
+
+    public function testSystemSettingMigration()
+    {
+        $migration = 'SystemSettingMigrationExample';
+        $setting = [
+            'key' => 'testSystemSettingMigration',
+            'value' => 'Blend Site',
+            'xtype' => 'textfield',
+            'namespace' => 'core',
+            'area' => 'site',
+        ];
+
+        $this->blender->runMigration('up', 'master', 0, 0, $migration);
+
+        $testSystemSetting3 = $this->modx->getObject('modSystemSetting', ['key' => $setting['key']]);
+        $this->assertInstanceOf(
+            '\modSystemSetting',
+            $testSystemSetting3,
+            'Validate testSystemSettingMigration that the system setting was created '.$setting['key']
+        );
+
+        if ($testSystemSetting3 instanceof \modSystemSetting) {
+            $this->assertEquals(
+                $setting['key'],
+                $testSystemSetting3->get('key'),
+                'Compare system setting key'
+            );
+
+            $this->assertEquals(
+                $setting['value'],
+                $testSystemSetting3->get('value'),
+                'Compare system setting value'
+            );
+
+            $this->assertEquals(
+                $setting['namespace'],
+                $testSystemSetting3->get('namespace'),
+                'Compare system setting namespace'
+            );
+        }
+    }
+
+    public function testSystemSettingRevertMigration()
+    {
+        $migration = 'SystemSettingMigrationExample';
+        $setting_key = 'testSystemSettingMigration';
+
+        $testSystemSetting3 = $this->modx->getObject('modSystemSetting', ['key' => $setting_key]);
+
+        $this->assertInstanceOf(
+            '\modSystemSetting',
+            $testSystemSetting3,
+            'Validate SystemSettingMigrationExample did create a system setting '.$setting_key
+        );
+
+        $this->blender->runMigration('down', 'master', 0, 0, $migration);
+
+        $testSystemSetting4 = $this->modx->getObject('modSystemSetting', ['key' => $setting_key]);
+
+        $this->assertEquals(
+            false,
+            $testSystemSetting4,
+            'Compare SystemSettingMigrationExample revert, setting should be empty/false'
+        );
+    }
+
+    public function testRemoveBlend()
+    {
+        if (BLEND_CLEAN_UP) {
+            $this->blender->install('down');
+
+            $this->assertEquals(
+                false,
+                $this->blender->isBlendInstalledInModx()
+            );
+        }
+    }
+}

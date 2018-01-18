@@ -472,9 +472,12 @@ class Blender
     /**
      * @param array $settings ~ [ ['name' => 'mySystemSetting', 'value' => 'myValue'], ..]
      * @param string $timestamp
+     *
+     * @return bool
      */
     public function blendManySystemSettings($settings=[], $timestamp='')
     {
+        $success = true;
         // will update if system setting does exist or create new
         foreach ($settings as $setting) {
             $systemSetting = new SystemSetting($this->modx, $this);
@@ -489,6 +492,7 @@ class Blender
 
             } else {
                 // Error: no name/key
+                $success = false;
                 continue;
             }
 
@@ -511,16 +515,23 @@ class Blender
 
             if ( $systemSetting->blend() ) {
                 $this->out($systemSetting->getName().' setting has been blended');
+            } else {
+                $success = false;
             }
         }
+
+        return $success;
     }
 
     /**
      * @param array $settings ~ [ ['name' => 'mySystemSetting', 'value' => 'myValue'], ..]
      * @param string $timestamp
+     *
+     * @return bool
      */
     public function revertBlendManySystemSettings($settings=[], $timestamp='')
     {
+        $success = true;
         // will update if system setting does exist or create new
         foreach ($settings as $setting) {
             $systemSetting = new SystemSetting($this->modx, $this);
@@ -535,6 +546,7 @@ class Blender
 
             } else {
                 // Error: no name/key
+                $success = false;
                 continue;
             }
 
@@ -543,8 +555,11 @@ class Blender
 
             } else {
                 $this->out($systemSetting->getName().' setting was not reverted', true);
+                $success = false;
             }
         }
+
+        return $success;
     }
 
     /**
