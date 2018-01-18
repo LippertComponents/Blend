@@ -6,6 +6,7 @@
             <file>tests/PluginTest.php</file>
             <file>tests/SnippetTest.php</file>
             <file>tests/SystemSettingsTest.php</file>
+            <file>tests/TemplateTest.php</file>
         </testsuite>
     </testsuites>
 </phpunit>
