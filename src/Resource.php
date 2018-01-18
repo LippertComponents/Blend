@@ -32,6 +32,9 @@ class Resource
     /** @var array  */
     protected $resource_data = [];
 
+    /** @var bool  */
+    protected $debug = false;
+
     /**
      * Element constructor.
      *
@@ -50,6 +53,25 @@ class Resource
     }
 
     /**
+     * @return bool
+     */
+    public function isDebug()
+    {
+        return $this->debug;
+    }
+
+    /**
+     * @param bool $debug
+     *
+     * @return $this
+     */
+    public function setDebug(bool $debug)
+    {
+        $this->debug = $debug;
+        return $this;
+    }
+
+    /**
      * @param string $timestamp ~ will be the directory name
      *
      * @return $this
@@ -63,6 +85,8 @@ class Resource
         return $this;
     }
 
+    // @TODO convenience methods to build resource custom pages not just from seeds
+
     /**
      * @param string $seed_key
      *
@@ -74,11 +98,53 @@ class Resource
         return $this->resource_data;
     }
 
-    public function blendResource($seed_key, $overwrite=false)
+    /**
+     * @param \modResource $resource
+     * @param string $seed_key
+     *
+     * @return void
+     */
+    public function backupCurrentVersion($resource, $seed_key)
+    {
+        // save the raw data, this is for local only not portable
+        $this->resource_data = $resource->toArray();
+
+        // no IDs only TV name
+        $tvs = [];// TemplateVarResources modTemplateVarResource
+
+        $template = $resource->getOne('Template');
+        if (is_object($template)) {
+
+            // get all TemplateValues
+            $tvTemplates = $template->getMany('TemplateVarTemplates');
+            foreach ($tvTemplates as $tvTemplate) {
+                $tv = $tvTemplate->getOne('TemplateVar');
+                $tv_name = $tv->get('name');
+
+                $tvs[$tv_name] = [
+                    'type' => $tv->get('type'),
+                    'value' => $resource->getTVValue($tv_name)
+                ];
+            }
+        }
+
+        $this->resource_data['tv'] = $tvs;
+
+        // now cache it
+        $this->modx->cacheManager->set(
+            'down-' . $seed_key,
+            $this->resource_data,
+            $this->cache_life,
+            $this->cacheOptions
+        );
+    }
+
+    public function blendFromSeed($seed_key, $overwrite=false)
     {
         $save = false;
         $this->loadResourceDataFromSeed($seed_key);
         // does it exist
+        // @TODO make way to change the alias and get data together
         $resource = $this->getResourceFromSeedKey($seed_key);
         if ($resource) {
             $this->exists = true;
@@ -87,9 +153,12 @@ class Resource
                 $this->blender->out('   Seed ID: '. $this->resource_data['id'].' -- '. $this->resource_data['pagetitle']);
                 return $save;
             }
+            $this->backupCurrentVersion($resource, $seed_key);
+
         } else {
             $resource = $this->modx->newObject('modResource');
         }
+
         $org_id = $this->resource_data['id'];
         unset($this->resource_data['id']);
 
@@ -110,7 +179,7 @@ class Resource
             [
                 'blender' => $this->blender,
                 'blendResource' => $this,
-                'resource' => &$resource,
+                'resource' => $resource,
                 'tvs' => $tvs,
                 'extras' => $extras,
                 'data' => &$this->resource_data
@@ -124,28 +193,18 @@ class Resource
 
         if ($save) {
             // TVs:
-            foreach ($tvs as $tv_name => $value) {
+            foreach ($tvs as $tv_name => $tv_data) {
                 //$this->blender->out('  set TV: '.$tv_name.' '.$value);
-                switch ($tv_name) {
-                    case 'primaryCategory':
-                        // no break
-                    case 'optionalCategories':
-                    case 'optonialCategories';
-                        // no break
-                    case 'rvor_author':
-                        // no break
-                        if (!empty($value)) {
-                            $value = $this->blender->getResourceIDFromSeedKey($value);
+                $value = $tv_data['value'];
+
+                switch ($tv_data['type']) {
+                    case 'resourcelist':
+                        if (isset($tv_data['portable_value'])) {
+                            $value = $this->blender->getResourceIDFromSeedKey($tv_data['portable_value']);
                         }
                         break;
-                    case 'blogit.post_main_image':
-                        // no break;
-                    case 'blogit.post_thumb_image':
-                        // no break;
-                    case 'rvor_author_pic':
-                        $value = str_replace('/assets/content/rvor/', '', $value);
-                        break;
                 }
+
                 $resource->setTVValue($tv_name, $value);
             }
             // extras
@@ -159,7 +218,7 @@ class Resource
                 [
                     'blender' => $this->blender,
                     'blendResource' => $this,
-                    'resource' => &$resource,
+                    'resource' => $resource,
                     'tvs' => $tvs,
                     'extras' => $extras,
                     'data' => &$this->resource_data
@@ -167,6 +226,48 @@ class Resource
             );
         }
         return $save;
+    }
+
+    /**
+     * @param string $seed_key
+     *
+     * @return bool
+     */
+    public function revertBlendFromSeed($seed_key)
+    {
+        $this->loadResourceDataFromSeed('down-'.$seed_key);
+        // new-alias
+
+        $resource = $this->getResourceFromSeedKey($seed_key);
+
+        // 1. get previous data from cache:
+        $data = $this->modx->cacheManager->get('down-'.$seed_key, $this->cacheOptions);
+
+        if (!$data) {
+            if ($this->isDebug()) {
+                $this->blender->out('Remove resource: ' . $seed_key.'');
+            }
+            return $resource->remove();
+
+        } elseif (is_array($data)) {
+            if ($this->isDebug()) {
+                $this->blender->out('Restore resource to old version ' . $seed_key);
+            }
+            // load old data:
+            $resource->fromArray($data);
+            $resource->save();
+
+            // @TODO remove all current TV values?
+
+            // tvs:
+            foreach ($data['tvs'] as $tv => $tv_data) {
+                $resource->setTVValue($tv, $tv_data['value']);
+            }
+
+            return $resource->save();
+        }
+
+        return false;
     }
 
     /**
@@ -223,10 +324,11 @@ class Resource
 
     /**
      * @param \modResource $resource
+     * @param string $type
      *
      * @return string
      */
-    public function seedResource(\modResource $resource)
+    public function seed(\modResource $resource, $type='export')
     {
         // No IDs! must get the alias and get a seed key,
         // @TODO need to log error and exit if any duplicate alias
@@ -253,17 +355,15 @@ class Resource
                 $tv = $tvTemplate->getOne('TemplateVar');
                 $tv_name = $tv->get('name');
 
-                $tvs[$tv_name] = $resource->getTVValue($tv_name);
-                switch ($tv_name) {
-                    case 'primaryCategory':
-                        // no break
-                    case 'optionalCategories':
-                    case 'optonialCategories';
-                        // no break
-                    case 'rvor_author':
-                        // no break
-                        if ($tvs[$tv_name] > 0) {
-                            $tvs[$tv_name] = $this->blender->getResourceSeedKeyFromID($tvs[$tv_name]);
+                $tvs[$tv_name] = [
+                    'type' => $tv->get('type'),
+                    'value' => $resource->getTVValue($tv_name)
+                ];
+
+                switch ($tv->get('type')) {
+                    case 'resourcelist':
+                        if ($tvs[$tv_name]['value'] > 0) {
+                            $tvs[$tv_name]['portable_value'] = $this->blender->getResourceSeedKeyFromID($tvs[$tv_name]);
                         }
                         break;
                 }
@@ -286,19 +386,31 @@ class Resource
                 'blender' => $this->blender,
                 'blendResource' => $this,
                 'resource' => &$resource,
-                'data' => &$this->resource_data
+                'data' => &$this->resource_data,
+                'type' => $type
             ]
         );
 
         // now cache it:
         $this->modx->cacheManager->set(
-            $seed_key,
+            ($type == 'backup' ? 'down-' : '').$seed_key,
             $this->resource_data,
             $this->cache_life,
             $this->cacheOptions
         );
 
         return $seed_key;
+    }
+
+    /**
+     * @param array $resource_data
+     *
+     * @return $this
+     */
+    public function setResourceData(array $resource_data)
+    {
+        $this->resource_data = $resource_data;
+        return $this;
     }
 
     /**

@@ -469,31 +469,69 @@ class Blender
     /**
      * @param array $resources
      * @param string $timestamp
+     * @param bool $overwrite
+     *
+     * @return bool
      */
-    public function blendManyResources($resources=[], $timestamp='')
+    public function blendManyResources($resources=[], $timestamp='', $overwrite=false)
     {
-        $blendResource = new Resource($this->modx, $this);
-        if (!empty($timestamp)) {
-            $blendResource->setSeedTimeDir($timestamp);
-        }
-
+        $saved = true;
         // will update if resource does exist or create new
         foreach ($resources as $seed_key) {
-            if ($blendResource->blendResource($seed_key)) {
+            /** @var \LCI\Blend\Resource $blendResource */
+            $blendResource = new Resource($this->modx, $this);
+            if (!empty($timestamp)) {
+                $blendResource->setSeedTimeDir($timestamp);
+            }
+
+            if ($blendResource->blendFromSeed($seed_key, $overwrite)) {
                 $this->out($seed_key.' has been blended into ID: ');
+
             } elseif($blendResource->isExists()) {
                 // @TODO prompt Do you want to blend Y/N/Compare
                 $this->out($seed_key.' already exists', true);
                 if ($this->prompt('Would you like to update?', 'Y') === 'Y') {
-                    if ($blendResource->blendResource($seed_key, true)) {
+                    if ($blendResource->blendFromSeed($seed_key, true)) {
                         $this->out($seed_key.' has been blended into ID: ');
                     }
                 }
             } else {
                 $this->out('There was an error saving '.$seed_key, true);
+                $saved = false;
             }
         }
 
+        return $saved;
+    }
+
+    /**
+     * @param array $resources
+     * @param string $timestamp
+     * @param bool $overwrite
+     *
+     * @return bool
+     */
+    public function revertBlendManyResources($resources=[], $timestamp='', $overwrite=false)
+    {
+        $saved = true;
+        // will update if resource does exist or create new
+        foreach ($resources as $seed_key) {
+            /** @var \LCI\Blend\Resource $blendResource */
+            $blendResource = new Resource($this->modx, $this);
+            if (!empty($timestamp)) {
+                $blendResource->setSeedTimeDir($timestamp);
+            }
+
+            if ($blendResource->revertBlendFromSeed($seed_key)) {
+                $this->out($seed_key.' has been reverted ');
+
+            } else {
+                $this->out('There was an error reverting resource '.$seed_key, true);
+                $saved = false;
+            }
+        }
+
+        return $saved;
     }
 
     /**
@@ -701,7 +739,7 @@ class Blender
             $blendResource = new Resource($this->modx, $this);
             $seed_key = $blendResource
                 ->setSeedTimeDir($this->timestamp)
-                ->seedResource($resource);
+                ->seed($resource);
             $this->out("ID: ".$resource->get('id').' Key: '.$seed_key);
             $keys[] = $seed_key;
         }
