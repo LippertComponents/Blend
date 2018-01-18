@@ -197,7 +197,8 @@ class Blender
         /** @var Chunk $chunk */
         $chunk =  new Chunk($this->modx, $this);
         return $chunk
-            ->setName($name);
+            ->setName($name)
+            ->setSeedTimeDir($this->getTimestamp());
     }
     /**
      * @param array $chunks
@@ -261,7 +262,8 @@ class Blender
         /** @var Plugin $plugin */
         $plugin =  new Plugin($this->modx, $this);
         return $plugin
-            ->setName($name);
+            ->setName($name)
+            ->setSeedTimeDir($this->getTimestamp());
     }
 
     /**
@@ -326,7 +328,8 @@ class Blender
         /** @var Snippet $snippet */
         $snippet =  new Snippet($this->modx, $this);
         return $snippet
-            ->setName($name);
+            ->setName($name)
+            ->setSeedTimeDir($this->getTimestamp());
     }
 
     /**
@@ -1138,7 +1141,7 @@ class Blender
                 $migration_template = 'resource.txt';
                 $placeholders['resourceData'] = $this->prettyVarExport($class_data);
                 $placeholders['classUpInners'] = '$this->blender->blendManyResources($this->resources, $this->getTimestamp());';
-                $placeholders['classDownInners'] = '//@TODO';
+                $placeholders['classDownInners'] = '$this->blender->revertBlendManyResources($this->resources, $this->getTimestamp());';
                 break;
 
             case 'snippet':

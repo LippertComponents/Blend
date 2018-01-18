@@ -21,6 +21,7 @@ class PluginMigrationExample extends Migrations
         /** @var \LCI\Blend\Plugin $testPlugin3 */
         $testPlugin3 = $this->blender->blendOneRawPlugin('testPlugin3');
         $testPlugin3
+            ->setSeedTimeDir($this->getTimestamp())
             ->setDescription('This is my 3rd test plugin, note this is limited to 255 or something and no HTML')
             ->setCategoryFromNames('Parent Plugin Cat=>Child Plugin Cat')
             ->setCode('<?php $eventName = $modx->event->name;//3rd ')
@@ -102,6 +103,6 @@ class PluginMigrationExample extends Migrations
      */
     protected function assignTimestamp()
     {
-        $this->timestamp = '2018_01_06_094339';
+        $this->timestamp = BLEND_TEST_TIMESTAMP;
     }
 }

@@ -19,6 +19,7 @@ class SnippetMigrationExample extends Migrations
         /** @var \LCI\Blend\Snippet $testSnippet3 */
         $testSnippet3 = $this->blender->blendOneRawSnippet('testSnippet3');
         $testSnippet3
+            ->setSeedTimeDir($this->getTimestamp())
             ->setDescription('This is my 3rd test snippet, note this is limited to 255 or something and no HTML')
             ->setCategoryFromNames('Parent Snippet Cat=>Child Snippet Cat')
             ->setCode('<?php return \'This is the 3rd test Snippet!\'; ')
@@ -99,6 +100,6 @@ class SnippetMigrationExample extends Migrations
      */
     protected function assignTimestamp()
     {
-        $this->timestamp = '2018_01_06_094339';
+        $this->timestamp = BLEND_TEST_TIMESTAMP;
     }
 }

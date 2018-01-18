@@ -84,6 +84,6 @@ class SystemSettingMigrationExample extends Migrations
      */
     protected function assignTimestamp()
     {
-        $this->timestamp = '2018_01_10_093000';
+        $this->timestamp = BLEND_TEST_TIMESTAMP;
     }
 }

@@ -19,6 +19,7 @@ class ChunkMigrationExample extends Migrations
         /** @var \LCI\Blend\Chunk $chunk */
         $testChunk3 = $this->blender->blendOneRawChunk('testChunk3');
         $testChunk3
+            ->setSeedTimeDir($this->getTimestamp())
             ->setDescription('This is my 3rd test chunk, note this is limited to 255 or something and no HTML')
             ->setCategoryFromNames('Parent Cat=>Child Cat')
             ->setCode('Hi [[+testPlaceholder3]], ...')
@@ -41,8 +42,23 @@ class ChunkMigrationExample extends Migrations
      */
     public function down()
     {
-        // remove the chunk from MODX
-        /** @var bool|\modChunk $testChunk3 */
+        $name = 'testChunk3';
+
+        $blendChunk = new \LCI\Blend\Chunk($this->modx, $this->blender);
+        $blendChunk
+            ->setName($name)
+            ->setSeedTimeDir($this->getTimestamp());
+
+        if ( $blendChunk->revertBlend() ) {
+            $this->blender->out($blendChunk->getName().' setting has been reverted to '.$this->getTimestamp());
+
+        } else {
+            $this->blender->out($blendChunk->getName().' setting was not reverted', true);
+        }
+
+        /**
+         * Manually via xPDO, but no control her to what the last version may have been, assuming it did not exist:
+        /** @var bool|\modChunk $testChunk3 * /
         $name = 'testChunk3';
         $testChunk3 = $this->modx->getObject('modChunk', ['name' => $name]);
         if ($testChunk3 instanceof \modChunk) {
@@ -52,6 +68,7 @@ class ChunkMigrationExample extends Migrations
                 $this->blender->out($name.' could not be removed', true);
             }
         }
+         */
     }
 
     /**
@@ -83,6 +100,6 @@ class ChunkMigrationExample extends Migrations
      */
     protected function assignTimestamp()
     {
-        $this->timestamp = '2018_01_06_094339';
+        $this->timestamp = BLEND_TEST_TIMESTAMP;
     }
 }

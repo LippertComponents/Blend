@@ -32,7 +32,7 @@ class m2018_01_10_093000_Resource extends Migrations
      */
     public function down()
     {
-        //@TODO
+        $this->blender->revertBlendManyResources($this->resources, $this->getTimestamp());
     }
 
     /**

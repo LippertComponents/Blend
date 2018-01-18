@@ -19,6 +19,7 @@ class TemplateMigrationExample extends Migrations
         /** @var \LCI\Blend\Template $testTemplate3 */
         $testTemplate3 = $this->blender->blendOneRawTemplate('testTemplate3');
         $testTemplate3
+            ->setSeedTimeDir($this->getTimestamp())
             ->setDescription('This is my 3rd test template, note this is limited to 255 or something and no HTML')
             ->setCategoryFromNames('Parent Template Cat=>Child Template Cat')
             ->setCode('<!DOCTYPE html><html lang="en"><head><title>[[*pagetitle]]</title></head><body><!-- 3rd -->[[*content]]</body></html>')
@@ -99,6 +100,6 @@ class TemplateMigrationExample extends Migrations
      */
     protected function assignTimestamp()
     {
-        $this->timestamp = '2018_01_18_094339';
+        $this->timestamp = BLEND_TEST_TIMESTAMP;
     }
 }
