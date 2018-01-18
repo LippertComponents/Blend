@@ -393,6 +393,7 @@ abstract class Element
         }
 
         if ($this->static) {
+            // @TODO abstract media sources
             $this->element->set('source', $this->media_source_id);
             $this->element->set('static', 1);
             $this->element->set('static_file', $this->static_file);

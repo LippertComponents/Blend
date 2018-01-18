@@ -407,20 +407,47 @@ class Blender
         }
         // will update if template does exist or create new
         foreach ($templates as $seed_key) {
-            if ($blendTemplate->blendTemplate($seed_key)) {
-                $this->out($seed_key.' has been blended into ID: ');
+
+            /** @var Snippet $blendTemplate */
+            $blendTemplate = new Template($this->modx, $this);
+            if (!empty($timestamp)) {
+                $blendTemplate->setSeedTimeDir($timestamp);
+            }
+            if ($blendTemplate->blendFromSeed($seed_key)) {
+                $this->out($seed_key.' has been blended');
 
             } elseif($blendTemplate->isExists()) {
-                // @TODO prompt Do you want to blend Y/N/Compare
                 $this->out($seed_key.' template already exists', true);
                 if ($this->prompt('Would you like to update?', 'Y') === 'Y') {
-                    if ($blendTemplate->blendTemplate($seed_key, true)) {
-                        // @TODO get ID
-                        $this->out($seed_key.' has been blended into ID: ');
+                    if ($blendTemplate->blendFromSeed($seed_key, true)) {
+                        $this->out($seed_key.' has been blended');
                     }
                 }
             } else {
                 $this->out('There was an error saving '.$seed_key, true);
+            }
+        }
+    }
+
+    /**
+     * @param array $templates
+     * @param string $timestamp
+     */
+    public function revertBlendManyTemplates($templates=[], $timestamp='')
+    {
+        // will update if system setting does exist or create new
+        foreach ($templates as $seed_key) {
+            /** @var Template $blendTemplate */
+            $blendTemplate = new Template($this->modx, $this);
+            if (!empty($timestamp)) {
+                $blendTemplate->setSeedTimeDir($timestamp);
+            }
+
+            if ( $blendTemplate->revertBlendFromSeed($seed_key) ) {
+                $this->out($blendTemplate->getName().' snippet has been reverted to '.$timestamp);
+
+            } else {
+                $this->out($blendTemplate->getName().' snippet was not reverted', true);
             }
         }
     }
@@ -1094,7 +1121,7 @@ class Blender
                 $migration_template = 'template.txt';
                 $placeholders['templateData'] = $this->prettyVarExport($class_data);
                 $placeholders['classUpInners'] = '$this->blender->blendManyTemplates($this->templates, $this->getTimestamp());';
-                $placeholders['classDownInners'] = '//@TODO';
+                $placeholders['classDownInners'] = '$this->blender->revertBlendManyTemplates($this->templates, $this->getTimestamp());';
                 break;
 
 

@@ -52,84 +52,7 @@ class Template extends Element
         ];
         return $this;
     }
-
-    /**
-     * @param string $seed_key
-     * @param bool $overwrite
-     *
-     * @return bool
-     */
-    public function blendTemplate($seed_key, $overwrite=false)
-    {
-        $save = false;
-        $this->loadElementDataFromSeed($seed_key);
-
-        // does it exist
-        $name = '';
-        if (isset($this->element_data[$this->name_column_name])) {
-            $this->setName($this->element_data[$this->name_column_name]);
-            $name = $this->element_data[$this->name_column_name];
-        }
-        $template = $this->getElementFromName($name);
-        if ($template) {
-            $this->exists = true;
-            if (!$overwrite) {
-                return $save;
-            }
-        } else {
-            $this->exists = false;
-        }
-
-        unset($this->element_data['id']);
-
-        $tvs = $this->element_data['tvs'];
-        unset($this->element_data['tvs']);
-        foreach ($tvs as $tv) {
-            // seed the TV:
-            $tvSeed = new TemplateVariable($this->modx, $this->blender);
-            $tvSeed
-                ->setSeedTimeDir($this->getTimestamp())
-                ->loadElementDataFromSeed($tv['seed_key']);
-            $tvSeed->save(true);
-
-            $this->attachTemplateVariable($tv['name'], $tv['rank']);
-        }
-
-        // get template
-        $this->modx->invokeEvent(
-            'OnBlendElementBeforeSave',
-            [
-                'blender' => $this->blender,
-                'blendResource' => $this,
-                'element' => &$this->element,
-                'tvs' => $tvs,
-                'data' => &$this->element_data
-            ]
-        );
-
-        // load from array:
-        $this->loadFromArray($this->element_data);
-        $save = $this->save();
-
-        if ($save) {
-
-            $this->modx->invokeEvent(
-                'OnBlendElementAfterSave',
-                [
-                    'blender' => $this->blender,
-                    'blendResource' => $this,
-                    'element' => &$this->element,
-                    'tvs' => $tvs,
-                    'data' => &$this->element_data
-                ]
-            );
-        } else {
-            $this->blender->out('  error? ', true);
-        }
-        return $save;
-    }
-
-
+    
     protected function relatedPieces()
     {
         if (count($this->tv_names) > 0) {
@@ -199,5 +122,22 @@ class Template extends Element
     {
         $this->name = $name;
         return $this;
+    }
+
+    /**
+     * @param array $tvs
+     */
+    public function setTvs($tvs)
+    {
+        foreach ($tvs as $tv) {
+            // seed the TV:
+            $tvSeed = new TemplateVariable($this->modx, $this->blender);
+            $tvSeed
+                ->setSeedTimeDir($this->getTimestamp())
+                ->loadElementDataFromSeed($tv['seed_key']);
+            $tvSeed->save(true);
+
+            $this->attachTemplateVariable($tv['name'], $tv['rank']);
+        }
     }
 }
