@@ -138,3 +138,10 @@ fabric.properties
 /vendor/
 /composer.lock
 /tests/config.php
+/tests/database/seeds/*
+!tests/database/seeds/2018_01_10_093000/
+/tests/database/seeds/2018_01_10_093000/*
+!tests/database/seeds/2018_01_10_093000/resources/
+/tests/database/seeds/2018_01_10_093000/resources/*
+!tests/database/seeds/2018_01_10_093000/resources/test-blend-many-resource-1.cache.php
+!tests/database/seeds/2018_01_10_093000/resources/test-blend-many-resource-2.cache.php

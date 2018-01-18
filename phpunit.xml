@@ -4,6 +4,7 @@
             <file>tests/BlendTest.php</file>
             <file>tests/ChunkTest.php</file>
             <file>tests/PluginTest.php</file>
+            <file>tests/ResourceTest.php</file>
             <file>tests/SnippetTest.php</file>
             <file>tests/SystemSettingsTest.php</file>
             <file>tests/TemplateTest.php</file>
