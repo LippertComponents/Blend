@@ -1,9 +1,15 @@
 {
   "name": "lci/blend",
-  "description": "This project aims to import/export resources and elements from MODX to another MODX install to allow dev to prod git workflows.",
-  "license": "GPL-2.0+",
+  "description": "This project aims to import/export resources and elements from MODX to another MODX install to allow easier dev to prod git workflows.",
+  "license": "MIT",
   "keywords": [
-    "modx"
+    "modx", "migrate", "seed"
+  ],
+  "authors": [
+    {
+      "name": "Joshua Gulledge",
+      "role": "Developer"
+    }
   ],
   "autoload": {
     "psr-4": {
@@ -11,6 +17,7 @@
     }
   },
   "require": {
+    "php" : ">=7.0.0",
     "league/climate": "^3.2"
   },
   "bin": [
