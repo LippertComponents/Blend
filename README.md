@@ -48,11 +48,7 @@ new MODX install.
 
 ### Step 1
 
-Via composer
-
-1. Add to your projects composer.json file:  
-```composer require lci/blend```
-2. Then do ```composer install``` or ```composer update```
+Via composer, just run: ```composer require lci/blend```
 
 **OR**
 
