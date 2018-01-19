@@ -47,29 +47,21 @@ new MODX install.
 ## Install
 
 ### Step 1
+
+Via composer
+
+1. Add to your projects composer.json file:  
+```composer require lci/blend```
+2. Then do ```composer install``` or ```composer update```
+
+**OR**
+
 Via git
 1. CD into the directory that you want the project to live in. Can be anywhere PHP runs, one place could be outside of 
 your public or www directory. Or if you prefer the traditional MODX extras path then in MODX/core/components/blend/
 2. ```git clone git@github.com:LippertComponents/Blend.git .```
 
-**OR**
 
-Via composer
-1. Add to your projects composer.json file:
-```
-{
-    "repositories": [
-        {
-            "type": "vcs",
-            "url": "https://github.com/LippertComponents/Blend.git"
-        }
-    ],
-    "require": {
-        "lci/blend": "dev-master"
-    }
-}
-```
-2. Then do ```composer install``` or ```composer update```
 
 ### Step 2
 Go the bin directory, you may need to copy the sample.config.php file to just config.php and then set the correct path to MODX.
