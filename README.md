@@ -202,10 +202,6 @@ should show up there.
     - OnBlendResourceAfterSave
     - OnBlendSeedResource
 
-
-Issues
- - categories not working
-
 ## Road map 
 
 - v1.0 
