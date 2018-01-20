@@ -127,7 +127,7 @@ class BlenderCli
 
             } else {
                 $method = $this->climate->arguments->get('method');
-                $this->blend->runMigration($method, $type, $count, $id);
+                $this->blend->runMigration($method, $type, $count, $id, $name);
 
             }
 
