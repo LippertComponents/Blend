@@ -410,6 +410,8 @@ abstract class Element
         // takes a string or array
         $this->element->set('properties', $this->properties->getData());
 
+        $this->element->set('category', $this->getCategoryIDFromNames());
+
         $this->setAdditionalElementColumns();
         $this->relatedPieces();
         if ($this->element->save()) {
