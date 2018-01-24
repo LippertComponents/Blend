@@ -939,6 +939,16 @@ class Blender
      */
     public function isBlendInstalledInModx()
     {
+        try {
+            $table = $this->modx->getTableName('BlendMigrations');
+            if ($this->modx->query("SELECT 1 FROM {$table} LIMIT 1") === false) {
+                return false;
+            }
+        } catch (Exception $exception) {
+            // We got an exception == table not found
+            return false;
+        }
+
         /** @var \xPDOQuery $query */
         $query = $this->modx->newQuery('BlendMigrations');
         $query->sortBy('name');
