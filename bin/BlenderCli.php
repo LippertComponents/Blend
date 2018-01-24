@@ -163,7 +163,7 @@ class BlenderCli
             }
 
         } elseif ( $this->climate->arguments->defined('install') ) {
-            $this->blend->install();
+            $this->blend->install('up', true);
 
         } elseif ( $this->climate->arguments->defined('uninstall') ) {
             $this->blend->install('down');

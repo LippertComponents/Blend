@@ -862,7 +862,7 @@ class Blender
     /**
      * @param string $method
      */
-    public function install($method='up')
+    public function install($method='up', $prompt=false)
     {
         $name = 'install_blender';
 
@@ -896,6 +896,23 @@ class Blender
                 $migration->set('created_at', date('Y-m-d H:i:s'));
                 $migration->set('processed_at', date('Y-m-d H:i:s'));
                 $migration->save();
+
+                // does the migration directory exist?
+                if (!file_exists($this->getMigrationDirectory())) {
+                    $create = true;
+                    if ($prompt) {
+                        $response = $this->prompt('Create the following directory for migration files? (y/n) '.PHP_EOL
+                            .$this->getMigrationDirectory(), 'y');
+                        if (strtolower(trim($response)) != 'y') {
+                            $create = false;
+                        }
+                    }
+                    if ($create) {
+                        mkdir($this->getMigrationDirectory(), 0700, true);
+                        $this->out('Created migration directory: '. $this->getMigrationDirectory());
+                    }
+                }
+
             } else {
                 $this->out('Blender did not save the DB correctly ', true);
             }
