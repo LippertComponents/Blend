@@ -107,7 +107,7 @@ class Resource
     public function backupCurrentVersion($resource, $seed_key)
     {
         // save the raw data, this is for local only not portable
-        $this->resource_data = $resource->toArray();
+        $resource_data = $resource->toArray();
 
         // no IDs only TV name
         $tvs = [];// TemplateVarResources modTemplateVarResource
@@ -128,12 +128,12 @@ class Resource
             }
         }
 
-        $this->resource_data['tv'] = $tvs;
+        $resource_data['tv'] = $tvs;
 
         // now cache it
         $this->modx->cacheManager->set(
             'down-' . $seed_key,
-            $this->resource_data,
+            $resource_data,
             $this->cache_life,
             $this->cacheOptions
         );
