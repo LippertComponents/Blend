@@ -283,7 +283,21 @@ abstract class Element
      */
     public function setCategoryFromNames($category)
     {
-        $this->category_names = explode('=>', $category);
+        $categories = explode('=>', $category);
+
+        $this->category_names = [];
+        $lineage = '';
+
+        $count = 0;
+        foreach ($categories as $category) {
+            if (!empty($lineage)) {
+                $lineage .= '=>';
+            }
+            $lineage .= trim($category);
+
+            $this->category_names[$count++] = ['name' => $category, 'lineage' => $lineage];
+        }
+
         return $this;
     }
 
@@ -439,9 +453,13 @@ abstract class Element
         $category_id = 0;
         $categories = $this->blender->getCategoryMap();
         $refresh = false;
-        foreach ($this->category_names as $category) {
-            if (isset($categories['names'][$category])) {
-                $category_id = $categories['names'][$category];
+        foreach ($this->category_names as $count => $name_data) {
+            $category = $name_data['name'];
+            $lineage = $name_data['lineage'];
+
+            if (isset($categories['lineage'][$lineage])) {
+                $category_id = $categories['lineage'][$lineage];
+
             } else {
                 $newCategory = $this->modx->newObject('modCategory');
                 $newCategory->fromArray([
@@ -460,25 +478,17 @@ abstract class Element
 
     /**
      * @param int $category_id
-     * @param string $string
      *
      * @return string
      */
-    public function getCategoryAsString($category_id=0, $string='')
+    public function getCategoryAsString($category_id=0)
     {
         $categories = $this->blender->getCategoryMap();
-        if (isset($categories['ids'][$category_id])) {
-            $category = $categories['ids'][$category_id];
-            if (empty($string)) {
-                $string = $category['category'];
-            } else {
-                $string = $category['category'].'=>'.$string;
-            }
-            if ($category['parent'] > 0 ) {
-                $string = $this->getCategoryAsString($category['parent'], $string);
-            }
+        if (isset($categories['ids'][$category_id]) && isset($categories['ids'][$category_id]['lineage'])) {
+            return $categories['ids'][$category_id]['lineage'];
         }
-        return $string;
+
+        return '';
     }
     /**
      * @param \modElement $element

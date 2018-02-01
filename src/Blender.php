@@ -171,17 +171,31 @@ class Blender
         if (count($this->category_map) == 0 || $refresh) {
             $this->category_map = [
                 'ids' => [],
-                'names' => []
+                'names' => [],
+                'lineage' => []
             ];
             $query = $this->modx->newQuery('modCategory');
             $query->sortBy('parent');
             $query->sortBy('rank');
             $categories = $this->modx->getCollection('modCategory', $query);
             foreach ($categories as $category) {
-                $this->category_map['ids'][$category->get('id')] = $category->toArray();
-                // @TODO this is not unique! Need: Parent=>Child=>Grand Child
-                $key = $category->get('name');
-                $this->category_map['names'][$key] = $category->toArray();
+                $category_data = $category->toArray();
+
+                $this->category_map['ids'][$category->get('id')] = $category_data;
+
+                $key = trim($category->get('name'));
+                // This is not unique!
+                $this->category_map['names'][$key] = $category_data;
+
+                // Get the lineage: Parent=>Child=>Grand Child as key
+                $lineage = $key;
+                if ($category_data['parent'] > 0) {
+                    $lineage = $this->category_map['ids'][$category_data['parent']].'=>'.$key;
+                }
+
+                $this->category_map['ids'][$category->get('id')]['lineage'] = $lineage;
+
+                $this->category_map['lineage'][$lineage] = $category->toArray();
             }
         }
         return $this->category_map;
