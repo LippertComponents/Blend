@@ -183,14 +183,14 @@ class Blender
 
                 $this->category_map['ids'][$category->get('id')] = $category_data;
 
-                $key = trim($category->get('name'));
+                $key = trim($category->get('category'));
                 // This is not unique!
                 $this->category_map['names'][$key] = $category_data;
 
                 // Get the lineage: Parent=>Child=>Grand Child as key
                 $lineage = $key;
                 if ($category_data['parent'] > 0) {
-                    $lineage = $this->category_map['ids'][$category_data['parent']].'=>'.$key;
+                    $lineage = $this->category_map['ids'][$category_data['parent']]['lineage'].'=>'.$key;
                 }
 
                 $this->category_map['ids'][$category->get('id')]['lineage'] = $lineage;
@@ -1284,7 +1284,7 @@ class Blender
 
                 }
             } else {
-                $this->out($class_name . ' migration has not been removed from the blend_migrations table');
+                $this->out($class_name . ' migration has not been removed from the blend_migrations table', true);
             }
 
         } else {
