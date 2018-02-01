@@ -104,4 +104,17 @@ class BaseBlend extends TestCase
     {
         return trim(ltrim($string, '<?php'));
     }
+
+    /**
+     * @param string $string
+     * @return mixed
+     */
+    protected function removeDateFromStringArrayValue(string $string, $key='editedon')
+    {
+        $pattern = '/(\''.$key.'\' => \')(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})(\')/';
+        $string = preg_replace($pattern, '\''.$key.'\' => null', $string);
+
+        // make the null lower case: answer
+        return str_replace(['\''.$key.'\' => NULL', '\''.$key.'\' => null'], '\''.$key.'\' => null', $string);
+    }
 }

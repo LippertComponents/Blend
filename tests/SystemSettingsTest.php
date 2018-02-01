@@ -109,8 +109,8 @@ final class SystemSettingsTest extends BaseBlend
         $seed_data = $this->blender->makeSystemSettingSeeds(['key' => $setting['key']]);
 
         $this->assertEquals(
-            $this->removeStringLineEndings($this->getStringAfterFirstComment(file_get_contents(BLEND_COMPARE_DIRECTORY.$setting['key'].'.migration.php'))),
-            $this->removeStringLineEndings($this->getStringAfterFirstComment(file_get_contents($this->blender->getMigrationDirectory().'m2018_01_10_093000_Systemsettings.php'))),
+            $this->removeStringLineEndings($this->removeDateFromStringArrayValue($this->getStringAfterFirstComment(file_get_contents(BLEND_COMPARE_DIRECTORY.$setting['key'].'.migration.php')))),
+            $this->removeStringLineEndings($this->removeDateFromStringArrayValue($this->getStringAfterFirstComment(file_get_contents($this->blender->getMigrationDirectory().'m2018_01_10_093000_Systemsettings.php')))),
             'Comparing existing testSystemSetting2 migration file with generated file'
         );
 
