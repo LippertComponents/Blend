@@ -30,7 +30,7 @@ class TemplateVariable extends Element
     protected $output_properties = '';
 
     /** @var string ~ the xPDO class name */
-    protected $element_class = 'modTemplateVariable';
+    protected $element_class = 'modTemplateVar';
 
     /**
      * @param string $name
@@ -162,7 +162,7 @@ class TemplateVariable extends Element
             $tvs = [];
             foreach ($this->template_names as $template_name_data) {
                 // get the TV:
-                $template = $this->modx->getObject('modTemplateVariable', ['templatename' => $template_name_data['name']]);
+                $template = $this->modx->getObject('modTemplateVar', ['templatename' => $template_name_data['name']]);
                 if ($template) {
                     $tvt = $this->modx->newObject('modTemplateVarTemplate');
                     $tvt->set('templateid', $template->get('id'));

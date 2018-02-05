@@ -59,7 +59,7 @@ class Template extends Element
             $tvs = [];
             foreach ($this->tv_names as $tv_name_data) {
                 // get the TV:
-                $tv = $this->modx->getObject('modTemplateVariable', ['name' => $tv_name_data['name']]);
+                $tv = $this->modx->getObject('modTemplateVar', ['name' => $tv_name_data['name']]);
                 if ($tv) {
                     $tvt = $this->modx->newObject('modTemplateVarTemplate');
                     $tvt->set('tmplvarid', $tv->get('id'));
