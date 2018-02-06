@@ -457,8 +457,8 @@ abstract class Element
             $category = $name_data['name'];
             $lineage = $name_data['lineage'];
 
-            if (isset($categories['lineage'][$lineage])) {
-                $category_id = $categories['lineage'][$lineage];
+            if (isset($categories['lineage'][$lineage]) && isset($categories['lineage'][$lineage]['id'])) {
+                $category_id = $categories['lineage'][$lineage]['id'];
 
             } else {
                 $newCategory = $this->modx->newObject('modCategory');

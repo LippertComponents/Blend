@@ -60,6 +60,15 @@ final class ChunkTest extends BaseBlend
                     'Compare chunk code'
                 );
 
+                $modChunk = $this->modx->getObject('modChunk', ['name' => $chunk_name]);
+                $modCategory = $modChunk->getOne('Category');
+
+                $this->assertEquals(
+                    'Child Cat',
+                    $modCategory->get('category'),
+                    'Compare categories'
+                );
+
                 $this->assertEquals(
                     true,
                     $blendChunk->revertBlend(),
