@@ -47,7 +47,7 @@ class Template extends Element
     public function attachTemplateVariable($tv_name, $rank=0)
     {
         $this->tv_names[] = [
-            'tv_name' => $tv_name,
+            'name' => $tv_name,
             'rank' => $rank
         ];
         return $this;
