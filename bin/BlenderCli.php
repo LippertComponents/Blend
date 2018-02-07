@@ -94,7 +94,7 @@ class BlenderCli
 
         /** @var CLImate climate */
         $this->climate = new CLImate;
-        $this->climate->description('Blend Data Management for MODX Revolution');
+        $this->climate->description('Blend Data Management for MODX Revolution, '.$this->modx->getOption('blend.version'));
 
         /** @var Blender */
         $this->blend = new Blender($this->modx, ['blend_modx_migration_dir' => BLEND_MODX_MIGRATION_PATH]);
@@ -109,9 +109,19 @@ class BlenderCli
      */
     public function run()
     {
-        //$this->climate->out('Cache path: '.$this->stockpile->getCachePath());
+        if ($this->climate->arguments->defined('refresh')) {
+            $this->modx->cacheManager->refresh();
+            $this->climate->flank('Cache has been refreshed(cleared)');
 
-        if ($this->climate->arguments->defined('help')) {
+        } elseif ($this->blend->requireUpdate()) {
+            $this->climate->error('DB update is required');
+            $input = $this->climate->input('Do you wish to upgrade? (y)');
+            $input->defaultTo('y');
+            if ($input->prompt() == 'y') {
+                $this->blend->update();
+            }
+
+        } elseif ($this->climate->arguments->defined('help')) {
             $this->getUsage();
 
         } elseif ( $this->climate->arguments->defined('migrate') ) {
@@ -422,6 +432,12 @@ class BlenderCli
                 'description' => 'Install Blend in MODX',
                 'noValue'     => true,
             ],
+            'refresh' => [
+                'prefix'      => 'r',
+                'longPrefix'  => 'refresh',
+                'description' => 'Refresh MODX cache, often needed after a migration is ran',
+                'noValue'     => true,
+            ],
             'migrate' => [
                 'prefix'      => 'm',
                 'longPrefix'  => 'migrate',
@@ -469,7 +485,7 @@ class BlenderCli
 
         } elseif ( $this->climate->arguments->defined('install') ) {
             $this->climate->out('install');
-            $this->climate->description('Install Blend Data Management for MODX Revolution');
+            $this->climate->description('Install Blend Data Management for MODX Revolution, '.$this->blend->getVersion());
 
         } else {
             $this->climate->arguments->add($exe_args);

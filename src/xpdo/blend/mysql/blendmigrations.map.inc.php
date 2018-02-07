@@ -11,6 +11,7 @@ $xpdo_meta_map['BlendMigrations']= array (
     'type' => 'master',
     'description' => NULL,
     'status' => 'ready',
+    'author' => NULL,
     'created_at' => 'CURRENT_TIMESTAMP',
     'processed_at' => NULL,
   ),
@@ -51,6 +52,13 @@ $xpdo_meta_map['BlendMigrations']= array (
       'phptype' => 'string',
       'null' => false,
       'default' => 'ready',
+    ),
+    'author' =>
+    array (
+      'dbtype' => 'varchar',
+      'precision' => '255',
+      'phptype' => 'string',
+      'null' => true,
     ),
     'created_at' => 
     array (

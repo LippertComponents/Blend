@@ -48,6 +48,17 @@ class install_blender extends Migrations
         foreach ($this->blender_events as $event_name) {
             $this->createSystemEvents($event_name);
         }
+
+        /** @var \LCI\Blend\SystemSetting $systemSetting */
+        $systemSetting = new \LCI\Blend\SystemSetting($this->modx, $this->blender);
+        $systemSetting
+            ->setName('blend.version')
+            ->setSeedTimeDir($this->getTimestamp())
+            ->setValue($this->blender->getVersion())
+            ->setArea('Blend')
+            ->blend();
+
+        $this->modx->cacheManager->refresh();
     }
 
     /**
@@ -73,6 +84,15 @@ class install_blender extends Migrations
         foreach ($this->blender_events as $event_name) {
             $this->removeSystemEvents($event_name);
         }
+
+        /** @var \LCI\Blend\SystemSetting $systemSetting */
+        $systemSetting = new \LCI\Blend\SystemSetting($this->modx, $this->blender);
+        $systemSetting
+            ->setName('blend.version')
+            ->setSeedTimeDir($this->getTimestamp())
+            ->revertBlend();
+
+        $this->modx->cacheManager->refresh();
     }
 
     /**
@@ -129,7 +149,7 @@ class install_blender extends Migrations
      */
     protected function assignVersion()
     {
-        $this->version = '1.0 Dev 2017_11_10_161037';
+        $this->version = $this->blender->getVersion();
     }
 
     /**
@@ -145,6 +165,6 @@ class install_blender extends Migrations
      */
     protected function assignTimestamp()
     {
-        $this->timestamp = '2017_11_10_152937';
+        $this->timestamp = '2018_02_02_020202';
     }
 }

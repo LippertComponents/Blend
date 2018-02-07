@@ -12,12 +12,23 @@ use PHPUnit\Runner\Exception;
 
 class Blender
 {
+    /** @var string ~ version number of the project */
+    private $version = '0.9.7';
+
+    /** @var array a list of valid upgrade migrations */
+    protected $update_migrations = [
+        '0.9.7' => 'v0_9_7_update'
+    ];
+
     /** @var  \modx */
     protected $modx;
 
+    /** @var \League\CLImate\CLImate */
     protected $climate;
 
+    /** @var array  */
     protected $config = [];
+
     /** @var boolean|array  */
     protected $blendMigrations = false;
 
@@ -70,6 +81,14 @@ class Blender
 
         $this->modx->addPackage('blend', $this->config['model_dir']);
         //exit();
+    }
+
+    /**
+     * @return string
+     */
+    public function getVersion(): string
+    {
+        return $this->version;
     }
 
     /**
@@ -671,6 +690,14 @@ class Blender
     }
 
     /**
+     * @param string $message
+     */
+    public function outSuccess($message)
+    {
+        $this->climate->backgroundBlack()->green($message);
+    }
+
+    /**
      * @param string $name
      * @param string $server_type
      *
@@ -901,7 +928,6 @@ class Blender
             /** @var \BlendMigrations $migration */
             $migration = $this->modx->newObject('BlendMigrations');
             if ($migration) {
-                $this->out('Blender loaded', true);
                 $migration->set('name', $name);
                 $migration->set('type', 'master');
                 $migration->set('description', $migrationProcessClass->getDescription());
@@ -909,7 +935,11 @@ class Blender
                 $migration->set('status', 'up_complete');
                 $migration->set('created_at', date('Y-m-d H:i:s'));
                 $migration->set('processed_at', date('Y-m-d H:i:s'));
-                $migration->save();
+                if ($migration->save() ) {
+                    $this->outSuccess('Blend installed');
+                } else {
+                    $this->out('Blend did not install', true);
+                }
 
                 // does the migration directory exist?
                 if (!file_exists($this->getMigrationDirectory())) {
@@ -923,7 +953,7 @@ class Blender
                     }
                     if ($create) {
                         mkdir($this->getMigrationDirectory(), 0700, true);
-                        $this->out('Created migration directory: '. $this->getMigrationDirectory());
+                        $this->outSuccess('Created migration directory: '. $this->getMigrationDirectory());
                     }
                 }
 
@@ -949,6 +979,93 @@ class Blender
     }
 
     /**
+     * @param string $method
+     */
+    public function update($method='up')
+    {
+        $current_vesion = $this->modx->getOption('blend.version');
+
+        // new blender for each instance
+        $config = $this->config;
+        $config['migrations_dir'] = __DIR__.'/migration/';
+
+        $blender = new Blender($this->modx, $config);
+        $blender->setClimate($this->climate);
+
+        foreach ($this->update_migrations as $v => $migration_name) {
+            if (version_compare($this->getVersion(), $current_vesion, '>') ) {
+                // can not use as xPDO get queries fill the SELECT with the DB fields and since we are adding one this is a SQL error
+                //$blender->runMigration($method, 'master', 0, 0, $migration_name);
+
+                /** @var Migrations $migrationProcessClass */
+                $migrationProcessClass = $this->loadMigrationClass($migration_name, $blender);
+
+                if (!$migrationProcessClass instanceof Migrations) {
+                    $this->out('File is not an instance of LCI\Blend\Migrations: '.$migration_name, true);
+                    $this->out('Did not process, verify it is in the proper directory', true);
+
+                } elseif ($method == 'up' && $this->isBlendInstalledInModx()) {
+
+                    $migrationProcessClass->up();
+
+                    /** @var \BlendMigrations $migration */
+                    $migration = $this->modx->newObject('BlendMigrations');
+                    if ($migration) {
+                        $migration->set('name', $migration_name);
+                        $migration->set('type', 'master');
+                        $migration->set('description', $migrationProcessClass->getDescription());
+                        $migration->set('version', $migrationProcessClass->getVersion());
+                        $migration->set('status', 'up_complete');
+                        $migration->set('created_at', date('Y-m-d H:i:s'));
+                        $migration->set('processed_at', date('Y-m-d H:i:s'));
+                        if ($migration->save() ) {
+                            $this->outSuccess('Blend updated to '.$v);
+                        } else {
+                            $this->out('Blend did not update to '.$v, true);
+                        }
+
+                    } else {
+                        $this->out('Blender could not save the update to '.$v, true);
+                    }
+
+                } elseif ($method == 'down') {
+                    $migrationProcessClass->down();
+
+                    /** @var \BlendMigrations $migration */
+                    $migration = $this->modx->getObject('BlendMigrations', ['name' => $migration_name]);
+                    if ($migration) {
+                        $migration->set('name', $migration_name);
+                        $migration->set('description', $migrationProcessClass->getDescription());
+                        $migration->set('version', $migrationProcessClass->getVersion());
+                        $migration->set('status', 'down_complete');
+                        $migration->set('processed_at', date('Y-m-d H:i:s'));
+                        $migration->save();
+                    }
+
+                }
+
+            }
+        }
+
+    }
+
+    /**
+     * @return bool
+     */
+    public function requireUpdate()
+    {
+        $upgrade = false;
+
+        $current_vesion = $this->modx->getOption('blend.version');
+        //                                      FILE version,        DB Version
+        if ( $this->isBlendInstalledInModx() && ( !$current_vesion || version_compare($this->getVersion(), $current_vesion, '>')) ) {
+            $upgrade = true;
+        }
+
+        return $upgrade;
+    }
+
+    /**
      * @return bool
      */
     public function isBlendInstalledInModx()
@@ -965,12 +1082,14 @@ class Blender
 
         /** @var \xPDOQuery $query */
         $query = $this->modx->newQuery('BlendMigrations');
-        $query->sortBy('name');
-
-        $installMigration = $this->modx->getObject('BlendMigrations', [
+        $query->select('id');
+        $query->where([
             'name' => 'install_blender',
             'status' => 'up_complete'
         ]);
+        $query->sortBy('name');
+
+        $installMigration = $this->modx->getObject('BlendMigrations', $query);
         if ($installMigration instanceof \BlendMigrations) {
             return true;
         }
@@ -1090,6 +1209,7 @@ class Blender
                     if ($migrationProcessClass instanceof Migrations) {
                         $migration->set('description', $migrationProcessClass->getDescription());
                         $migration->set('version', $migrationProcessClass->getVersion());
+                        $migration->set('author', $migrationProcessClass->getAuthor());
                     }
                     if (!$migration->save()) {
                         exit();
@@ -1238,7 +1358,6 @@ class Blender
                 $write = file_put_contents($this->getMigrationDirectory() . $class_name . '.php', $file_contents);
                 $migration = $this->modx->newObject('BlendMigrations');
                 if ($migration && $log) {
-                    $this->out('Blender loaded', true);
                     $migration->set('name', $class_name);
                     $migration->set('type', 'master');
                     $migration->set('description', '');// @TODO

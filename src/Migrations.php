@@ -28,6 +28,9 @@ abstract class Migrations
     /** @var string ~ will be for any seeds to find their related directory */
     protected $timestamp = '';
 
+    /** @var string name of Author of the Migration */
+    protected $author = '';
+
     /**
      * Migrations constructor.
      *
@@ -72,6 +75,14 @@ abstract class Migrations
             get_class($this).'::'.__METHOD__.PHP_EOL.
             'Did not implement down()'
         );
+    }
+
+    /**
+     * @return string
+     */
+    public function getAuthor()
+    {
+        return $this->author;
     }
 
     /**
