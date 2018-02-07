@@ -18,7 +18,7 @@ final class SnippetTest extends BaseBlend
         /** @var \LCI\Blend\Snippet $testSnippet1 */
         $testSnippet1 = $this->blender->blendOneRawSnippet($snippet_name);
         $testSnippet1
-            ->setSeedTimeDir($snippet_name)
+            ->setSeedsDir($snippet_name)
             ->setDescription($snippet_description)
             ->setCategoryFromNames('Parent Cat=>Child Cat')
             ->setCode($snippet_code)
@@ -94,8 +94,8 @@ final class SnippetTest extends BaseBlend
             $testSnippet2->save();
         }
 
-        $actual_timestamp = $this->blender->getTimestamp();
-        $this->blender->setTimestamp(BLEND_TEST_TIMESTAMP);
+        $actual_timestamp = $this->blender->getSeedsDir();
+        $this->blender->setSeedsDir(BLEND_TEST_SEEDS_DIR);
 
         $this->blender->makeSnippetSeeds(['name' => $snippet_name]);
 
@@ -107,7 +107,7 @@ final class SnippetTest extends BaseBlend
 
         $fixed_data = require_once BLEND_COMPARE_DIRECTORY.'testSnippet2.seed.php';
         $generated_data = false;
-        $seed_file = $this->blender->getSeedsDirectory().BLEND_TEST_TIMESTAMP.DIRECTORY_SEPARATOR.'elements'.DIRECTORY_SEPARATOR.'modSnippet_testSnippet2.cache.php';
+        $seed_file = $this->blender->getSeedsDirectory().BLEND_TEST_SEEDS_DIR.DIRECTORY_SEPARATOR.'elements'.DIRECTORY_SEPARATOR.'modSnippet_testSnippet2.cache.php';
         if (file_exists($seed_file)) {
             $generated_data = require_once $seed_file;
         }
@@ -119,13 +119,13 @@ final class SnippetTest extends BaseBlend
             'Comparing existing testSnippet2 seed file with generated seed file'
         );
 
-        $this->blender->setTimestamp($actual_timestamp);
+        $this->blender->setSeedsDir($actual_timestamp);
     }
 
     public function testCleanUpMakeSnippetSeeds()
     {
-        $actual_timestamp = $this->blender->getTimestamp();
-        $this->blender->setTimestamp(BLEND_TEST_TIMESTAMP);
+        $actual_timestamp = $this->blender->getSeedsDir();
+        $this->blender->setSeedsDir(BLEND_TEST_SEEDS_DIR);
 
         $snippet_name = 'testSnippet2';
 
@@ -143,7 +143,7 @@ final class SnippetTest extends BaseBlend
                 'Remove created snippet2 migration seed file'
             );
         }
-        $this->blender->setTimestamp($actual_timestamp);
+        $this->blender->setSeedsDir($actual_timestamp);
     }
 
 

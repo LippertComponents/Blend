@@ -21,7 +21,7 @@ class PluginMigrationExample extends Migrations
         /** @var \LCI\Blend\Plugin $testPlugin3 */
         $testPlugin3 = $this->blender->blendOneRawPlugin('testPlugin3');
         $testPlugin3
-            ->setSeedTimeDir($this->getTimestamp())
+            ->setSeedsDir($this->getSeedsDir())
             ->setDescription('This is my 3rd test plugin, note this is limited to 255 or something and no HTML')
             ->setCategoryFromNames('Parent Plugin Cat=>Child Plugin Cat')
             ->setCode('<?php $eventName = $modx->event->name;//3rd ')
@@ -51,10 +51,10 @@ class PluginMigrationExample extends Migrations
         $blendPlugin = new \LCI\Blend\Plugin($this->modx, $this->blender);
         $blendPlugin
             ->setName($name)
-            ->setSeedTimeDir($this->getTimestamp());
+            ->setSeedsDir($this->getSeedsDir());
 
         if ( $blendPlugin->revertBlend() ) {
-            $this->blender->out($blendPlugin->getName().' setting has been reverted to '.$this->getTimestamp());
+            $this->blender->out($blendPlugin->getName().' setting has been reverted to '.$this->getSeedsDir());
 
         } else {
             $this->blender->out($blendPlugin->getName().' setting was not reverted', true);
@@ -101,8 +101,8 @@ class PluginMigrationExample extends Migrations
     /**
      * Method is called on construct, Child class can override and implement this
      */
-    protected function assignTimestamp()
+    protected function assignSeedsDir()
     {
-        $this->timestamp = BLEND_TEST_TIMESTAMP;
+        $this->seeds_dir = BLEND_TEST_SEEDS_DIR;
     }
 }

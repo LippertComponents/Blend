@@ -19,7 +19,7 @@ class SnippetMigrationExample extends Migrations
         /** @var \LCI\Blend\Snippet $testSnippet3 */
         $testSnippet3 = $this->blender->blendOneRawSnippet('testSnippet3');
         $testSnippet3
-            ->setSeedTimeDir($this->getTimestamp())
+            ->setSeedsDir($this->getSeedsDir())
             ->setDescription('This is my 3rd test snippet, note this is limited to 255 or something and no HTML')
             ->setCategoryFromNames('Parent Snippet Cat=>Child Snippet Cat')
             ->setCode('<?php return \'This is the 3rd test Snippet!\'; ')
@@ -49,10 +49,10 @@ class SnippetMigrationExample extends Migrations
         $blendSnippet = new \LCI\Blend\Snippet($this->modx, $this->blender);
         $blendSnippet
             ->setName($name)
-            ->setSeedTimeDir($this->getTimestamp());
+            ->setSeedsDir($this->getSeedsDir());
 
         if ( $blendSnippet->revertBlend() ) {
-            $this->blender->out($blendSnippet->getName().' setting has been reverted to '.$this->getTimestamp());
+            $this->blender->out($blendSnippet->getName().' setting has been reverted to '.$this->getSeedsDir());
 
         } else {
             $this->blender->out($blendSnippet->getName().' setting was not reverted', true);
@@ -98,8 +98,8 @@ class SnippetMigrationExample extends Migrations
     /**
      * Method is called on construct, Child class can override and implement this
      */
-    protected function assignTimestamp()
+    protected function assignSeedsDir()
     {
-        $this->timestamp = BLEND_TEST_TIMESTAMP;
+        $this->seeds_dir = BLEND_TEST_SEEDS_DIR;
     }
 }

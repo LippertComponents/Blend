@@ -53,7 +53,7 @@ class install_blender extends Migrations
         $systemSetting = new \LCI\Blend\SystemSetting($this->modx, $this->blender);
         $systemSetting
             ->setName('blend.version')
-            ->setSeedTimeDir($this->getTimestamp())
+            ->setSeedsDir($this->getSeedsDir())
             ->setValue($this->blender->getVersion())
             ->setArea('Blend')
             ->blend();
@@ -89,7 +89,7 @@ class install_blender extends Migrations
         $systemSetting = new \LCI\Blend\SystemSetting($this->modx, $this->blender);
         $systemSetting
             ->setName('blend.version')
-            ->setSeedTimeDir($this->getTimestamp())
+            ->setSeedsDir($this->getSeedsDir())
             ->revertBlend();
 
         $this->modx->cacheManager->refresh();
@@ -163,8 +163,8 @@ class install_blender extends Migrations
     /**
      * Method is called on construct, Child class can override and implement this
      */
-    protected function assignTimestamp()
+    protected function assignSeedsDir()
     {
-        $this->timestamp = '2018_02_02_020202';
+        $this->seeds_dir = '2018_02_02_020202';
     }
 }

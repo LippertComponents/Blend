@@ -19,7 +19,7 @@ class ChunkMigrationExample extends Migrations
         /** @var \LCI\Blend\Chunk $chunk */
         $testChunk3 = $this->blender->blendOneRawChunk('testChunk3');
         $testChunk3
-            ->setSeedTimeDir($this->getTimestamp())
+            ->setSeedsDir($this->getSeedsDir())
             ->setDescription('This is my 3rd test chunk, note this is limited to 255 or something and no HTML')
             ->setCategoryFromNames('Parent Cat=>Child Cat')
             ->setCode('Hi [[+testPlaceholder3]], ...')
@@ -47,10 +47,10 @@ class ChunkMigrationExample extends Migrations
         $blendChunk = new \LCI\Blend\Chunk($this->modx, $this->blender);
         $blendChunk
             ->setName($name)
-            ->setSeedTimeDir($this->getTimestamp());
+            ->setSeedsDir($this->getSeedsDir());
 
         if ( $blendChunk->revertBlend() ) {
-            $this->blender->out($blendChunk->getName().' setting has been reverted to '.$this->getTimestamp());
+            $this->blender->out($blendChunk->getName().' setting has been reverted to '.$this->getSeedsDir());
 
         } else {
             $this->blender->out($blendChunk->getName().' setting was not reverted', true);
@@ -98,8 +98,8 @@ class ChunkMigrationExample extends Migrations
     /**
      * Method is called on construct, Child class can override and implement this
      */
-    protected function assignTimestamp()
+    protected function assignSeedsDir()
     {
-        $this->timestamp = BLEND_TEST_TIMESTAMP;
+        $this->seeds_dir = BLEND_TEST_SEEDS_DIR;
     }
 }

@@ -26,7 +26,7 @@ abstract class Migrations
     protected $type = 'master';
 
     /** @var string ~ will be for any seeds to find their related directory */
-    protected $timestamp = '';
+    protected $seeds_dir = '';
 
     /** @var string name of Author of the Migration */
     protected $author = '';
@@ -45,7 +45,7 @@ abstract class Migrations
         $this->assignDescription();
         $this->assignVersion();
         $this->assignType();
-        $this->assignTimestamp();
+        $this->assignSeedsDir();
     }
     /**
      * Run the migrations.
@@ -110,11 +110,20 @@ abstract class Migrations
     }
 
     /**
+     * @return string use setSeedsDir
+     */
+    public function getSeedsDir()
+    {
+        return $this->seeds_dir;
+    }
+
+    /**
+     * @deprecated v0.9.7, use getSeedsDir
      * @return string
      */
     public function getTimestamp()
     {
-        return $this->timestamp;
+        return $this->getSeedsDir();
     }
 
     /**
@@ -144,9 +153,14 @@ abstract class Migrations
     /**
      * Method is called on construct, Child class can override and implement this
      */
-    protected function assignTimestamp()
+    protected function assignSeedsDir()
     {
-        $this->timestamp = '';
+        $this->seeds_dir = '';
+        // for @deprecated method: assignTimestamp
+        if (method_exists($this, 'assignTimestamp')) {
+            $this->assignTimestamp();
+            $this->seeds_dir = $this->timestamp;
+        }
     }
 
 }

@@ -21,7 +21,7 @@ class m2018_01_10_093000_Template extends Migrations
      */
     public function up()
     {
-        $this->blender->blendManyTemplates($this->templates, $this->getTimestamp());
+        $this->blender->blendManyTemplates($this->templates, $this->getSeedsDir());
     }
 
     /**
@@ -31,7 +31,7 @@ class m2018_01_10_093000_Template extends Migrations
      */
     public function down()
     {
-        $this->blender->revertBlendManyTemplates($this->templates, $this->getTimestamp());
+        $this->blender->revertBlendManyTemplates($this->templates, $this->getSeedsDir());
     }
 
     /**
@@ -61,8 +61,8 @@ class m2018_01_10_093000_Template extends Migrations
     /**
      * Method is called on construct, Child class can override and implement this
      */
-    protected function assignTimestamp()
+    protected function assignSeedsDir()
     {
-        $this->timestamp = '2018_01_10_093000';
+        $this->seeds_dir = '2018_01_10_093000';
     }
 }

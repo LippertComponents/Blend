@@ -24,7 +24,7 @@ class Resource
     protected $cacheOptions = [];
 
     /** @var string */
-    protected $timestamp = '';
+    protected $seeds_dir = '';
 
     /** @var int $cache_life in seconds, 0 is forever */
     protected $cache_life = 0;
@@ -72,17 +72,28 @@ class Resource
     }
 
     /**
+     * @param string $dir ~ will be the directory name
+     *
+     * @return $this
+     */
+    public function setSeedsDir($dir)
+    {
+        $this->seeds_dir = (string) $dir;
+        if (!empty($this->seeds_dir)) {
+            $this->cacheOptions[\xPDO::OPT_CACHE_PATH] = $this->blender->getSeedsDirectory() . $dir . '/';
+        }
+        return $this;
+    }
+
+    /**
+     * @deprecated v0.9.7, use setSeedsDir
      * @param string $timestamp ~ will be the directory name
      *
      * @return $this
      */
     public function setSeedTimeDir($timestamp)
     {
-        $this->timestamp = (string) $timestamp;
-        if (!empty($this->timestamp)) {
-            $this->cacheOptions[\xPDO::OPT_CACHE_PATH] = $this->blender->getSeedsDirectory() . $timestamp . '/';
-        }
-        return $this;
+        return $this->setSeedsDir($timestamp);
     }
 
     // @TODO convenience methods to build resource custom pages not just from seeds

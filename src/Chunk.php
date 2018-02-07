@@ -23,7 +23,7 @@ class Chunk extends Element
     {
         /** @var Chunk $element */
         $element = new self($this->modx, $this->blender);
-        $element->setSeedTimeDir($this->getTimestamp());
+        $element->setSeedsDir($this->getSeedsDir());
         return $element->loadElementFromName($name);
     }
 }

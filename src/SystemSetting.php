@@ -18,7 +18,7 @@ class SystemSetting
     protected $blender;
 
     /** @var string */
-    protected $timestamp = '';
+    protected $seeds_dir = '';
 
     /** @var array  */
     protected $cacheOptions = [];
@@ -73,26 +73,43 @@ class SystemSetting
     /**
      * @return string
      */
-    public function getTimestamp()
+    public function getSeedsDir()
     {
-        return $this->timestamp;
+        return $this->seeds_dir;
     }
 
     /**
+     * @deprecated v0.9.7, use getSeedsDir
+     * @return string
+     */
+    public function getTimestamp()
+    {
+        return $this->seeds_dir;
+    }
+
+    /**
+     * @param string $dir ~ will be the directory name
+     *
+     * @return $this
+     */
+    public function setSeedsDir($dir)
+    {
+        $this->seeds_dir = (string) $dir;
+        if (!empty($this->seeds_dir)) {
+            $this->cacheOptions[\xPDO::OPT_CACHE_PATH] = $this->blender->getSeedsDirectory() . $dir . '/';
+        }
+        return $this;
+    }
+
+    /**
+     * @deprecated v0.9.7, use setSeedsDir
      * @param string $timestamp ~ will be the directory name
      *
      * @return $this
      */
     public function setSeedTimeDir($timestamp)
     {
-        $this->timestamp = (string) $timestamp;
-        echo __METHOD__.PHP_EOL;
-        if (!empty($this->timestamp)) {
-            echo 'Set ts: '.$this->timestamp.PHP_EOL;
-            $this->cacheOptions[\xPDO::OPT_CACHE_PATH] = $this->blender->getSeedsDirectory() . $timestamp . '/';
-        }
-        echo ' ---------- '.PHP_EOL;
-        return $this;
+        return $this->setSeedsDir($timestamp);
     }
 
     /**

@@ -32,11 +32,11 @@ class SystemSettingMigrationExample extends Migrations
         $blendExistingSetting = new SystemSetting($this->modx, $this->blender);
         // Can use lots of helper methods for core system settings, see all setCore* methods
         $blendExistingSetting->setCoreSiteName('Blend SystemSettingMigrationExample');
-        $blendExistingSetting->setSeedTimeDir($this->getTimestamp());
+        $blendExistingSetting->setSeedsDir($this->getSeedsDir());
         $blendExistingSetting->blend();
 
         // From array:
-        $this->blender->blendManySystemSettings($this->settings, $this->getTimestamp());
+        $this->blender->blendManySystemSettings($this->settings, $this->getSeedsDir());
     }
 
     /**
@@ -49,10 +49,10 @@ class SystemSettingMigrationExample extends Migrations
         $my = new SystemSetting($this->modx, $this->blender);
         // Can use lots of helper methods for core system settings, see all setCore* methods
         $my->setCoreSiteName('Blend SystemSettingMigrationExample');
-        $my->setSeedTimeDir($this->getTimestamp());
+        $my->setSeedsDir($this->getSeedsDir());
         $my->revertBlend();
 
-        $this->blender->revertBlendManySystemSettings($this->settings, $this->getTimestamp());
+        $this->blender->revertBlendManySystemSettings($this->settings, $this->getSeedsDir());
     }
 
     /**
@@ -82,8 +82,8 @@ class SystemSettingMigrationExample extends Migrations
     /**
      * Method is called on construct, Child class can override and implement this
      */
-    protected function assignTimestamp()
+    protected function assignSeedsDir()
     {
-        $this->timestamp = BLEND_TEST_TIMESTAMP;
+        $this->seeds_dir = BLEND_TEST_SEEDS_DIR;
     }
 }

@@ -56,8 +56,8 @@ class [[+className]] extends Migrations
     /**
      * Method is called on construct, Child class can override and implement this
      */
-    protected function assignTimestamp()
+    protected function assignSeedsDir()
     {
-        $this->timestamp = '[[+timestamp]]';
+        $this->seeds_dir = '[[+seeds_dir]]';
     }
 }

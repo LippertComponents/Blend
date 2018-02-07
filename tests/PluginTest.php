@@ -20,7 +20,7 @@ final class PluginTest extends BaseBlend
         /** @var \LCI\Blend\Plugin $testPlugin1 */
         $testPlugin1 = $this->blender->blendOneRawPlugin($plugin_name);
         $testPlugin1
-            ->setSeedTimeDir($plugin_name)
+            ->setSeedsDir($plugin_name)
             ->setDescription($plugin_description)
             ->setCategoryFromNames('Parent Plugin Cat=>Child Plugin Cat')
             ->setCode($plugin_code)
@@ -119,8 +119,8 @@ final class PluginTest extends BaseBlend
             $testPlugin2->save();
         }
 
-        $actual_timestamp = $this->blender->getTimestamp();
-        $this->blender->setTimestamp(BLEND_TEST_TIMESTAMP);
+        $actual_timestamp = $this->blender->getSeedsDir();
+        $this->blender->setSeedsDir(BLEND_TEST_SEEDS_DIR);
 
         $this->blender->makePluginSeeds(['name' => $plugin_name]);
 
@@ -132,7 +132,7 @@ final class PluginTest extends BaseBlend
 
         $fixed_data = require_once BLEND_COMPARE_DIRECTORY.'testPlugin2.seed.php';
         $generated_data = false;
-        $seed_file = $this->blender->getSeedsDirectory().BLEND_TEST_TIMESTAMP.DIRECTORY_SEPARATOR.'elements'.DIRECTORY_SEPARATOR.'modPlugin_testPlugin2.cache.php';
+        $seed_file = $this->blender->getSeedsDirectory().BLEND_TEST_SEEDS_DIR.DIRECTORY_SEPARATOR.'elements'.DIRECTORY_SEPARATOR.'modPlugin_testPlugin2.cache.php';
         if (file_exists($seed_file)) {
             $generated_data = require_once $seed_file;
         }
@@ -144,13 +144,13 @@ final class PluginTest extends BaseBlend
             'Comparing existing testPlugin2 seed file with generated seed file'
         );
 
-        $this->blender->setTimestamp($actual_timestamp);
+        $this->blender->setSeedsDir($actual_timestamp);
     }
 
     public function testCleanUpMakePluginSeeds()
     {
-        $actual_timestamp = $this->blender->getTimestamp();
-        $this->blender->setTimestamp(BLEND_TEST_TIMESTAMP);
+        $actual_timestamp = $this->blender->getSeedsDir();
+        $this->blender->setSeedsDir(BLEND_TEST_SEEDS_DIR);
 
         $plugin_name = 'testPlugin2';
 
@@ -168,7 +168,7 @@ final class PluginTest extends BaseBlend
                 'Remove created plugin2 migration seed file'
             );
         }
-        $this->blender->setTimestamp($actual_timestamp);
+        $this->blender->setSeedsDir($actual_timestamp);
     }
 
 

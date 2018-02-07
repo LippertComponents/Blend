@@ -34,7 +34,7 @@ class Template extends Element
     {
         /** @var Template $element */
         $element = new self($this->modx, $this->blender);
-        $element->setSeedTimeDir($this->getTimestamp());
+        $element->setSeedsDir($this->getSeedsDir());
         return $element->loadElementFromName($name);
     }
 
@@ -100,7 +100,7 @@ class Template extends Element
 
             $tvSeed = new TemplateVariable($this->modx, $this->blender);
             $seed_key = $tvSeed
-                ->setSeedTimeDir($this->getTimestamp())
+                ->setSeedsDir($this->getSeedsDir())
                 ->seedElement($tv);
             $tv_keys[] = [
                 'seed_key' => $seed_key,
@@ -133,7 +133,7 @@ class Template extends Element
             // seed the TV:
             $tvSeed = new TemplateVariable($this->modx, $this->blender);
             $tvSeed
-                ->setSeedTimeDir($this->getTimestamp())
+                ->setSeedsDir($this->getSeedsDir())
                 ->loadElementDataFromSeed($tv['seed_key']);
             $tvSeed->save(true);
 

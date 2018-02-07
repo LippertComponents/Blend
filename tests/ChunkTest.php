@@ -18,7 +18,7 @@ final class ChunkTest extends BaseBlend
         /** @var \LCI\Blend\Chunk $chunk */
         $testChunk1 = $this->blender->blendOneRawChunk($chunk_name);
         $testChunk1
-            ->setSeedTimeDir($chunk_name)
+            ->setSeedsDir($chunk_name)
             ->setDescription($chunk_description)
             ->setCategoryFromNames('Parent Cat=>Child Cat')
             ->setCode($chunk_code)
@@ -103,11 +103,12 @@ final class ChunkTest extends BaseBlend
             $testChunk2->save();
         }
 
-        $actual_timestamp = $this->blender->getTimestamp();
-        $this->blender->setTimestamp(BLEND_TEST_TIMESTAMP);
+        $actual_timestamp = $this->blender->getSeedsDir();
+        $this->blender->setSeedsDir(BLEND_TEST_SEEDS_DIR);
 
         $this->blender->makeChunkSeeds(['name' => $chunk_name]);
 
+        $this->blender->out('DIR: '.BLEND_COMPARE_DIRECTORY.$chunk_name.'.php', true);
         $this->assertEquals(
             $this->removeStringLineEndings($this->getStringAfterFirstComment(file_get_contents(BLEND_COMPARE_DIRECTORY.$chunk_name.'.php'))),
             $this->removeStringLineEndings($this->getStringAfterFirstComment(file_get_contents($this->blender->getMigrationDirectory().'m2018_01_10_093000_Chunk.php'))),
@@ -116,7 +117,7 @@ final class ChunkTest extends BaseBlend
 
         $fixed_data = require_once BLEND_COMPARE_DIRECTORY.'testChunk2.seed.php';
         $generated_data = false;
-        $seed_file = $this->blender->getSeedsDirectory().BLEND_TEST_TIMESTAMP.DIRECTORY_SEPARATOR.'elements'.DIRECTORY_SEPARATOR.'modChunk_testChunk2.cache.php';
+        $seed_file = $this->blender->getSeedsDirectory().BLEND_TEST_SEEDS_DIR.DIRECTORY_SEPARATOR.'elements'.DIRECTORY_SEPARATOR.'modChunk_testChunk2.cache.php';
         if (file_exists($seed_file)) {
             $generated_data = require_once $seed_file;
         }
@@ -128,13 +129,15 @@ final class ChunkTest extends BaseBlend
             'Comparing existing testChunk2 seed file with generated seed file'
         );
 
-        $this->blender->setTimestamp($actual_timestamp);
+        $this->blender->setSeedsDir($actual_timestamp);
     }
 
+    /**
+     */
     public function testCleanUpMakeChunkSeeds()
     {
-        $actual_timestamp = $this->blender->getTimestamp();
-        $this->blender->setTimestamp(BLEND_TEST_TIMESTAMP);
+        $actual_timestamp = $this->blender->getSeedsDir();
+        $this->blender->setSeedsDir(BLEND_TEST_SEEDS_DIR);
 
         $chunk_name = 'testChunk2';
 
@@ -152,7 +155,7 @@ final class ChunkTest extends BaseBlend
                 'Remove created chunk2 migration seed file'
             );
         }
-        $this->blender->setTimestamp($actual_timestamp);
+        $this->blender->setSeedsDir($actual_timestamp);
     }
 
     public function testChunkMigration()

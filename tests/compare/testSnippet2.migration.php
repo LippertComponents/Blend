@@ -21,7 +21,7 @@ class m2018_01_10_093000_Snippet extends Migrations
      */
     public function up()
     {
-        $this->blender->blendManySnippets($this->snippets, $this->getTimestamp());
+        $this->blender->blendManySnippets($this->snippets, $this->getSeedsDir());
     }
 
     /**
@@ -31,7 +31,7 @@ class m2018_01_10_093000_Snippet extends Migrations
      */
     public function down()
     {
-        $this->blender->revertBlendManySnippets($this->snippets, $this->getTimestamp());
+        $this->blender->revertBlendManySnippets($this->snippets, $this->getSeedsDir());
     }
 
     /**
@@ -61,8 +61,8 @@ class m2018_01_10_093000_Snippet extends Migrations
     /**
      * Method is called on construct, Child class can override and implement this
      */
-    protected function assignTimestamp()
+    protected function assignSeedsDir()
     {
-        $this->timestamp = '2018_01_10_093000';
+        $this->seeds_dir = '2018_01_10_093000';
     }
 }

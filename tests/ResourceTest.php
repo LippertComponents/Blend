@@ -19,7 +19,7 @@ final class ResourceTest extends BaseBlend
 
         $this->assertEquals(
             true,
-            $this->blender->blendManyResources($resource_seeds, BLEND_TEST_TIMESTAMP),
+            $this->blender->blendManyResources($resource_seeds, BLEND_TEST_SEEDS_DIR),
             'testBlendManyResources() blend attempted'
         );
 
@@ -43,7 +43,7 @@ final class ResourceTest extends BaseBlend
 
         $this->assertEquals(
             true,
-            $this->blender->revertBlendManyResources($resource_seeds, BLEND_TEST_TIMESTAMP),
+            $this->blender->revertBlendManyResources($resource_seeds, BLEND_TEST_SEEDS_DIR),
             'testBlendManyResources() blend attempted'
         );
 
@@ -92,8 +92,8 @@ final class ResourceTest extends BaseBlend
             }
         }
 
-        $actual_timestamp = $this->blender->getTimestamp();
-        $this->blender->setTimestamp(BLEND_TEST_TIMESTAMP);
+        $actual_timestamp = $this->blender->getSeedsDir();
+        $this->blender->setSeedsDir(BLEND_TEST_SEEDS_DIR);
 
         $seeds = $this->blender->makeResourceSeeds(['alias:IN' => $aliases]);
 
@@ -107,7 +107,7 @@ final class ResourceTest extends BaseBlend
         foreach ($test_resources as $alias => $test_resource) {
             $fixed_data = require_once BLEND_COMPARE_DIRECTORY . 'testResource'.$count.'.seed.php';
             $generated_data = false;
-            $seed_file = $this->blender->getSeedsDirectory() . BLEND_TEST_TIMESTAMP . DIRECTORY_SEPARATOR . 'resources' . DIRECTORY_SEPARATOR . $alias.'.cache.php';
+            $seed_file = $this->blender->getSeedsDirectory() . BLEND_TEST_SEEDS_DIR . DIRECTORY_SEPARATOR . 'resources' . DIRECTORY_SEPARATOR . $alias.'.cache.php';
             if (file_exists($seed_file)) {
                 $generated_data = require_once $seed_file;
             }
@@ -120,13 +120,13 @@ final class ResourceTest extends BaseBlend
             );
         }
 
-        $this->blender->setTimestamp($actual_timestamp);
+        $this->blender->setSeedsDir($actual_timestamp);
     }
 
     public function testCleanUpMakeResourceSeeds()
     {
-        $actual_timestamp = $this->blender->getTimestamp();
-        $this->blender->setTimestamp(BLEND_TEST_TIMESTAMP);
+        $actual_timestamp = $this->blender->getSeedsDir();
+        $this->blender->setSeedsDir(BLEND_TEST_SEEDS_DIR);
 
         $aliases = [
             'test-blend-many-resource-3',
@@ -146,7 +146,7 @@ final class ResourceTest extends BaseBlend
                 'Remove created resource2 migration seed file'
             );
         }
-        $this->blender->setTimestamp($actual_timestamp);
+        $this->blender->setSeedsDir($actual_timestamp);
     }
 
     public function testRemoveBlend()

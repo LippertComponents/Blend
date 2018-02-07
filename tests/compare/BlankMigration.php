@@ -7,7 +7,7 @@
 
 use \LCI\Blend\Migrations;
 
-class BlankMigration extends Migrations
+class m2018_01_10_093000_BlankMigration extends Migrations
 {
     /**
      * Run the migrations.
@@ -56,8 +56,8 @@ class BlankMigration extends Migrations
     /**
      * Method is called on construct, Child class can override and implement this
      */
-    protected function assignTimestamp()
+    protected function assignSeedsDir()
     {
-        $this->timestamp = '2018_01_10_093000';
+        $this->seeds_dir = '2018_01_10_093000';
     }
 }

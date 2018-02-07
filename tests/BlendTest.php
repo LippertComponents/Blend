@@ -21,8 +21,8 @@ final class BlendTest extends BaseBlend
     {
         $migration_class_name = 'BlankMigration';
 
-        $actual_timestamp = $this->blender->getTimestamp();
-        $this->blender->setTimestamp(BLEND_TEST_TIMESTAMP);
+        $actual_timestamp = $this->blender->getSeedsDir();
+        $this->blender->setSeedsDir(BLEND_TEST_SEEDS_DIR);
 
         $this->assertEquals(
             true,
@@ -31,20 +31,20 @@ final class BlendTest extends BaseBlend
         );
 
         $this->assertEquals(
-            $this->removeStringLineEndings($this->getStringAfterFirstComment(file_get_contents(BLEND_COMPARE_DIRECTORY.'BlankMigration.php'))),
-            $this->removeStringLineEndings($this->getStringAfterFirstComment(file_get_contents($this->blender->getMigrationDirectory().'BlankMigration.php'))),
+            $this->removeStringLineEndings($this->getStringAfterFirstComment(file_get_contents(BLEND_COMPARE_DIRECTORY.$migration_class_name.'.php'))),
+            $this->removeStringLineEndings($this->getStringAfterFirstComment(file_get_contents($this->blender->getMigrationDirectory().$this->blender->getMigrationName('BlankMigration').'.php'))),
             'Comparing existing blank migration file with generated file'
         );
 
-        $this->blender->setTimestamp($actual_timestamp);
+        $this->blender->setSeedsDir($actual_timestamp);
     }
 
     public function testCleanUpCreateBlankMigrationClassFile()
     {
         $migration_class_name = 'BlankMigration';
 
-        $actual_timestamp = $this->blender->getTimestamp();
-        $this->blender->setTimestamp(BLEND_TEST_TIMESTAMP);
+        $actual_timestamp = $this->blender->getSeedsDir();
+        $this->blender->setSeedsDir(BLEND_TEST_SEEDS_DIR);
 
         // Clean up
         if (BLEND_CLEAN_UP) {
@@ -54,7 +54,7 @@ final class BlendTest extends BaseBlend
                 'Remove created blank migration file'
             );
         }
-        $this->blender->setTimestamp($actual_timestamp);
+        $this->blender->setSeedsDir($actual_timestamp);
     }
 
     public function testCanBeUninstalledBlend()

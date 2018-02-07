@@ -19,7 +19,7 @@ final class TemplateTest extends BaseBlend
         /** @var \LCI\Blend\Template $testTemplate1 */
         $testTemplate1 = $this->blender->blendOneRawTemplate($template_name);
         $testTemplate1
-            ->setSeedTimeDir($template_name)
+            ->setSeedsDir($template_name)
             ->setDescription($template_description)
             ->setCategoryFromNames('Parent Template Cat=>Child Template Cat')
             ->setCode($template_code)
@@ -99,8 +99,8 @@ final class TemplateTest extends BaseBlend
             $testTemplate2->save();
         }
 
-        $actual_timestamp = $this->blender->getTimestamp();
-        $this->blender->setTimestamp(BLEND_TEST_TIMESTAMP);
+        $actual_timestamp = $this->blender->getSeedsDir();
+        $this->blender->setSeedsDir(BLEND_TEST_SEEDS_DIR);
 
         $this->blender->makeTemplateSeeds(['templatename' => $template_name]);
 
@@ -112,7 +112,7 @@ final class TemplateTest extends BaseBlend
 
         $fixed_data = require_once BLEND_COMPARE_DIRECTORY.'testTemplate2.seed.php';
         $generated_data = false;
-        $seed_file = $this->blender->getSeedsDirectory().BLEND_TEST_TIMESTAMP.DIRECTORY_SEPARATOR.'elements'.DIRECTORY_SEPARATOR.'modTemplate_testTemplate2.cache.php';
+        $seed_file = $this->blender->getSeedsDirectory().BLEND_TEST_SEEDS_DIR.DIRECTORY_SEPARATOR.'elements'.DIRECTORY_SEPARATOR.'modTemplate_testTemplate2.cache.php';
         if (file_exists($seed_file)) {
             $generated_data = require_once $seed_file;
         }
@@ -124,13 +124,13 @@ final class TemplateTest extends BaseBlend
             'Comparing existing testTemplate2 seed file with generated seed file'
         );
 
-        $this->blender->setTimestamp($actual_timestamp);
+        $this->blender->setSeedsDir($actual_timestamp);
     }
 
     public function testCleanUpMakeTemplateSeeds()
     {
-        $actual_timestamp = $this->blender->getTimestamp();
-        $this->blender->setTimestamp(BLEND_TEST_TIMESTAMP);
+        $actual_timestamp = $this->blender->getSeedsDir();
+        $this->blender->setSeedsDir(BLEND_TEST_SEEDS_DIR);
 
         $template_name = 'testTemplate2';
 
@@ -148,7 +148,7 @@ final class TemplateTest extends BaseBlend
                 'Remove created template2 migration seed file'
             );
         }
-        $this->blender->setTimestamp($actual_timestamp);
+        $this->blender->setSeedsDir($actual_timestamp);
     }
 
 

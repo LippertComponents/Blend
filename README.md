@@ -98,10 +98,10 @@ Same as above, but in short command
 ```php
 <?php
 // Manual set up of a chunk:
-/** @var \LCI\Chunk $myChunk */
+/** @var \LCI\Blend\Chunk $myChunk */
 $myChunk = $this->blender->blendOneRawChunk('myChunk');
 $myChunk
-    ->setSeedTimeDir($this->getTimestamp())// This is needed to set the down() data
+    ->setSeedsDir($this->getTimestamp())// This is needed to set the down() data
     ->setDescription('This is my test chunk, note this is limited to 255 or something')
     ->setCategoryFromNames('My Site=>Chunks')
     ->setCode('[[+testPlaceholder]]')// could do file_get_contents()
@@ -128,7 +128,7 @@ $name = 'myChunk';
 $blendChunk = new \LCI\Blend\Chunk($this->modx, $this->blender);
 $blendChunk
     ->setName($name)
-    ->setSeedTimeDir($this->getTimestamp());// This is needed to retrieve the down data
+    ->setSeedsDir($this->getTimestamp());// This is needed to retrieve the down data
 
 if ( $blendChunk->revertBlend() ) {
     $this->blender->out($blendChunk->getName().' setting has been reverted to '.$this->getTimestamp());

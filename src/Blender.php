@@ -42,7 +42,7 @@ class Blender
     protected $category_map = [];
 
     /** @var string date('Y_m_d_His') */
-    protected $timestamp = '';
+    protected $seeds_dir = '';
 
     /**
      * Stockpile constructor.
@@ -70,7 +70,7 @@ class Blender
         ];
         $this->config = array_merge($this->config, $config);
 
-        $this->timestamp = date('Y_m_d_His');
+        $this->seeds_dir = date('Y_m_d_His');
 
         $tagger_path = $this->modx->getOption('tagger.core_path', null, $this->modx->getOption('core_path') . 'components/tagger/') . 'model/tagger/';
         if (is_dir($tagger_path)) {
@@ -94,22 +94,41 @@ class Blender
     /**
      * @return string
      */
-    public function getTimestamp()
+    public function getSeedsDir()
     {
-        return $this->timestamp;
+        return $this->seeds_dir;
     }
 
     /**
-     * @param string $timestamp
+     * @deprecated v0.9.7, use getSeedsDir
+     * @return string
+     */
+    public function getTimestamp()
+    {
+        return $this->seeds_dir;
+    }
+
+    /**
+     * @param string $seeds_dir ~ local folder
      *
      * @return Blender
      */
-    public function setTimestamp(string $timestamp)
+    public function setSeedsDir(string $seeds_dir)
     {
-        $this->timestamp = $timestamp;
+        $this->seeds_dir = $seeds_dir;
         return $this;
     }
 
+    /**
+     * @deprecated v0.9.7, use setSeedsDir
+     * @param string $timestamp ~ will be the directory name
+     *
+     * @return $this
+     */
+    public function setSeedTimeDir($timestamp)
+    {
+        return $this->setSeedDir($timestamp);
+    }
 
     /**
      * @return string
@@ -231,19 +250,19 @@ class Blender
         $chunk =  new Chunk($this->modx, $this);
         return $chunk
             ->setName($name)
-            ->setSeedTimeDir($this->getTimestamp());
+            ->setSeedsDir($this->getSeedsDir());
     }
     /**
      * @param array $chunks
-     * @param string $timestamp
+     * @param string $seeds_dir
      */
-    public function blendManyChunks($chunks=[], $timestamp='')
+    public function blendManyChunks($chunks=[], $seeds_dir='')
     {
         // will update if element does exist or create new
         foreach ($chunks as $seed_key) {
             $blendChunk = new Chunk($this->modx, $this);
-            if (!empty($timestamp)) {
-                $blendChunk->setSeedTimeDir($timestamp);
+            if (!empty($seeds_dir)) {
+                $blendChunk->setSeedsDir($seeds_dir);
             }
             if ($blendChunk->blendFromSeed($seed_key)) {
                 $this->out($seed_key.' has been blended into ID: ');
@@ -264,20 +283,20 @@ class Blender
 
     /**
      * @param array $chunks
-     * @param string $timestamp
+     * @param string $seeds_dir
      */
-    public function revertBlendManyChunks($chunks=[], $timestamp='')
+    public function revertBlendManyChunks($chunks=[], $seeds_dir='')
     {
         // will update if system setting does exist or create new
         foreach ($chunks as $seed_key) {
             /** @var Chunk $systemSetting */
             $blendChunk = new Chunk($this->modx, $this);
-            if (!empty($timestamp)) {
-                $blendChunk->setSeedTimeDir($timestamp);
+            if (!empty($seeds_dir)) {
+                $blendChunk->setSeedsDir($seeds_dir);
             }
 
             if ( $blendChunk->revertBlendFromSeed($seed_key) ) {
-                $this->out($blendChunk->getName().' chunk has been reverted to '.$timestamp);
+                $this->out($blendChunk->getName().' chunk has been reverted to '.$seeds_dir);
 
             } else {
                 $this->out($blendChunk->getName().' chunk was not reverted', true);
@@ -296,20 +315,20 @@ class Blender
         $plugin =  new Plugin($this->modx, $this);
         return $plugin
             ->setName($name)
-            ->setSeedTimeDir($this->getTimestamp());
+            ->setSeedsDir($this->getSeedsDir());
     }
 
     /**
      * @param array $plugins
-     * @param string $timestamp
+     * @param string $seeds_dir
      */
-    public function blendManyPlugins($plugins=[], $timestamp='')
+    public function blendManyPlugins($plugins=[], $seeds_dir='')
     {
         // will update if element does exist or create new
         foreach ($plugins as $seed_key) {
             $blendPlugin = new Plugin($this->modx, $this);
-            if (!empty($timestamp)) {
-                $blendPlugin->setSeedTimeDir($timestamp);
+            if (!empty($seeds_dir)) {
+                $blendPlugin->setSeedsDir($seeds_dir);
             }
             if ($blendPlugin->blendFromSeed($seed_key)) {
                 $this->out($seed_key.' has been blended into ID: ');
@@ -330,20 +349,20 @@ class Blender
 
     /**
      * @param array $plugins
-     * @param string $timestamp
+     * @param string $seeds_dir
      */
-    public function revertBlendManyPlugins($plugins=[], $timestamp='')
+    public function revertBlendManyPlugins($plugins=[], $seeds_dir='')
     {
         // will update if system setting does exist or create new
         foreach ($plugins as $seed_key) {
             /** @var Plugin $systemSetting */
             $blendPlugin = new Plugin($this->modx, $this);
-            if (!empty($timestamp)) {
-                $blendPlugin->setSeedTimeDir($timestamp);
+            if (!empty($seeds_dir)) {
+                $blendPlugin->setSeedsDir($seeds_dir);
             }
 
             if ( $blendPlugin->revertBlendFromSeed($seed_key) ) {
-                $this->out($blendPlugin->getName().' plugin has been reverted to '.$timestamp);
+                $this->out($blendPlugin->getName().' plugin has been reverted to '.$seeds_dir);
 
             } else {
                 $this->out($blendPlugin->getName().' plugin was not reverted', true);
@@ -362,21 +381,21 @@ class Blender
         $snippet =  new Snippet($this->modx, $this);
         return $snippet
             ->setName($name)
-            ->setSeedTimeDir($this->getTimestamp());
+            ->setSeedsDir($this->getSeedsDir());
     }
 
     /**
      * @param array $snippets
-     * @param string $timestamp
+     * @param string $seeds_dir
      */
-    public function blendManySnippets($snippets=[], $timestamp='')
+    public function blendManySnippets($snippets=[], $seeds_dir='')
     {
         // will update if element does exist or create new
         foreach ($snippets as $seed_key) {
             /** @var Snippet $blendSnippet */
             $blendSnippet = new Snippet($this->modx, $this);
-            if (!empty($timestamp)) {
-                $blendSnippet->setSeedTimeDir($timestamp);
+            if (!empty($seeds_dir)) {
+                $blendSnippet->setSeedsDir($seeds_dir);
             }
             if ($blendSnippet->blendFromSeed($seed_key)) {
                 $this->out($seed_key.' has been blended');
@@ -396,20 +415,20 @@ class Blender
     }
     /**
      * @param array $snippets
-     * @param string $timestamp
+     * @param string $seeds_dir
      */
-    public function revertBlendManySnippets($snippets=[], $timestamp='')
+    public function revertBlendManySnippets($snippets=[], $seeds_dir='')
     {
         // will update if system setting does exist or create new
         foreach ($snippets as $seed_key) {
             /** @var Snippet $systemSetting */
             $blendSnippet = new Snippet($this->modx, $this);
-            if (!empty($timestamp)) {
-                $blendSnippet->setSeedTimeDir($timestamp);
+            if (!empty($seeds_dir)) {
+                $blendSnippet->setSeedsDir($seeds_dir);
             }
 
             if ( $blendSnippet->revertBlendFromSeed($seed_key) ) {
-                $this->out($blendSnippet->getName().' snippet has been reverted to '.$timestamp);
+                $this->out($blendSnippet->getName().' snippet has been reverted to '.$seeds_dir);
 
             } else {
                 $this->out($blendSnippet->getName().' snippet was not reverted', true);
@@ -427,27 +446,27 @@ class Blender
         /** @var Template $template */
         $template =  new Template($this->modx, $this);
         return $template
-            ->setSeedTimeDir($this->timestamp)
+            ->setSeedsDir($this->seeds_dir)
             ->setName($name);
     }
 
     /**
      * @param array $templates
-     * @param string $timestamp
+     * @param string $seeds_dir
      */
-    public function blendManyTemplates($templates=[], $timestamp='')
+    public function blendManyTemplates($templates=[], $seeds_dir='')
     {
         $blendTemplate = new Template($this->modx, $this);
-        if (!empty($timestamp)) {
-            $blendTemplate->setSeedTimeDir($timestamp);
+        if (!empty($seeds_dir)) {
+            $blendTemplate->setSeedsDir($seeds_dir);
         }
         // will update if template does exist or create new
         foreach ($templates as $seed_key) {
 
             /** @var Snippet $blendTemplate */
             $blendTemplate = new Template($this->modx, $this);
-            if (!empty($timestamp)) {
-                $blendTemplate->setSeedTimeDir($timestamp);
+            if (!empty($seeds_dir)) {
+                $blendTemplate->setSeedsDir($seeds_dir);
             }
             if ($blendTemplate->blendFromSeed($seed_key)) {
                 $this->out($seed_key.' has been blended');
@@ -467,20 +486,20 @@ class Blender
 
     /**
      * @param array $templates
-     * @param string $timestamp
+     * @param string $seeds_dir
      */
-    public function revertBlendManyTemplates($templates=[], $timestamp='')
+    public function revertBlendManyTemplates($templates=[], $seeds_dir='')
     {
         // will update if system setting does exist or create new
         foreach ($templates as $seed_key) {
             /** @var Template $blendTemplate */
             $blendTemplate = new Template($this->modx, $this);
-            if (!empty($timestamp)) {
-                $blendTemplate->setSeedTimeDir($timestamp);
+            if (!empty($seeds_dir)) {
+                $blendTemplate->setSeedsDir($seeds_dir);
             }
 
             if ( $blendTemplate->revertBlendFromSeed($seed_key) ) {
-                $this->out($blendTemplate->getName().' snippet has been reverted to '.$timestamp);
+                $this->out($blendTemplate->getName().' snippet has been reverted to '.$seeds_dir);
 
             } else {
                 $this->out($blendTemplate->getName().' snippet was not reverted', true);
@@ -498,26 +517,26 @@ class Blender
         /** @var Element $tv */
         $tv =  new TemplateVariable($this->modx, $this);
         return $tv
-            ->setSeedTimeDir($this->timestamp)
+            ->setSeedsDir($this->seeds_dir)
             ->setName($name);
     }
 
     /**
      * @param array $resources
-     * @param string $timestamp
+     * @param string $seeds_dir
      * @param bool $overwrite
      *
      * @return bool
      */
-    public function blendManyResources($resources=[], $timestamp='', $overwrite=false)
+    public function blendManyResources($resources=[], $seeds_dir='', $overwrite=false)
     {
         $saved = true;
         // will update if resource does exist or create new
         foreach ($resources as $seed_key) {
             /** @var \LCI\Blend\Resource $blendResource */
             $blendResource = new Resource($this->modx, $this);
-            if (!empty($timestamp)) {
-                $blendResource->setSeedTimeDir($timestamp);
+            if (!empty($seeds_dir)) {
+                $blendResource->setSeedsDir($seeds_dir);
             }
 
             if ($blendResource->blendFromSeed($seed_key, $overwrite)) {
@@ -542,20 +561,20 @@ class Blender
 
     /**
      * @param array $resources
-     * @param string $timestamp
+     * @param string $seeds_dir
      * @param bool $overwrite
      *
      * @return bool
      */
-    public function revertBlendManyResources($resources=[], $timestamp='', $overwrite=false)
+    public function revertBlendManyResources($resources=[], $seeds_dir='', $overwrite=false)
     {
         $saved = true;
         // will update if resource does exist or create new
         foreach ($resources as $seed_key) {
             /** @var \LCI\Blend\Resource $blendResource */
             $blendResource = new Resource($this->modx, $this);
-            if (!empty($timestamp)) {
-                $blendResource->setSeedTimeDir($timestamp);
+            if (!empty($seeds_dir)) {
+                $blendResource->setSeedsDir($seeds_dir);
             }
 
             if ($blendResource->revertBlendFromSeed($seed_key)) {
@@ -572,18 +591,18 @@ class Blender
 
     /**
      * @param array $settings ~ [ ['name' => 'mySystemSetting', 'value' => 'myValue'], ..]
-     * @param string $timestamp
+     * @param string $seeds_dir
      *
      * @return bool
      */
-    public function blendManySystemSettings($settings=[], $timestamp='')
+    public function blendManySystemSettings($settings=[], $seeds_dir='')
     {
         $success = true;
         // will update if system setting does exist or create new
         foreach ($settings as $setting) {
             $systemSetting = new SystemSetting($this->modx, $this);
-            if (!empty($timestamp)) {
-                $systemSetting->setSeedTimeDir($timestamp);
+            if (!empty($seeds_dir)) {
+                $systemSetting->setSeedsDir($seeds_dir);
             }
             if (isset($setting['key'])) {
                 $systemSetting->setName($setting['key']);
@@ -626,18 +645,18 @@ class Blender
 
     /**
      * @param array $settings ~ [ ['name' => 'mySystemSetting', 'value' => 'myValue'], ..]
-     * @param string $timestamp
+     * @param string $seeds_dir
      *
      * @return bool
      */
-    public function revertBlendManySystemSettings($settings=[], $timestamp='')
+    public function revertBlendManySystemSettings($settings=[], $seeds_dir='')
     {
         $success = true;
         // will update if system setting does exist or create new
         foreach ($settings as $setting) {
             $systemSetting = new SystemSetting($this->modx, $this);
-            if (!empty($timestamp)) {
-                $systemSetting->setSeedTimeDir($timestamp);
+            if (!empty($seeds_dir)) {
+                $systemSetting->setSeedsDir($seeds_dir);
             }
             if (isset($setting['key'])) {
                 $systemSetting->setName($setting['key']);
@@ -652,7 +671,7 @@ class Blender
             }
 
             if ( $systemSetting->revertBlend() ) {
-                $this->out($systemSetting->getName().' setting has been reverted to '.$timestamp);
+                $this->out($systemSetting->getName().' setting has been reverted to '.$seeds_dir);
 
             } else {
                 $this->out($systemSetting->getName().' setting was not reverted', true);
@@ -725,7 +744,7 @@ class Blender
             /** @var Chunk $blendChunk */
             $blendChunk = new Chunk($this->modx, $this);
             $seed_key = $blendChunk
-                ->setSeedTimeDir($this->timestamp)
+                ->setSeedsDir($this->seeds_dir)
                 ->seedElement($chunk);
             $this->out("Chunk: ".$chunk->get('name').' Key: '.$seed_key);
             $keys[] = $seed_key;
@@ -754,7 +773,7 @@ class Blender
             /** @var Plugin $blendPlugin */
             $blendPlugin = new Plugin($this->modx, $this);
             $seed_key = $blendPlugin
-                ->setSeedTimeDir($this->timestamp)
+                ->setSeedsDir($this->seeds_dir)
                 ->seedElement($plugin);
             $this->out("Plugin: ".$plugin->get('name').' Key: '.$seed_key);
             $keys[] = $seed_key;
@@ -782,7 +801,7 @@ class Blender
         foreach ($collection as $resource) {
             $blendResource = new Resource($this->modx, $this);
             $seed_key = $blendResource
-                ->setSeedTimeDir($this->timestamp)
+                ->setSeedsDir($this->seeds_dir)
                 ->seed($resource);
             $this->out("ID: ".$resource->get('id').' Key: '.$seed_key);
             $keys[] = $seed_key;
@@ -811,7 +830,7 @@ class Blender
             /** @var Snippet $blendSnippet */
             $blendSnippet = new Snippet($this->modx, $this);
             $seed_key = $blendSnippet
-                ->setSeedTimeDir($this->timestamp)
+                ->setSeedsDir($this->seeds_dir)
                 ->seedElement($snippet);
             $this->out("Snippet: ".$snippet->get('name').' Key: '.$seed_key);
             $keys[] = $seed_key;
@@ -871,7 +890,7 @@ class Blender
         foreach ($collection as $template) {
             $blendTemplate = new Template($this->modx, $this);
             $seed_key = $blendTemplate
-                ->setSeedTimeDir($this->timestamp)
+                ->setSeedsDir($this->seeds_dir)
                 ->seedElement($template);
             $this->out("Template ID: ".$template->get('id').' Key: '.$seed_key);
             $keys[] = $seed_key;
@@ -1244,14 +1263,21 @@ class Blender
 
         return $migrationProcessClass;
     }
+
     /**
-     * @param string $type
-     *
+     * @param $type
+     * @param bool $set_case
      * @return string
      */
-    protected function getMigrationName($type)
+    public function getMigrationName($type, $set_case=false)
     {
-        return 'm'.$this->timestamp.'_'.ucfirst(strtolower($type));
+        $name = 'm'.$this->seeds_dir.'_';
+        if ($set_case) {
+            $name .= ucfirst(strtolower($type));
+        } else {
+            $name .= $type;
+        }
+        return $name;
     }
 
     /**
@@ -1266,9 +1292,9 @@ class Blender
     protected function writeMigrationClassFile($type, $class_data=[], $server_type='master', $name=null, $log=true)
     {
         if (!empty($name)) {
-            $class_name = $name = preg_replace('/[^A-Za-z0-9\_\.]/', '', str_replace(['/', ' '], '_', $name));
+            $class_name = $this->getMigrationName(preg_replace('/[^A-Za-z0-9\_]/', '', str_replace(['/', ' '], '_', $name)));
         } else {
-            $class_name = $this->getMigrationName($type);
+            $class_name = $this->getMigrationName($type, true);
         }
 
         $migration_template = 'blank.txt';
@@ -1279,7 +1305,7 @@ class Blender
             'classUpInners' => '//@TODO',
             'classDownInners' => '//@TODO',
             'serverType' => $server_type,
-            'timestamp' => $this->timestamp
+            'seeds_dir' => $this->seeds_dir
         ];
 
         switch ($type) {
@@ -1287,43 +1313,43 @@ class Blender
             case 'chunk':
                 $migration_template = 'chunk.txt';
                 $placeholders['chunkData'] = $this->prettyVarExport($class_data);
-                $placeholders['classUpInners'] = '$this->blender->blendManyChunks($this->chunks, $this->getTimestamp());';
-                $placeholders['classDownInners'] = '$this->blender->revertBlendManyChunks($this->chunks, $this->getTimestamp());';
+                $placeholders['classUpInners'] = '$this->blender->blendManyChunks($this->chunks, $this->getSeedsDir());';
+                $placeholders['classDownInners'] = '$this->blender->revertBlendManyChunks($this->chunks, $this->getSeedsDir());';
                 break;
 
             case 'plugin':
                 $migration_template = 'plugin.txt';
                 $placeholders['pluginData'] = $this->prettyVarExport($class_data);
-                $placeholders['classUpInners'] = '$this->blender->blendManyPlugins($this->plugins, $this->getTimestamp());';
-                $placeholders['classDownInners'] = '$this->blender->revertBlendManyPlugins($this->plugins, $this->getTimestamp());';
+                $placeholders['classUpInners'] = '$this->blender->blendManyPlugins($this->plugins, $this->getSeedsDir());';
+                $placeholders['classDownInners'] = '$this->blender->revertBlendManyPlugins($this->plugins, $this->getSeedsDir());';
                 break;
 
             case 'resource':
                 $migration_template = 'resource.txt';
                 $placeholders['resourceData'] = $this->prettyVarExport($class_data);
-                $placeholders['classUpInners'] = '$this->blender->blendManyResources($this->resources, $this->getTimestamp());';
-                $placeholders['classDownInners'] = '$this->blender->revertBlendManyResources($this->resources, $this->getTimestamp());';
+                $placeholders['classUpInners'] = '$this->blender->blendManyResources($this->resources, $this->getSeedsDir());';
+                $placeholders['classDownInners'] = '$this->blender->revertBlendManyResources($this->resources, $this->getSeedsDir());';
                 break;
 
             case 'snippet':
                 $migration_template = 'snippet.txt';
                 $placeholders['snippetData'] = $this->prettyVarExport($class_data);
-                $placeholders['classUpInners'] = '$this->blender->blendManySnippets($this->snippets, $this->getTimestamp());';
-                $placeholders['classDownInners'] = '$this->blender->revertBlendManySnippets($this->snippets, $this->getTimestamp());';
+                $placeholders['classUpInners'] = '$this->blender->blendManySnippets($this->snippets, $this->getSeedsDir());';
+                $placeholders['classDownInners'] = '$this->blender->revertBlendManySnippets($this->snippets, $this->getSeedsDir());';
                 break;
 
             case 'systemSettings':
                 $migration_template = 'systemSettings.txt';
                 $placeholders['settingsData'] = $this->prettyVarExport($class_data);
-                $placeholders['classUpInners'] = '$this->blender->blendManySystemSettings($this->settings, $this->getTimestamp());';
-                $placeholders['classDownInners'] = '$this->blender->revertBlendManySystemSettings($this->settings, $this->getTimestamp());';
+                $placeholders['classUpInners'] = '$this->blender->blendManySystemSettings($this->settings, $this->getSeedsDir());';
+                $placeholders['classDownInners'] = '$this->blender->revertBlendManySystemSettings($this->settings, $this->getSeedsDir());';
                 break;
 
             case 'template':
                 $migration_template = 'template.txt';
                 $placeholders['templateData'] = $this->prettyVarExport($class_data);
-                $placeholders['classUpInners'] = '$this->blender->blendManyTemplates($this->templates, $this->getTimestamp());';
-                $placeholders['classDownInners'] = '$this->blender->revertBlendManyTemplates($this->templates, $this->getTimestamp());';
+                $placeholders['classUpInners'] = '$this->blender->blendManyTemplates($this->templates, $this->getSeedsDir());';
+                $placeholders['classDownInners'] = '$this->blender->revertBlendManyTemplates($this->templates, $this->getSeedsDir());';
                 break;
 
 
@@ -1387,9 +1413,9 @@ class Blender
     public function removeMigrationFile($name, $type)
     {
         if (!empty($name)) {
-            $class_name = $name = preg_replace('/[^A-Za-z0-9\_\.]/', '', str_replace(['/', ' '], '_', $name));
+            $class_name = $this->getMigrationName(preg_replace('/[^A-Za-z0-9\_]/', '', str_replace(['/', ' '], '_', $name)));
         } else {
-            $class_name = $this->getMigrationName($type);
+            $class_name = $this->getMigrationName($type, true);
         }
 
         $removed = false;

@@ -22,7 +22,7 @@ class m2018_01_10_093000_Resource extends Migrations
      */
     public function up()
     {
-        $this->blender->blendManyResources($this->resources, $this->getTimestamp());
+        $this->blender->blendManyResources($this->resources, $this->getSeedsDir());
     }
 
     /**
@@ -32,7 +32,7 @@ class m2018_01_10_093000_Resource extends Migrations
      */
     public function down()
     {
-        $this->blender->revertBlendManyResources($this->resources, $this->getTimestamp());
+        $this->blender->revertBlendManyResources($this->resources, $this->getSeedsDir());
     }
 
     /**
@@ -62,8 +62,8 @@ class m2018_01_10_093000_Resource extends Migrations
     /**
      * Method is called on construct, Child class can override and implement this
      */
-    protected function assignTimestamp()
+    protected function assignSeedsDir()
     {
-        $this->timestamp = '2018_01_10_093000';
+        $this->seeds_dir = '2018_01_10_093000';
     }
 }

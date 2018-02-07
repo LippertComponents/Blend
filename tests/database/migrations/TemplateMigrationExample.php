@@ -19,7 +19,7 @@ class TemplateMigrationExample extends Migrations
         /** @var \LCI\Blend\Template $testTemplate3 */
         $testTemplate3 = $this->blender->blendOneRawTemplate('testTemplate3');
         $testTemplate3
-            ->setSeedTimeDir($this->getTimestamp())
+            ->setSeedsDir($this->getSeedsDir())
             ->setDescription('This is my 3rd test template, note this is limited to 255 or something and no HTML')
             ->setCategoryFromNames('Parent Template Cat=>Child Template Cat')
             ->setCode('<!DOCTYPE html><html lang="en"><head><title>[[*pagetitle]]</title></head><body><!-- 3rd -->[[*content]]</body></html>')
@@ -49,10 +49,10 @@ class TemplateMigrationExample extends Migrations
         $blendTemplate = new \LCI\Blend\Template($this->modx, $this->blender);
         $blendTemplate
             ->setName($name)
-            ->setSeedTimeDir($this->getTimestamp());
+            ->setSeedsDir($this->getSeedsDir());
 
         if ( $blendTemplate->revertBlend() ) {
-            $this->blender->out($blendTemplate->getName().' setting has been reverted to '.$this->getTimestamp());
+            $this->blender->out($blendTemplate->getName().' setting has been reverted to '.$this->getSeedsDir());
 
         } else {
             $this->blender->out($blendTemplate->getName().' setting was not reverted', true);
@@ -98,8 +98,8 @@ class TemplateMigrationExample extends Migrations
     /**
      * Method is called on construct, Child class can override and implement this
      */
-    protected function assignTimestamp()
+    protected function assignSeedsDir()
     {
-        $this->timestamp = BLEND_TEST_TIMESTAMP;
+        $this->seeds_dir = BLEND_TEST_SEEDS_DIR;
     }
 }

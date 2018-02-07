@@ -103,8 +103,8 @@ final class SystemSettingsTest extends BaseBlend
             );
         }
 
-        $actual_timestamp = $this->blender->getTimestamp();
-        $this->blender->setTimestamp(BLEND_TEST_TIMESTAMP);
+        $actual_timestamp = $this->blender->getSeedsDir();
+        $this->blender->setSeedsDir(BLEND_TEST_SEEDS_DIR);
 
         $seed_data = $this->blender->makeSystemSettingSeeds(['key' => $setting['key']]);
 
@@ -114,13 +114,13 @@ final class SystemSettingsTest extends BaseBlend
             'Comparing existing testSystemSetting2 migration file with generated file'
         );
 
-        $this->blender->setTimestamp($actual_timestamp);
+        $this->blender->setSeedsDir($actual_timestamp);
     }
 
     public function testCleanUpMakeSystemSettingsSeeds()
     {
-        $actual_timestamp = $this->blender->getTimestamp();
-        $this->blender->setTimestamp(BLEND_TEST_TIMESTAMP);
+        $actual_timestamp = $this->blender->getSeedsDir();
+        $this->blender->setSeedsDir(BLEND_TEST_SEEDS_DIR);
 
         $setting_name = 'testSystemSetting2';
 
@@ -138,7 +138,7 @@ final class SystemSettingsTest extends BaseBlend
                 'Remove created testSystemSetting2 migration seed file'
             );
         }
-        $this->blender->setTimestamp($actual_timestamp);
+        $this->blender->setSeedsDir($actual_timestamp);
     }
 
 

@@ -23,7 +23,7 @@ class Snippet extends Element
     {
         /** @var Snippet $element */
         $element = new self($this->modx, $this->blender);
-        $element->setSeedTimeDir($this->getTimestamp());
+        $element->setSeedsDir($this->getSeedsDir());
         return $element->loadElementFromName($name);
     }
 }
