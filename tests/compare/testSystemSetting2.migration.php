@@ -71,6 +71,6 @@ class m2018_01_10_093000_Systemsettings extends Migrations
      */
     protected function assignSeedsDir()
     {
-        $this->seeds_dir = '2018_01_10_093000';
+        $this->seeds_dir = 'm2018_01_10_093000_Systemsettings';
     }
 }

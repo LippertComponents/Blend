@@ -1305,7 +1305,7 @@ class Blender
             'classUpInners' => '//@TODO',
             'classDownInners' => '//@TODO',
             'serverType' => $server_type,
-            'seeds_dir' => $this->seeds_dir
+            'seeds_dir' => $class_name
         ];
 
         switch ($type) {
