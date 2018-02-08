@@ -21,7 +21,7 @@ final class SnippetTest extends BaseBlend
             ->setSeedsDir($snippet_name)
             ->setDescription($snippet_description)
             ->setCategoryFromNames('Parent Cat=>Child Cat')
-            ->setCode($snippet_code)
+            ->setCode($snippet_code, true)
             ->setAsStatic('core/components/mysite/elements/snippets/mySnippet.tpl');
 
         $blended = $testSnippet1->blend(true);

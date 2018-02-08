@@ -21,7 +21,7 @@ final class ChunkTest extends BaseBlend
             ->setSeedsDir($chunk_name)
             ->setDescription($chunk_description)
             ->setCategoryFromNames('Parent Cat=>Child Cat')
-            ->setCode($chunk_code)
+            ->setCode($chunk_code, true)
             ->setAsStatic('core/components/mysite/elements/chunks/myChunk.tpl');
 
         $blended = $testChunk1->blend(true);

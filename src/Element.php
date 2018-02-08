@@ -44,10 +44,13 @@ abstract class Element
     protected $media_source_id;
 
     /** @var  bool */
-    protected $static = null;
+    protected $static = false;
 
     /** @var string  */
     protected $code = null;
+
+    /** @var bool  */
+    protected $overwrite_static = false;
 
     /** @var  string */
     protected $static_file;
@@ -265,22 +268,25 @@ abstract class Element
 
     /**
      * @param string $code ~ if not doing static file then set the Elements code here
+     * @param bool $overwrite_static ~ if the setAsStatic is ran, false will keep the static content code, true will overwrite the static file
      * @return $this
      */
-    public function setCode(string $code)
+    public function setCode(string $code, $overwrite_static=false)
     {
         $this->code = $code;
+        $this->overwrite_static = $overwrite_static;
         return $this;
     }
 
     /**
+     * duplicate method for setCode, matches MODX naming
      * @param string $code ~ if not doing static file then set the Elements code here
+     * @param bool $overwrite_static ~ if the setAsStatic is ran, false will keep the static content code, true will overwrite the static file
      * @return $this
      */
-    public function setContent(string $code)
+    public function setContent(string $code, $overwrite_static=false)
     {
-        $this->code = $code;
-        return $this;
+        return $this->setCode($code, $overwrite_static);
     }
 
     /**
@@ -431,13 +437,16 @@ abstract class Element
             $this->element->set('source', $this->media_source_id);
             $this->element->set('static', 1);
             $this->element->set('static_file', $this->static_file);
+            // do I need to fill the code/content from file_get_contents?
+
         } elseif ($this->static === false) {
             $this->element->set('source', 0);
             $this->element->set('static', 0);
             $this->element->set('static_file', '');
+
         }
 
-        if ($this->code !== null) {
+        if ($this->code !== null && (($this->static && $this->overwrite_static) || $this->static !== true)) {
             // are all elements code column content?
             $this->element->set('content', $this->code);
         }

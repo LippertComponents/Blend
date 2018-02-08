@@ -22,7 +22,7 @@ final class TemplateTest extends BaseBlend
             ->setSeedsDir($template_name)
             ->setDescription($template_description)
             ->setCategoryFromNames('Parent Template Cat=>Child Template Cat')
-            ->setCode($template_code)
+            ->setCode($template_code, true)
             ->setAsStatic('core/components/mysite/elements/templates/myTemplate.tpl');
         // @TODO add a TV here
         //->attachTemplateVariable('testTemplateVariable1');

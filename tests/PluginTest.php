@@ -23,7 +23,7 @@ final class PluginTest extends BaseBlend
             ->setSeedsDir($plugin_name)
             ->setDescription($plugin_description)
             ->setCategoryFromNames('Parent Plugin Cat=>Child Plugin Cat')
-            ->setCode($plugin_code)
+            ->setCode($plugin_code, true)
             ->setAsStatic('core/components/mysite/elements/plugins/myPlugin.tpl')
             ->attachOnEvent($plugin_event);
 
