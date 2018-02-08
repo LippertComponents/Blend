@@ -744,7 +744,7 @@ class Blender
             /** @var Chunk $blendChunk */
             $blendChunk = new Chunk($this->modx, $this);
             $seed_key = $blendChunk
-                ->setSeedsDir($this->seeds_dir)
+                ->setSeedsDir($this->getMigrationName('chunk', $name))
                 ->seedElement($chunk);
             $this->out("Chunk: ".$chunk->get('name').' Key: '.$seed_key);
             $keys[] = $seed_key;
@@ -773,7 +773,7 @@ class Blender
             /** @var Plugin $blendPlugin */
             $blendPlugin = new Plugin($this->modx, $this);
             $seed_key = $blendPlugin
-                ->setSeedsDir($this->seeds_dir)
+                ->setSeedsDir($this->getMigrationName('plugin', $name))
                 ->seedElement($plugin);
             $this->out("Plugin: ".$plugin->get('name').' Key: '.$seed_key);
             $keys[] = $seed_key;
@@ -801,7 +801,7 @@ class Blender
         foreach ($collection as $resource) {
             $blendResource = new Resource($this->modx, $this);
             $seed_key = $blendResource
-                ->setSeedsDir($this->seeds_dir)
+                ->setSeedsDir($this->getMigrationName('resource', $name))
                 ->seed($resource);
             $this->out("ID: ".$resource->get('id').' Key: '.$seed_key);
             $keys[] = $seed_key;
@@ -830,7 +830,7 @@ class Blender
             /** @var Snippet $blendSnippet */
             $blendSnippet = new Snippet($this->modx, $this);
             $seed_key = $blendSnippet
-                ->setSeedsDir($this->seeds_dir)
+                ->setSeedsDir($this->getMigrationName('snippet', $name))
                 ->seedElement($snippet);
             $this->out("Snippet: ".$snippet->get('name').' Key: '.$seed_key);
             $keys[] = $seed_key;
@@ -890,7 +890,7 @@ class Blender
         foreach ($collection as $template) {
             $blendTemplate = new Template($this->modx, $this);
             $seed_key = $blendTemplate
-                ->setSeedsDir($this->seeds_dir)
+                ->setSeedsDir($this->getMigrationName('template', $name))
                 ->seedElement($template);
             $this->out("Template ID: ".$template->get('id').' Key: '.$seed_key);
             $keys[] = $seed_key;
@@ -908,12 +908,12 @@ class Blender
     public function makeSiteSeed($server_type='master', $name=null)
     {
         $site_data = [
-            'chunks' => $this->makeChunkSeeds(null, $server_type, null, false),
-            'plugins' => $this->makePluginSeeds(null, $server_type, null, false),
-            'resources' => $this->makeResourceSeeds(null, $server_type, null, false),
-            'snippets' => $this->makeSnippetSeeds(null, $server_type, null, false),
-            'systemSettings' => $this->makeSystemSettingSeeds(null, $server_type, null, false),
-            'templates' => $this->makeTemplateSeeds(null, $server_type, null, false)
+            'chunks' => $this->makeChunkSeeds(null, $server_type, $name, false),
+            'plugins' => $this->makePluginSeeds(null, $server_type, $name, false),
+            'resources' => $this->makeResourceSeeds(null, $server_type, $name, false),
+            'snippets' => $this->makeSnippetSeeds(null, $server_type, $name, false),
+            'systemSettings' => $this->makeSystemSettingSeeds(null, $server_type, $name, false),
+            'templates' => $this->makeTemplateSeeds(null, $server_type, $name, false)
         ];
 
         $this->writeMigrationClassFile('site', $site_data, $server_type, $name);
@@ -1266,18 +1266,18 @@ class Blender
 
     /**
      * @param $type
-     * @param bool $set_case
+     * @param null $name
      * @return string
      */
-    public function getMigrationName($type, $set_case=false)
+    public function getMigrationName($type, $name=null)
     {
-        $name = 'm'.$this->seeds_dir.'_';
-        if ($set_case) {
-            $name .= ucfirst(strtolower($type));
+        $dir_name = 'm'.$this->seeds_dir.'_';
+        if (empty($name)) {
+            $dir_name .= ucfirst(strtolower($type));
         } else {
-            $name .= $type;
+            $dir_name .= preg_replace('/[^A-Za-z0-9\_]/', '', str_replace(['/', ' '], '_', $name));
         }
-        return $name;
+        return $dir_name;
     }
 
     /**
@@ -1291,11 +1291,7 @@ class Blender
      */
     protected function writeMigrationClassFile($type, $class_data=[], $server_type='master', $name=null, $log=true)
     {
-        if (!empty($name)) {
-            $class_name = $this->getMigrationName(preg_replace('/[^A-Za-z0-9\_]/', '', str_replace(['/', ' '], '_', $name)));
-        } else {
-            $class_name = $this->getMigrationName($type, true);
-        }
+        $class_name = $this->getMigrationName($type, $name);
 
         $migration_template = 'blank.txt';
         $placeholders = [
@@ -1412,11 +1408,8 @@ class Blender
      */
     public function removeMigrationFile($name, $type)
     {
-        if (!empty($name)) {
-            $class_name = $this->getMigrationName(preg_replace('/[^A-Za-z0-9\_]/', '', str_replace(['/', ' '], '_', $name)));
-        } else {
-            $class_name = $this->getMigrationName($type, true);
-        }
+        // @TODO refactor for setting $name
+        $class_name = $this->getMigrationName($type, $name);
 
         $removed = false;
         $migration_file = $this->getMigrationDirectory() . $class_name . '.php';

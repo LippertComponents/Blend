@@ -32,7 +32,7 @@ final class BlendTest extends BaseBlend
 
         $this->assertEquals(
             $this->removeStringLineEndings($this->getStringAfterFirstComment(file_get_contents(BLEND_COMPARE_DIRECTORY.$migration_class_name.'.php'))),
-            $this->removeStringLineEndings($this->getStringAfterFirstComment(file_get_contents($this->blender->getMigrationDirectory().$this->blender->getMigrationName('BlankMigration').'.php'))),
+            $this->removeStringLineEndings($this->getStringAfterFirstComment(file_get_contents($this->blender->getMigrationDirectory().$this->blender->getMigrationName('blank','BlankMigration').'.php'))),
             'Comparing existing blank migration file with generated file'
         );
 
