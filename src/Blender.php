@@ -13,7 +13,7 @@ use PHPUnit\Runner\Exception;
 class Blender
 {
     /** @var string ~ version number of the project */
-    private $version = '0.9.7';
+    private $version = '0.9.8';
 
     /** @var array a list of valid upgrade migrations */
     protected $update_migrations = [

@@ -1,3 +1,7 @@
+## [0.9.8] - 2018-02-08
+
+- Fix site migration template with proper method name
+
 ## [0.9.7] - 2018-02-08
 
  - Fix for not setting code/content on elements if they are set as static, overwrite is now an option
