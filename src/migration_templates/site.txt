@@ -20,27 +20,27 @@ class [[+className]] extends Migrations
     public function up()
     {
         if (isset($this->site_data['chunks'])) {
-            $this->blender->blendManyChunks($this->site_data['chunks'], $this->getseeds_dir());
+            $this->blender->blendManyChunks($this->site_data['chunks'], $this->getSeedsDir());
         }
 
         if (isset($this->site_data['plugins'])) {
-            $this->blender->blendManyPlugins($this->site_data['plugins'], $this->getseeds_dir());
+            $this->blender->blendManyPlugins($this->site_data['plugins'], $this->getSeedsDir());
         }
 
         if (isset($this->site_data['resources'])) {
-            $this->blender->blendManyResources($this->site_data['resources'], $this->getseeds_dir());
+            $this->blender->blendManyResources($this->site_data['resources'], $this->getSeedsDir());
         }
 
         if (isset($this->site_data['snippets'])) {
-            $this->blender->blendManySnippets($this->site_data['snippets'], $this->getseeds_dir());
+            $this->blender->blendManySnippets($this->site_data['snippets'], $this->getSeedsDir());
         }
 
         if (isset($this->site_data['systemSettings'])) {
-            $this->blender->blendManySystemSettings($this->site_data['systemSettings'], $this->getseeds_dir());
+            $this->blender->blendManySystemSettings($this->site_data['systemSettings'], $this->getSeedsDir());
         }
 
         if (isset($this->site_data['templates'])) {
-            $this->blender->blendManyTemplates($this->site_data['templates'], $this->getseeds_dir());
+            $this->blender->blendManyTemplates($this->site_data['templates'], $this->getSeedsDir());
         }
     }
 
@@ -52,27 +52,27 @@ class [[+className]] extends Migrations
     public function down()
     {
         if (isset($this->site_data['chunks'])) {
-            $this->blender->revertBlendManyChunks($this->site_data['chunks'], $this->getseeds_dir());
+            $this->blender->revertBlendManyChunks($this->site_data['chunks'], $this->getSeedsDir());
         }
 
         if (isset($this->site_data['plugins'])) {
-            $this->blender->revertBlendManyPlugins($this->site_data['plugins'], $this->getseeds_dir());
+            $this->blender->revertBlendManyPlugins($this->site_data['plugins'], $this->getSeedsDir());
         }
 
         if (isset($this->site_data['resources']) && method_exists($this->blender, 'revertBlendManyResources')) {
-            $this->blender->revertBlendManyResources($this->site_data['resources'], $this->getseeds_dir());
+            $this->blender->revertBlendManyResources($this->site_data['resources'], $this->getSeedsDir());
         }
 
         if (isset($this->site_data['snippets'])) {
-            $this->blender->revertBlendManySnippets($this->site_data['snippets'], $this->getseeds_dir());
+            $this->blender->revertBlendManySnippets($this->site_data['snippets'], $this->getSeedsDir());
         }
 
         if (isset($this->site_data['systemSettings'])) {
-            $this->blender->revertBlendManySystemSettings($this->site_data['systemSettings'], $this->getseeds_dir());
+            $this->blender->revertBlendManySystemSettings($this->site_data['systemSettings'], $this->getSeedsDir());
         }
 
         if (isset($this->site_data['templates']) && method_exists($this->blender, 'revertBlendManyResources')) {
-            $this->blender->revertBlendManyTemplates($this->site_data['templates'], $this->getseeds_dir());
+            $this->blender->revertBlendManyTemplates($this->site_data['templates'], $this->getSeedsDir());
         }
     }
 
