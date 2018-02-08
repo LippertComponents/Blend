@@ -45,6 +45,9 @@
   'tv' => 
   array (
   ),
+  'resource_groups' =>
+  array (
+  ),
   'extras' => 
   array (
   ),

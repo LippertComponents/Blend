@@ -141,6 +141,9 @@ class Resource
 
         $resource_data['tv'] = $tvs;
 
+        // resource groups
+        $resource_data['resource_groups'] = $resource->getResourceGroupNames();
+
         // now cache it
         $this->modx->cacheManager->set(
             'down-' . $seed_key,
@@ -204,20 +207,25 @@ class Resource
 
         if ($save) {
             // TVs:
-            foreach ($tvs as $tv_name => $tv_data) {
-                //$this->blender->out('  set TV: '.$tv_name.' '.$value);
-                $value = $tv_data['value'];
+            if (is_array($tvs) && count($tvs) > 0) {
+                foreach ($tvs as $tv_name => $tv_data) {
+                    //$this->blender->out('  set TV: '.$tv_name.' '.$value);
+                    $value = $tv_data['value'];
 
-                switch ($tv_data['type']) {
-                    case 'resourcelist':
-                        if (isset($tv_data['portable_value'])) {
-                            $value = $this->blender->getResourceIDFromSeedKey($tv_data['portable_value']);
-                        }
-                        break;
+                    switch ($tv_data['type']) {
+                        case 'resourcelist':
+                            if (isset($tv_data['portable_value'])) {
+                                $value = $this->blender->getResourceIDFromSeedKey($tv_data['portable_value']);
+                            }
+                            break;
+                    }
+
+                    $resource->setTVValue($tv_name, $value);
                 }
-
-                $resource->setTVValue($tv_name, $value);
             }
+
+            $this->assignResourceGroups($resource, (isset($this->resource_data['resource_groups']) ? $this->resource_data['resource_groups'] : [] ));
+
             // extras
             $tagger = $this->blender->getTagger();
             if ($tagger instanceof \Tagger) {
@@ -275,10 +283,32 @@ class Resource
                 $resource->setTVValue($tv, $tv_data['value']);
             }
 
+            $this->assignResourceGroups($resource, (isset($data['resource_groups']) ? $data['resource_groups'] : [] ));
+
             return $resource->save();
         }
 
         return false;
+    }
+
+    /**
+     * @param \modResource $resource
+     * @param array $new_groups
+     */
+    protected function assignResourceGroups($resource, $new_groups=[])
+    {
+        // resource groups
+        $current_groups = $resource->getResourceGroupNames();
+        foreach ($current_groups as $group) {
+            if (!in_array($group, $new_groups)) {
+                $resource->leaveGroup($group);
+            }
+        }
+        foreach ($new_groups as $group) {
+            if (!in_array($group, $current_groups)) {
+                $resource->joinGroup($group);
+            }
+        }
     }
 
     /**
@@ -382,6 +412,9 @@ class Resource
         }
 
         $this->resource_data['tv'] = $tvs;
+
+        // resource groups
+        $this->resource_data['resource_groups'] = $resource->getResourceGroupNames();
 
         $this->resource_data['extras'] = [];
         // tagger:
