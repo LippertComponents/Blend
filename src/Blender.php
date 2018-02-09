@@ -17,7 +17,8 @@ class Blender
 
     /** @var array a list of valid upgrade migrations */
     protected $update_migrations = [
-        '0.9.7' => 'v0_9_7_update'
+        '0.9.7' => 'v0_9_7_update',
+        '0.9.8' => 'v0_9_8_update'
     ];
 
     /** @var  \modx */
