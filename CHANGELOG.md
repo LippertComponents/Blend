@@ -1,3 +1,9 @@
+## [0.9.9] - 2018-02-10
+
+- Add TemplateTVTest
+- Fix TVs to seed and blend with elements data 
+- Add related data to revert process, Template=>TVs now revert
+
 ## [0.9.8] - 2018-02-08
 
 - Fix site migration template with proper method name
