@@ -13,6 +13,9 @@ class Template extends Element
 {
     protected $tv_names = [];
 
+    /** @var array  */
+    protected $detach_tvs = [];
+
     protected $remove_tv_names = [];
 
     protected $icon = '';
@@ -24,6 +27,9 @@ class Template extends Element
 
     /** @var string */
     protected $name_column_name = 'templatename';
+
+    /** @var array  */
+    protected $tv_seeds = [];
 
     /**
      * @param string $name
@@ -52,9 +58,30 @@ class Template extends Element
         ];
         return $this;
     }
-    
+
+    /**
+     * @param $tv_name
+     * @return $this
+     */
+    public function detachTV($tv_name)
+    {
+        $this->detach_tvs[] = $tv_name;
+        return $this;
+    }
+
     protected function relatedPieces()
     {
+        foreach ($this->tv_seeds as $tv) {
+            // seed the TV:
+            $tvSeed = new TemplateVariable($this->modx, $this->blender);
+            $tvSeed
+                ->setSeedsDir($this->getSeedsDir())
+                ->loadElementDataFromSeed($tv['seed_key']);
+            $tvSeed->blend(true);
+
+            $this->attachTemplateVariable($tv['name'], $tv['rank']);
+        }
+
         if (count($this->tv_names) > 0) {
             $tvs = [];
             foreach ($this->tv_names as $tv_name_data) {
@@ -74,7 +101,57 @@ class Template extends Element
             }
             $this->element->addMany($tvs, 'TemplateVarTemplates');
         }
-        // @TODO remove any related that are not in the seed
+    }
+
+    protected function relatedPiecesAfterSave()
+    {
+        if (count($this->detach_tvs) > 0) {
+            $tvs = [];
+            foreach ($this->tv_names as $tv_name) {
+                // get the TV:
+                $tv = $this->modx->getObject('modTemplateVar', ['name' => $tv_name]);
+                if ($tv) {
+                    $templateVarTemplate = $this->modx->getObject('modTemplateVarTemplate', array(
+                        'tmplvarid' => $tv->get('id'),
+                        'templateid' => $this->element->get('id'),
+                    ));
+                    if ($templateVarTemplate && $templateVarTemplate instanceof modTemplateVarTemplate) {
+                        $templateVarTemplate->remove();
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * @param array|bool $data ~ the data loaded from the down seed
+     */
+    protected function revertRelatedPieces($data)
+    {
+        $this->tv_names;
+        $revert_tvs = [];
+        if (is_array($data) && isset($data['tvs'])) {
+            $revert_tvs = $data['tvs'];
+        }
+        foreach ($this->tv_seeds as $tv) {
+            // seed the TV:
+            $tvSeed = new TemplateVariable($this->modx, $this->blender);
+            $tvSeed
+                ->setSeedsDir($this->getSeedsDir())
+                ->loadElementDataFromSeed($tv['seed_key']);
+            $tvSeed->revertBlend();
+
+            if (is_array($data) && !in_array($tv['seed_key'], $revert_tvs)) {
+                $this->detachTV($tv['seed_key']);
+            }
+        }
+
+        if (is_array($data)) {
+            $this->tv_seeds = $revert_tvs;
+            $this->relatedPieces();
+            $this->element->save();
+            $this->relatedPiecesAfterSave();
+        }
     }
 
     protected function setAdditionalElementColumns()
@@ -129,15 +206,6 @@ class Template extends Element
      */
     public function setTvs($tvs)
     {
-        foreach ($tvs as $tv) {
-            // seed the TV:
-            $tvSeed = new TemplateVariable($this->modx, $this->blender);
-            $tvSeed
-                ->setSeedsDir($this->getSeedsDir())
-                ->loadElementDataFromSeed($tv['seed_key']);
-            $tvSeed->save(true);
-
-            $this->attachTemplateVariable($tv['name'], $tv['rank']);
-        }
+        $this->tv_seeds = $tvs;
     }
 }

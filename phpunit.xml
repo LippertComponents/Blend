@@ -8,6 +8,7 @@
             <file>tests/SnippetTest.php</file>
             <file>tests/SystemSettingsTest.php</file>
             <file>tests/TemplateTest.php</file>
+            <file>tests/TemplateTVTest.php</file>
         </testsuite>
     </testsuites>
 </phpunit>

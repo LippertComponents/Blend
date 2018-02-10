@@ -701,9 +701,11 @@ abstract class Element
      */
     public function revertBlend()
     {
-        $element = $this->getElementFromName($this->getName());
-        if (!is_object($element)) {
-            $element = $this->modx->getObject($this->element_class);
+        $reverted = false;
+
+        $this->element = $this->getElementFromName($this->getName());
+        if (!is_object($this->element)) {
+            $this->element = $this->modx->getObject($this->element_class);
         }
         // 1. get previous data from cache:
         $data = $this->modx->cacheManager->get('down-'.$this->blender->getElementSeedKeyFromName($this->getName(), $this->element_class), $this->cacheOptions);
@@ -712,18 +714,22 @@ abstract class Element
             if ($this->isDebug()) {
                 $this->blender->out('Remove old' . $this->getName());
             }
-            return $element->remove();
+            $reverted = $this->element->remove();
 
         } elseif (is_array($data)) {
             if ($this->isDebug()) {
                 $this->blender->out('Restore to old ' . $this->getName());
             }
             // load old data:
-            $element->fromArray($data);
-            return $element->save();
+            $this->element->fromArray($data);
+            $reverted = $this->element->save();
         }
 
-        return false;
+        if ($reverted || $data === false) {
+            $this->revertRelatedPieces($data);
+        }
+
+        return $reverted;
     }
 
     /**
@@ -745,6 +751,10 @@ abstract class Element
     protected function loadElementDataFromSeed($seed_key)
     {
         $this->element_data = $this->modx->cacheManager->get($seed_key, $this->cacheOptions);
+        if ($this->element_data == false) {
+            $this->blender->out('Error: Seed could not be found: '.$seed_key.' aborting', true);
+            exit();
+        }
         $this->loadFromArray($this->element_data);
         return $this;
     }
@@ -755,6 +765,14 @@ abstract class Element
     }
 
     protected function relatedPieces()
+    {
+
+    }
+
+    /**
+     * @param array|bool $data ~ the data loaded from the down seed
+     */
+    protected function revertRelatedPieces($data)
     {
 
     }

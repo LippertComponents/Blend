@@ -189,5 +189,6 @@ class TemplateVariable extends Element
         $this->element->set('default_text', $this->default_text);
         $this->element->set('input_properties', $this->input_properties);
         $this->element->set('output_properties', $this->output_properties);
+        $this->element->set('elements', $this->elements);
     }
 }

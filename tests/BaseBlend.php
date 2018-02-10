@@ -51,6 +51,7 @@ class BaseBlend extends TestCase
                 self::$fixture = $modx;
             }
         }
+        self::$fixture->cacheManager->refresh();
         return self::$fixture;
     }
 

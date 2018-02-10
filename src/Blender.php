@@ -228,8 +228,10 @@ class Blender
 
                 // Get the lineage: Parent=>Child=>Grand Child as key
                 $lineage = $key;
-                if ($category_data['parent'] > 0) {
+                if ($category_data['parent'] > 0 && isset($this->category_map['ids'][$category_data['parent']]) && isset($this->category_map['ids'][$category_data['parent']]['lineage'])) {
                     $lineage = $this->category_map['ids'][$category_data['parent']]['lineage'].'=>'.$key;
+                } elseif ($category_data['parent'] > 0) {
+                    //$this->out('DID NOT FIND PARENT?? '. print_r($category_data, true), true);
                 }
 
                 $this->category_map['ids'][$category->get('id')]['lineage'] = $lineage;
@@ -457,10 +459,6 @@ class Blender
      */
     public function blendManyTemplates($templates=[], $seeds_dir='')
     {
-        $blendTemplate = new Template($this->modx, $this);
-        if (!empty($seeds_dir)) {
-            $blendTemplate->setSeedsDir($seeds_dir);
-        }
         // will update if template does exist or create new
         foreach ($templates as $seed_key) {
 
