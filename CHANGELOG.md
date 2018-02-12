@@ -1,3 +1,9 @@
+## [0.9.10] - 2018-02-12
+
+- Resources sorted by context directories
+- Create resource groups if they do not exist add attach resource, no ACLs are created
+- Improve ResourceTest
+
 ## [0.9.9] - 2018-02-10
 
 - Add TemplateTVTest
