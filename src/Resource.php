@@ -32,6 +32,9 @@ class Resource
     /** @var array  */
     protected $resource_data = [];
 
+    /** @var string  */
+    protected $context_key = 'web';
+
     /** @var bool  */
     protected $debug = false;
 
@@ -96,16 +99,37 @@ class Resource
         return $this->setSeedsDir($timestamp);
     }
 
+    /**
+     * @return string
+     */
+    public function getContextKey()
+    {
+        return $this->context_key;
+    }
+
+    /**
+     * @param string $context_key
+     * @return \LCI\Blend\Resource
+     */
+    public function setContextKey(string $context_key)
+    {
+        $this->context_key = $context_key;
+        return $this;
+    }
+
     // @TODO convenience methods to build resource custom pages not just from seeds
+
 
     /**
      * @param string $seed_key
+     * @param string $context
+     * @param bool $backup
      *
      * @return bool|array
      */
-    protected function loadResourceDataFromSeed($seed_key)
+    protected function loadResourceDataFromSeed($seed_key, $context='web', $backup=false)
     {
-        $this->resource_data = $this->modx->cacheManager->get($seed_key, $this->cacheOptions);
+        $this->resource_data = $this->getCacheData($seed_key, $context, $backup);
         return $this->resource_data;
     }
 
@@ -145,21 +169,16 @@ class Resource
         $resource_data['resource_groups'] = $resource->getResourceGroupNames();
 
         // now cache it
-        $this->modx->cacheManager->set(
-            'down-' . $seed_key,
-            $resource_data,
-            $this->cache_life,
-            $this->cacheOptions
-        );
+        $this->setCacheData($seed_key, $resource_data, $resource_data['context_key'], true);
     }
 
     public function blendFromSeed($seed_key, $overwrite=false)
     {
         $save = false;
-        $this->loadResourceDataFromSeed($seed_key);
+        $this->loadResourceDataFromSeed($seed_key, $this->context_key);
         // does it exist
         // @TODO make way to change the alias and get data together
-        $resource = $this->getResourceFromSeedKey($seed_key);
+        $resource = $this->getResourceFromSeedKey($seed_key, $this->context_key);
         if ($resource) {
             $this->exists = true;
             if (!$overwrite) {
@@ -183,7 +202,17 @@ class Resource
         unset($this->resource_data['extras']);
 
         // get parent ID
-        $this->resource_data['parent'] = $this->blender->getResourceIDFromSeedKey($this->resource_data['parent']);
+        if (isset($this->resource_data['parent'])) {
+            if (isset($this->resource_data['parent']['context']) && isset($this->resource_data['parent']['seed_key'])) {
+                $this->resource_data['parent'] = $this->blender->getResourceIDFromSeedKey(
+                    $this->resource_data['parent']['seed_key'],
+                    $this->resource_data['parent']['context']
+                );
+            } else {
+                // < v0.9.9
+                $this->resource_data['parent'] = $this->blender->getResourceIDFromSeedKey($this->resource_data['parent']);
+            }
+        }
 
         // get template
         $this->resource_data['template'] = $this->getTemplateIDFromName($this->resource_data['template'], $resource);
@@ -214,7 +243,11 @@ class Resource
 
                     switch ($tv_data['type']) {
                         case 'resourcelist':
-                            if (isset($tv_data['portable_value'])) {
+                            if (isset($tv_data['portable_value']) && isset($tv_data['portable_value']['context']) && isset($tv_data['portable_value']['seed_keuy']) ) {
+                                $value = $this->blender->getResourceIDFromSeedKey($tv_data['portable_value']['seed_key'], $tv_data['portable_value']['context']);
+
+                            } elseif (isset($tv_data['portable_value'])) {
+                                // < v0.9.9
                                 $value = $this->blender->getResourceIDFromSeedKey($tv_data['portable_value']);
                             }
                             break;
@@ -254,13 +287,13 @@ class Resource
      */
     public function revertBlendFromSeed($seed_key)
     {
-        $this->loadResourceDataFromSeed('down-'.$seed_key);
+        $this->loadResourceDataFromSeed($seed_key, $this->context_key, true);
         // new-alias
 
-        $resource = $this->getResourceFromSeedKey($seed_key);
+        $resource = $this->getResourceFromSeedKey($seed_key, $this->context_key);
 
         // 1. get previous data from cache:
-        $data = $this->modx->cacheManager->get('down-'.$seed_key, $this->cacheOptions);
+        $data = $this->getCacheData($seed_key, $this->context_key, true); $this->modx->cacheManager->get('down-'.$seed_key, $this->cacheOptions);
 
         if (!$data) {
             if ($this->isDebug()) {
@@ -279,7 +312,7 @@ class Resource
             // @TODO remove all current TV values?
 
             // tvs:
-            foreach ($data['tvs'] as $tv => $tv_data) {
+            foreach ($data['tv'] as $tv => $tv_data) {
                 $resource->setTVValue($tv, $tv_data['value']);
             }
 
@@ -305,6 +338,16 @@ class Resource
             }
         }
         foreach ($new_groups as $group) {
+            /** @var \modResourceGroup $resourceGroup */
+            $resourceGroup = $this->modx->getObject('modResourceGroup', ['name' => $group]);
+            if (!$resourceGroup || !$resourceGroup instanceof \modResourceGroup) {
+                // create the resource group if it does not exist
+                $this->blender->out('Attempting to create a new Resource Group: '.$group);
+                $resourceGroup = $this->modx->newObject('modResourceGroup');
+                $resourceGroup->set('name', $group);
+                $resourceGroup->save();
+            }
+
             if (!in_array($group, $current_groups)) {
                 $resource->joinGroup($group);
             }
@@ -352,15 +395,16 @@ class Resource
 
     /**
      * @param string $seed_key
+     * @param string $context
      *
-     * @return bool|modResource
+     * @return bool|\modResource
      */
-    public function getResourceFromSeedKey($seed_key)
+    public function getResourceFromSeedKey($seed_key, $context='web')
     {
         // get the alias:
         $alias = $this->blender->getAliasFromSeedKey($seed_key);
 
-        return $this->modx->getObject('modResource', ['alias' => $alias]);
+        return $this->modx->getObject('modResource', ['alias' => $alias, 'context_key' => $context]);
     }
 
     /**
@@ -585,5 +629,48 @@ class Resource
             }
         }
 
+    }
+
+    /**
+     * @param $seed_key
+     * @param $context
+     * @param bool $backup
+     * @return mixed
+     */
+    protected function getCacheData($seed_key, $context, $backup=false)
+    {
+        $cache_options = $this->cacheOptions;
+        $cache_options[\xPDO::OPT_CACHE_KEY] .= '/'.$context;//'resources'
+
+        $key = $seed_key;
+        if ($backup) {
+            $key = 'down-' . $seed_key;
+        }
+
+        return $this->modx->cacheManager->get($key, $cache_options);
+    }
+
+    /**
+     * @param $seed_key
+     * @param $data
+     * @param $context
+     * @param bool $backup
+     */
+    protected function setCacheData($seed_key, $data, $context, $backup=false)
+    {
+        $cache_options = $this->cacheOptions;
+        $cache_options[\xPDO::OPT_CACHE_KEY] .= '/'.$context;//'resources'
+
+        $key = $seed_key;
+        if ($backup) {
+            $key = 'down-' . $seed_key;
+        }
+        // now cache it
+        $this->modx->cacheManager->set(
+            $key,
+            $data,
+            $this->cache_life,
+            $cache_options
+        );
     }
 }

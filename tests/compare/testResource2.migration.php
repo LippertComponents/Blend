@@ -2,7 +2,7 @@
 
 /**
  * Auto Generated from Blender
- * Date: 2018/01/18 at 15:06:43 EST -05:00
+ * Date: 2018/02/12 at 17:36:08 UTC +00:00
  */
 
 use \LCI\Blend\Migrations;
@@ -11,8 +11,11 @@ class m2018_01_10_093000_Resource extends Migrations
 {
     /** @var array  */
     protected $resources = array (
-      0 => 'test-blend-many-resource-3',
-      1 => 'test-blend-many-resource-4',
+      'web' => 
+      array (
+        0 => 'test-blend-many-resource-3',
+        1 => 'test-blend-many-resource-4',
+      ),
     );
 
     /**

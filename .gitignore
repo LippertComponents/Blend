@@ -163,5 +163,7 @@ fabric.properties
 !tests/database/seeds/2018_01_10_093000/elements/modTemplateVar_URLTV.cache.php
 !tests/database/seeds/2018_01_10_093000/resources/
 /tests/database/seeds/2018_01_10_093000/resources/*
-!tests/database/seeds/2018_01_10_093000/resources/test-blend-many-resource-1.cache.php
-!tests/database/seeds/2018_01_10_093000/resources/test-blend-many-resource-2.cache.php
+!tests/database/seeds/2018_01_10_093000/resources/web/
+/tests/database/seeds/2018_01_10_093000/resources/web/*
+!tests/database/seeds/2018_01_10_093000/resources/web/test-blend-many-resource-1.cache.php
+!tests/database/seeds/2018_01_10_093000/resources/web/test-blend-many-resource-2.cache.php

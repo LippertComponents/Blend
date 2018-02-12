@@ -45,6 +45,10 @@
   'tv' => 
   array (
   ),
+  'resource_groups' =>
+  array (
+    0 => 'Test Resource Group'
+  ),
   'extras' => 
   array (
   ),

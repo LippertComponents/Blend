@@ -532,27 +532,31 @@ class Blender
     {
         $saved = true;
         // will update if resource does exist or create new
-        foreach ($resources as $seed_key) {
-            /** @var \LCI\Blend\Resource $blendResource */
-            $blendResource = new Resource($this->modx, $this);
-            if (!empty($seeds_dir)) {
-                $blendResource->setSeedsDir($seeds_dir);
-            }
+        foreach ($resources as $context => $seeds) {
+            foreach ($seeds as $seed_key) {
+                /** @var \LCI\Blend\Resource $blendResource */
+                $blendResource = new Resource($this->modx, $this);
+                $blendResource->setContextKey($context);
 
-            if ($blendResource->blendFromSeed($seed_key, $overwrite)) {
-                $this->out($seed_key.' has been blended into ID: ');
-
-            } elseif($blendResource->isExists()) {
-                // @TODO prompt Do you want to blend Y/N/Compare
-                $this->out($seed_key.' already exists', true);
-                if ($this->prompt('Would you like to update?', 'Y') === 'Y') {
-                    if ($blendResource->blendFromSeed($seed_key, true)) {
-                        $this->out($seed_key.' has been blended into ID: ');
-                    }
+                if (!empty($seeds_dir)) {
+                    $blendResource->setSeedsDir($seeds_dir);
                 }
-            } else {
-                $this->out('There was an error saving '.$seed_key, true);
-                $saved = false;
+
+                if ($blendResource->blendFromSeed($seed_key, $overwrite)) {
+                    $this->out($seed_key . ' has been blended into ID: ');
+
+                } elseif ($blendResource->isExists()) {
+                    // @TODO prompt Do you want to blend Y/N/Compare
+                    $this->out($seed_key . ' already exists', true);
+                    if ($this->prompt('Would you like to update?', 'Y') === 'Y') {
+                        if ($blendResource->blendFromSeed($seed_key, true)) {
+                            $this->out($seed_key . ' has been blended into ID: ');
+                        }
+                    }
+                } else {
+                    $this->out('There was an error saving ' . $seed_key, true);
+                    $saved = false;
+                }
             }
         }
 
@@ -570,19 +574,22 @@ class Blender
     {
         $saved = true;
         // will update if resource does exist or create new
-        foreach ($resources as $seed_key) {
-            /** @var \LCI\Blend\Resource $blendResource */
-            $blendResource = new Resource($this->modx, $this);
-            if (!empty($seeds_dir)) {
-                $blendResource->setSeedsDir($seeds_dir);
-            }
+        foreach ($resources as $context => $seeds) {
+            foreach ($seeds as $seed_key) {
+                /** @var \LCI\Blend\Resource $blendResource */
+                $blendResource = new Resource($this->modx, $this);
+                $blendResource->setContextKey($context);
 
-            if ($blendResource->revertBlendFromSeed($seed_key)) {
-                $this->out($seed_key.' has been reverted ');
+                if (!empty($seeds_dir)) {
+                    $blendResource->setSeedsDir($seeds_dir);
+                }
+                if ($blendResource->revertBlendFromSeed($seed_key)) {
+                    $this->out($seed_key . ' has been reverted ');
 
-            } else {
-                $this->out('There was an error reverting resource '.$seed_key, true);
-                $saved = false;
+                } else {
+                    $this->out('There was an error reverting resource ' . $seed_key, true);
+                    $saved = false;
+                }
             }
         }
 
@@ -795,16 +802,24 @@ class Blender
      */
     public function makeResourceSeeds($criteria, $server_type='master', $name=null, $create_migration_file=true)
     {
-        $keys = [];
+        $keys = [
+            'web' => []
+        ];
 
         $collection = $this->modx->getCollection('modResource', $criteria);
         foreach ($collection as $resource) {
             $blendResource = new Resource($this->modx, $this);
             $seed_key = $blendResource
                 ->setSeedsDir($this->getMigrationName('resource', $name))
+                ->setContextKey($resource->get('context_key'))
                 ->seed($resource);
             $this->out("ID: ".$resource->get('id').' Key: '.$seed_key);
-            $keys[] = $seed_key;
+
+            if (!isset($keys[$resource->get('context_key')])) {
+                $keys[$resource->get('context_key')] = [];
+            }
+
+            $keys[$resource->get('context_key')][] = $seed_key;
         }
 
         if ($create_migration_file) {
@@ -1434,18 +1449,25 @@ class Blender
     /**
      * @param int $id
      *
-     * @return bool|string
+     * @return bool|array
      */
     public function getResourceSeedKeyFromID($id)
     {
         if (!isset($this->resource_id_map[$id])) {
-            $seed_key = false;
+            $seed_key = $context = false;
             $resource = $this->modx->getObject('modResource', $id);
             if ($resource) {
+                $context = $resource->get('context_key');
+                if (!isset($this->resource_seek_key_map[$context])) {
+                    $this->resource_seek_key_map[$context] = [];
+                }
                 $seed_key = $this->getSeedKeyFromAlias($resource->get('alias'));
-                $this->resource_seek_key_map[$seed_key] = $id;
+                $this->resource_seek_key_map[$context][$seed_key] = $id;
             }
-            $this->resource_id_map[$id] = $seed_key;
+            $this->resource_id_map[$id] = [
+                'context' => $context,
+                'seed_key' => $seed_key
+            ];
         }
 
         return $this->resource_id_map[$id];
@@ -1453,24 +1475,31 @@ class Blender
 
     /**
      * @param string $seed_key
+     * @param string $context
      *
      * @return bool|int
      */
-    public function getResourceIDFromSeedKey($seed_key)
+    public function getResourceIDFromSeedKey($seed_key, $context='web')
     {
-        if (!isset($this->resource_seek_key_map[$seed_key])) {
+        if (!isset($this->resource_seek_key_map[$context])) {
+            $this->resource_seek_key_map[$context] = [];
+        }
+        if (!isset($this->resource_seek_key_map[$context][$seed_key])) {
             $id = false;
             $alias = $this->getAliasFromSeedKey($seed_key);
-            $resource = $this->modx->getObject('modResource', ['alias' => $alias]);
+            $resource = $this->modx->getObject('modResource', ['alias' => $alias, 'context_key' => $context]);
             if ($resource) {
                 $id = $resource->get('id');
-                $this->resource_seek_key_map[$seed_key] = $id;
-                $this->resource_id_map[$id] = $seed_key;
+                $this->resource_seek_key_map[$context][$seed_key] = $id;
+                $this->resource_id_map[$id] = [
+                    'context' => $context,
+                    'seed_key' => $seed_key
+                ];
             }
-            $this->resource_seek_key_map[$seed_key] = $id;
+            $this->resource_seek_key_map[$context][$seed_key] = $id;
         }
 
-        return $this->resource_seek_key_map[$seed_key];
+        return $this->resource_seek_key_map[$context][$seed_key];
     }
 
     /**
