@@ -39,6 +39,9 @@ class SystemSetting
     protected $area = '';
 
     /** @var mixed|bool|string */
+    protected $current_value;
+
+    /** @var mixed|bool|string */
     protected $value;
 
     /** @var string */
@@ -249,6 +252,14 @@ class SystemSetting
     }
 
     /**
+     * @return bool|mixed|string ~ the current value of the system setting before blend/save
+     */
+    public function getCurrentValue()
+    {
+        return $this->current_value;
+    }
+
+    /**
      * @return string
      */
     public function getEditedOn(): string
@@ -348,6 +359,7 @@ class SystemSetting
         if (!$this->systemSetting) {
             $this->systemSetting = $this->modx->getObject('modSystemSetting', $this->name);
             if ($this->systemSetting instanceof \modSystemSetting) {
+                $this->current_value = $this->systemSetting->get('value');
                 $this->exists = true;
                 if ($load_defaults) {
                     $this->setNamespace($this->systemSetting->get('namespace'));
