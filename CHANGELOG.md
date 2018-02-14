@@ -1,5 +1,9 @@
 ## [0.9.10] - 2018-02-12
 
+- Add getCurrentValue method for SystemSettings, this method returns the current value of the system setting before blend/save
+
+## [0.9.10] - 2018-02-12
+
 - Resources sorted by context directories
 - Create resource groups if they do not exist add attach resource, no ACLs are created
 - Improve ResourceTest

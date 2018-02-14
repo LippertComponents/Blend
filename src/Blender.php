@@ -13,14 +13,15 @@ use PHPUnit\Runner\Exception;
 class Blender
 {
     /** @var string ~ version number of the project */
-    private $version = '0.9.10';
+    private $version = '0.9.11';
 
     /** @var array a list of valid upgrade migrations */
     protected $update_migrations = [
         '0.9.7' => 'v0_9_7_update',
         '0.9.8' => 'v0_9_8_update',
         '0.9.9' => 'v0_9_9_update',
-        '0.9.10' => 'v0_9_10_update'
+        '0.9.10' => 'v0_9_10_update',
+        '0.9.11' => 'v0_9_11_update'
     ];
 
     /** @var  \modx */
