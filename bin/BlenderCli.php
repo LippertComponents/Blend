@@ -602,6 +602,9 @@ class BlenderCli
      */
     protected function getUsage()
     {
+        // @see: http://www.network-science.de/ascii/
+        $this->climate->addArt(__DIR__.'/art');
+        $this->climate->draw('blend');
         $this->climate->usage();
     }
 
