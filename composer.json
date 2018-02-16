@@ -18,7 +18,7 @@
   },
   "require": {
     "php" : ">=7.0.0",
-    "league/climate": "^3.2"
+    "symfony/console": "^3.4"
   },
   "bin": [
     "bin/blend"

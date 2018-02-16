@@ -66,7 +66,7 @@ final class PluginTest extends BaseBlend
                 // @TODO Broke??
                 /* */
                 $related = $blendPlugin->getRelatedData();
-                $this->climate->out(print_r($related, true));
+
                 $this->assertEquals(
                     $plugin_event,
                     $related[0]['event'],

@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 use PHPUnit\Framework\TestCase;
 use LCI\Blend\Blender;
-use League\CLImate\CLImate;
+use LCI\Blend\Helpers\EmptyUserInteractionHandler;
 
 class BaseBlend extends TestCase
 {
@@ -13,8 +13,8 @@ class BaseBlend extends TestCase
     /** @var Blender */
     protected $blender;
 
-    /** @var CLImate */
-    protected $climate;
+    /** @var \LCI\Blend\Helpers\UserInteractionHandler */
+    protected $consoleUserInteractionHandler;
 
     /** @var bool  */
     protected $install_blend = false;
@@ -62,10 +62,10 @@ class BaseBlend extends TestCase
     {
         $this->modx = self::getInstance();
 
-        $this->climate = new CLImate;
 
-        $this->blender = new Blender($this->modx, ['blend_modx_migration_dir' => BLEND_MODX_MIGRATION_PATH]);
-        $this->blender->setClimate($this->climate);
+        $this->consoleUserInteractionHandler = new EmptyUserInteractionHandler();
+
+        $this->blender = new Blender($this->modx, $this->consoleUserInteractionHandler, ['blend_modx_migration_dir' => BLEND_MODX_MIGRATION_PATH]);
 
         if ($this->install_blend) {
             $this->blender->install();

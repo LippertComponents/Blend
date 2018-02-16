@@ -7,7 +7,9 @@
  */
 
 namespace LCI\Blend;
-use League\CLImate\CLImate;
+
+use modX;
+use LCI\Blend\Helpers\UserInteractionHandler;
 use PHPUnit\Runner\Exception;
 
 class Blender
@@ -27,8 +29,8 @@ class Blender
     /** @var  \modx */
     protected $modx;
 
-    /** @var \League\CLImate\CLImate */
-    protected $climate;
+    /** @var \LCI\Blend\Helpers\UserInteractionHandler */
+    protected $userInteractionHandler;
 
     /** @var array  */
     protected $config = [];
@@ -52,11 +54,14 @@ class Blender
      * Stockpile constructor.
      *
      * @param \modX $modx
+     * @param UserInteractionHandler $userInteractionHandler
      * @param array $config
      */
-    public function __construct(&$modx, $config=[])
+    public function __construct(modX $modx, UserInteractionHandler $userInteractionHandler, $config=[])
     {
         $this->modx = $modx;
+
+        $this->userInteractionHandler = $userInteractionHandler;
 
         $blend_modx_migration_dir = dirname(__DIR__);
         if (isset($config['blend_modx_migration_dir'])) {
@@ -85,6 +90,14 @@ class Blender
 
         $this->modx->addPackage('blend', $this->config['model_dir']);
         //exit();
+    }
+
+    /**
+     * @return UserInteractionHandler
+     */
+    public function getUserInteractionHandler(): UserInteractionHandler
+    {
+        return $this->userInteractionHandler;
     }
 
     /**
@@ -187,17 +200,6 @@ class Blender
             $this->blendMigrations = $blendMigrations;
         }
         return $this->blendMigrations;
-    }
-
-    /**
-     * @param CLImate $climate
-     *
-     * @return $this
-     */
-    public function setClimate(CLImate $climate)
-    {
-        $this->climate = $climate;
-        return $this;
     }
 
     /**
@@ -516,7 +518,7 @@ class Blender
      */
     public function blendOneRawTemplateVariable($name)
     {
-        /** @var Element $tv */
+        /** @var \LCI\Blend\TemplateVariable $tv */
         $tv =  new TemplateVariable($this->modx, $this);
         return $tv
             ->setSeedsDir($this->seeds_dir)
@@ -699,9 +701,39 @@ class Blender
      */
     protected function prompt($question, $default='')
     {
-        $input = $this->climate->input($question.' '.(!empty($default) ? "($default)" : ''));
-        $input->defaultTo($default);
-        return $input->prompt();
+        return $this->userInteractionHandler->promptInput($question, $default);
+    }
+
+    /**
+     * @param string $question
+     * @param bool $default
+     * @return bool
+     */
+    protected function promptConfirm($question, $default=true)
+    {
+        return $this->userInteractionHandler->promptConfirm($question, $default);
+    }
+
+    /**
+     * @param string $question
+     * @param string|mixed $default
+     * @param array $options ~ ex: ['Option1' => 'value', 'Option2' => 'value2', ...]
+     * @return mixed ~ selected value
+     */
+    protected function promptSelectOneOption($question, $default, $options=[])
+    {
+        return $this->userInteractionHandler->promptSelectOneOption($question, $default, $options);
+    }
+
+    /**
+     * @param string $question
+     * @param string|mixed $default
+     * @param array $options ~ ex: ['Option1' => 'value', 'Option2' => 'value2', ...]
+     * @return array ~ array of selected values
+     */
+    protected function promptSelectMultipleOptions($question, $default, $options=[])
+    {
+        return $this->userInteractionHandler->promptSelectMultipleOptions($question, $default, $options);
     }
 
     /**
@@ -711,9 +743,10 @@ class Blender
     public function out($message, $error=false)
     {
         if ($error) {
-            $this->climate->error($message);
+            $this->userInteractionHandler->tellUser($message, $this->userInteractionHandler::MASSAGE_ERROR);
+
         } else {
-            $this->climate->out($message);
+            $this->userInteractionHandler->tellUser($message, $this->userInteractionHandler::MASSAGE_STRING);
         }
     }
 
@@ -722,7 +755,7 @@ class Blender
      */
     public function outSuccess($message)
     {
-        $this->climate->backgroundBlack()->green($message);
+        $this->userInteractionHandler->tellUser($message, $this->userInteractionHandler::MASSAGE_SUCCESS);
     }
 
     /**
@@ -947,8 +980,7 @@ class Blender
         $config = $this->config;
         $config['migrations_dir'] = __DIR__.'/migration/';
 
-        $blender = new Blender($this->modx, $config);
-        $blender->setClimate($this->climate);
+        $blender = new Blender($this->modx, $this->getUserInteractionHandler(), $config);
 
         /** @var Migrations $migrationProcessClass */
         $migrationProcessClass = $this->loadMigrationClass($name, $blender);
@@ -1025,8 +1057,7 @@ class Blender
         $config = $this->config;
         $config['migrations_dir'] = __DIR__.'/migration/';
 
-        $blender = new Blender($this->modx, $config);
-        $blender->setClimate($this->climate);
+        $blender = new Blender($this->modx, $this->getUserInteractionHandler(), $config);
 
         foreach ($this->update_migrations as $v => $migration_name) {
             if (version_compare($this->getVersion(), $current_vesion, '>') ) {
@@ -1178,8 +1209,7 @@ class Blender
             }
 
             // new blender for each instance
-            $blender = new Blender($this->modx, $this->config);
-            $blender->setClimate($this->climate);
+            $blender = new Blender($this->modx, $this->getUserInteractionHandler(), $this->config);
 
             /** @var Migrations $migrationProcessClass */
             $migrationProcessClass = $this->loadMigrationClass($name, $blender);
@@ -1224,7 +1254,7 @@ class Blender
         }
 
         $migration_dir = $this->getMigrationDirectory();
-        $this->climate->out('Searching '.$migration_dir);
+        $this->out('Searching '.$migration_dir);
 
         $reload = false;
         /** @var \DirectoryIterator $file */
