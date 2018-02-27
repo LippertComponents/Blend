@@ -5,6 +5,9 @@ ini_set('display_errors', 1);
 use LCI\Blend\BlendConsole;
 use LCI\Blend\Console\Blend;
 use LCI\Blend\Console\Modx\Install as ModxInstall;
+use LCI\Blend\Console\Modx\Upgrade as ModxUpgrade;
+use LCI\Blend\Console\Modx\InstallPackage as ModxInstallPackage;
+use LCI\Blend\Console\Modx\RefreshCache;
 use LCI\Blend\Console\Migrate;
 use LCI\Blend\Console\Seed;
 
@@ -107,16 +110,15 @@ if (BlendConsole::isModxInstalled()) {
     if (BlendConsole::isBlendInstalled() && !BlendConsole::isBlendRequireUpdate()) {
         $application->add(new Migrate);
         $application->add(new Seed);
-    } else {
-
     }
-    //$application->add(new InstallModxCommand);
-    //$application->add(new UpgradeModxCommand);
-    //$application->add(new InstallPackageCommand);
+
+    $application->add(new ModxUpgrade);
+    $application->add(new ModxInstallPackage);
+    $application->add(new RefreshCache);
+
 } else {
-    die('MODX is not install, please install MODX or create a config.php file with the proper paths');
-    //$application->add(new ModxInstall);
-    // if modx is install then need a check of blend is installed:
+    //die('MODX is not install, please install MODX or create a config.php file with the proper paths');
+    $application->add(new ModxInstall);
 
 }
 return $application;

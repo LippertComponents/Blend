@@ -971,22 +971,36 @@ class Blender
 
     /**
      * @param string $method
+     * @param bool $prompt
      */
     public function install($method='up', $prompt=false)
     {
-        $name = 'install_blender';
+        $migration_name = 'install_blender';
+        $custom_migration_dir = __DIR__.'/migration/';
 
+        $this->runInstallMigration($migration_name, $custom_migration_dir, $method, $prompt);
+    }
+
+    /**
+     * @param string $migration_name
+     * @param string|null $custom_migration_dir
+     * @param string $method
+     * @param bool $prompt
+     */
+    protected function runInstallMigration($migration_name, $custom_migration_dir=null, $method='up', $prompt=false)
+    {
         // new blender for each instance
         $config = $this->config;
-        $config['migrations_dir'] = __DIR__.'/migration/';
+
+        $config['migrations_dir'] = $custom_migration_dir;
 
         $blender = new Blender($this->modx, $this->getUserInteractionHandler(), $config);
 
         /** @var Migrations $migrationProcessClass */
-        $migrationProcessClass = $this->loadMigrationClass($name, $blender);
+        $migrationProcessClass = $this->loadMigrationClass($migration_name, $blender);
 
         if (!$migrationProcessClass instanceof Migrations) {
-            $this->out('File is not an instance of LCI\Blend\Migrations: '.$name, true);
+            $this->out('File is not an instance of LCI\Blend\Migrations: '.$migration_name, true);
             $this->out('Did not process, verify it is in the proper directory', true);
 
         } elseif ($method == 'up' && !$this->isBlendInstalledInModx()) {
@@ -996,7 +1010,7 @@ class Blender
             /** @var \BlendMigrations $migration */
             $migration = $this->modx->newObject('BlendMigrations');
             if ($migration) {
-                $migration->set('name', $name);
+                $migration->set('name', $migration_name);
                 $migration->set('type', 'master');
                 $migration->set('description', $migrationProcessClass->getDescription());
                 $migration->set('version', $migrationProcessClass->getVersion());
@@ -1004,9 +1018,9 @@ class Blender
                 $migration->set('created_at', date('Y-m-d H:i:s'));
                 $migration->set('processed_at', date('Y-m-d H:i:s'));
                 if ($migration->save() ) {
-                    $this->outSuccess('Blend installed');
+                    $this->outSuccess($migration_name.' ran and logged');
                 } else {
-                    $this->out('Blend did not install', true);
+                    $this->out($migration_name . ' did not log correctly', true);
                 }
 
                 // does the migration directory exist?
@@ -1026,16 +1040,16 @@ class Blender
                 }
 
             } else {
-                $this->out('Blender did not save the DB correctly ', true);
+                $this->out($migration_name . ' did not log correctly', true);
             }
 
         } elseif ($method == 'down') {
             $migrationProcessClass->down();
 
             /** @var \BlendMigrations $migration */
-            $migration = $this->modx->getObject('BlendMigrations', ['name' => $name]);
+            $migration = $this->modx->getObject('BlendMigrations', ['name' => $migration_name]);
             if ($migration) {
-                $migration->set('name', $name);
+                $migration->set('name', $migration_name);
                 $migration->set('description', $migrationProcessClass->getDescription());
                 $migration->set('version', $migrationProcessClass->getVersion());
                 $migration->set('status', 'down_complete');
@@ -1044,6 +1058,64 @@ class Blender
             }
 
         }
+    }
+
+    /**
+     * @param string $branch
+     */
+    public function runModxInstallGitBranchMigration($branch, $config=[])
+    {
+        $version = '';
+        switch ($branch) {
+            case '3.x':
+                $version = 'v3_0_dev_install';
+                break;
+
+        }
+
+        $this->cacheUserInstallConfig($version, $config);
+        $this->runModxInstallMigration($version);
+    }
+
+    /**
+     * @param string $release
+     */
+    public function runModxInstallGitReleaseMigration($release, $config=[])
+    {
+        $release = str_replace(['.', '-'], '_', $release);
+
+        $this->cacheUserInstallConfig($release, $config);
+        $this->runModxInstallMigration($release);
+    }
+
+    /**
+     * @param string $migration_name
+     * @param string $method
+     * @param bool $prompt
+     */
+    protected function runModxInstallMigration($migration_name='v3_0_dev_install', $method='up', $prompt=false)
+    {
+        $custom_migration_dir = __DIR__.'/database/modx/migration/';
+
+        $this->runInstallMigration($migration_name, $custom_migration_dir, $method, $prompt);
+    }
+
+    /**
+     * @param string $version_key
+     */
+    protected function cacheUserInstallConfig($version_key, $config=[])
+    {
+        $cacheOptions = [
+            \xPDO::OPT_CACHE_KEY => 'modx'
+        ];
+
+        // now cache it:
+        $this->modx->cacheManager->set(
+            'install-config-'.$version_key,
+            $config,
+            0,
+            $cacheOptions
+        );
     }
 
     /**
@@ -1060,7 +1132,7 @@ class Blender
         $blender = new Blender($this->modx, $this->getUserInteractionHandler(), $config);
 
         foreach ($this->update_migrations as $v => $migration_name) {
-            if (version_compare($this->getVersion(), $current_vesion, '>') ) {
+            if (version_compare($this->getVersion(), $current_vesion) === 1 ) {
                 // can not use as xPDO get queries fill the SELECT with the DB fields and since we are adding one this is a SQL error
                 //$blender->runMigration($method, 'master', 0, 0, $migration_name);
 

@@ -57,22 +57,52 @@ abstract class BaseCommand extends Command
         $this->input = $input;
         $this->output = $output;
 
-        if ($this->loadMODX)
-        {
-            $this->modx = BlendConsole::loadMODX();
-        }
-
         $this->consoleUserInteractionHandler = new ConsoleUserInteractionHandler($input, $output);
         $this->consoleUserInteractionHandler->setCommandObject($this);
 
-        $this->blender = new Blender(
-            $this->modx,
-            $this->consoleUserInteractionHandler,
-            [
-                // @TODO rename:
-                'blend_modx_migration_dir' => BLEND_MY_MIGRATION_PATH,
-            ]
-        );
+        if ($this->loadMODX) {
+            $this->modx = BlendConsole::loadMODX();
+
+            $this->blender = new Blender(
+                $this->modx,
+                $this->consoleUserInteractionHandler,
+                [
+                    // @TODO rename:
+                    'blend_modx_migration_dir' => BLEND_MY_MIGRATION_PATH,
+                ]
+            );
+        }
+
+
+    }
+
+    public function loadModxInstall()
+    {
+        /* to validate installation, instantiate the modX class and run a few tests */
+        if (include_once (M_CORE_PATH . 'model/modx/modx.class.php')) {
+            $modx = new modX(M_CORE_PATH . 'config/', [
+                \xPDO::OPT_SETUP => true,
+            ]);
+
+            if (!is_object($modx) || !($modx instanceof modX)) {
+                $errors[] = '<p>'.$this->lexicon('modx_err_instantiate').'</p>';
+            } else {
+                $modx->setLogTarget(array(
+                    'target' => 'FILE',
+                    'options' => array(
+                        'filename' => 'install.' . MODX_CONFIG_KEY . '.' . strftime('%Y%m%dT%H%M%S') . '.log'
+                    )
+                ));
+
+                /* try to initialize the mgr context */
+                $modx->initialize('mgr');
+                if (!$modx->isInitialized()) {
+                    $errors[] = '<p>'.$this->lexicon('modx_err_instantiate_mgr').'</p>';
+                }
+            }
+        } else {
+            $errors[] = '<p>'.$this->lexicon('modx_class_err_nf').'</p>';
+        }
     }
 
     /**

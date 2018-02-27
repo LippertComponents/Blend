@@ -12,6 +12,11 @@ if (!defined('M_CORE_PATH')) {
     define('M_CORE_PATH', MODX_PATH.'core/');
 }
 
+// Downloads go here
+if (!defined('BLEND_CACHE_DIR')) {
+    define('BLEND_CACHE_DIR', M_CORE_PATH.'cache/blend/');
+}
+
 // Where you will write your migration project/site
 if (!defined('BLEND_MY_MIGRATION_PATH')) {
     define('BLEND_MY_MIGRATION_PATH', M_CORE_PATH.'components/blend/');
