@@ -29,6 +29,9 @@ class Blender
     /** @var  \modx */
     protected $modx;
 
+    /** @var array  */
+    protected $modx_version_info = [];
+
     /** @var \LCI\Blend\Helpers\UserInteractionHandler */
     protected $userInteractionHandler;
 
@@ -61,6 +64,8 @@ class Blender
     {
         $this->modx = $modx;
 
+        $this->modx_version_info = $this->modx->getVersionData();
+
         $this->userInteractionHandler = $userInteractionHandler;
 
         $blend_modx_migration_dir = dirname(__DIR__);
@@ -72,7 +77,7 @@ class Blender
             'migration_templates_dir' => __DIR__. '/migration_templates/',
             'migrations_dir' => $blend_modx_migration_dir.'database/migrations/',
             'seeds_dir' => $blend_modx_migration_dir.'database/seeds/',
-            'model_dir' => __DIR__.'/xpdo/',
+            'model_dir' => __DIR__ . (version_compare($this->modx_version_info['full_version'], '3.0') >= 0 ? '/xpdo/' : '/xpdo2/'),
             'extras' => [
                 'tagger' => false
             ]
@@ -89,7 +94,6 @@ class Blender
         }
 
         $this->modx->addPackage('blend', $this->config['model_dir']);
-        //exit();
     }
 
     /**
