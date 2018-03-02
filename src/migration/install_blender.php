@@ -34,15 +34,17 @@ class install_blender extends Migrations
     {
         // install DB table:
         $manager = $this->modx->getManager();
+
         // the class table object name
-        foreach ($this->blender_table_classes as $table_class) {
+        $table_class = $this->blender->getBlendClassObject();
+        //foreach ($this->blender_table_classes as $table_class) {
             if ($manager->createObjectContainer($table_class)) {
                 $this->blender->out($table_class.' table class has been created');
 
             } else {
                 $this->blender->out($table_class.' table class was not created', true);
             }
-        }
+        //}
 
         // install events:
         foreach ($this->blender_events as $event_name) {

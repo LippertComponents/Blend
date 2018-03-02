@@ -175,7 +175,10 @@ class Resource
     public function blendFromSeed($seed_key, $overwrite=false)
     {
         $save = false;
-        $this->loadResourceDataFromSeed($seed_key, $this->context_key);
+        if (!$this->loadResourceDataFromSeed($seed_key, $this->context_key)) {
+            $this->blender->out('Resource seed key: '.$seed_key. ' was not found in ' . $this->blender->getSeedsDirectory($this->seeds_dir));
+            return false;
+        }
         // does it exist
         // @TODO make way to change the alias and get data together
         $resource = $this->getResourceFromSeedKey($seed_key, $this->context_key);
@@ -192,7 +195,6 @@ class Resource
             $resource = $this->modx->newObject('modResource');
         }
 
-        $org_id = $this->resource_data['id'];
         unset($this->resource_data['id']);
 
         $tvs = $this->resource_data['tv'];

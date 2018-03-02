@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<model package="blend" baseClass="xPDOObject" platform="mysql" defaultEngine="MyISAM" version="1.1">
-	<object class="BlendMigrations" table="blend_migrations" extends="xPDOSimpleObject">
+<model package="LCI\\Blend\\Model\\xPDO" baseClass="xPDO\Om\xPDOObject" platform="mysql" defaultEngine="MyISAM" version="3.0">
+	<object class="BlendMigrations" table="blend_migrations" extends="xPDO\Om\xPDOSimpleObject">
 		<field key="name" dbtype="varchar" precision="255" phptype="string" null="false" />
 		<field key="version" dbtype="varchar" precision="32" phptype="string" null="true" />
 		<field key="type" dbtype="set" precision="'master','stagging','dev','local'" phptype="string" null="false" default="master" />

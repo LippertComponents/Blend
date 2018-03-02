@@ -80,7 +80,7 @@ class DownloadModxVersion
         $this->download_directory = rtrim($download_directory, '/').DIRECTORY_SEPARATOR;
 
         if (!file_exists($this->download_directory)) {
-            mkdir($this->download_directory, '0777', true);
+            mkdir($this->download_directory, 0700, true);
         }
         return $this;
     }
@@ -119,7 +119,7 @@ class DownloadModxVersion
         $this->zip_file = $this->download_directory.'branch-'.$branch.'.zip';
         $this->getFromGit($branch);
 
-        return $this->moveGitFiles();
+        return $this->moveGitFiles(true, false, false);
     }
 
     /**
@@ -233,7 +233,7 @@ class DownloadModxVersion
         $destination = MODX_PATH;
 
         if (!is_dir($destination)) {
-            mkdir($destination, 0644);
+            mkdir($destination, 0700);
         }
 
         /** @var \RecursiveDirectoryIterator $directoryIterator */
@@ -281,7 +281,7 @@ class DownloadModxVersion
      * @param string $directory
      * @return bool
      */
-    protected function deleteDirectory($directory)
+    public function deleteDirectory($directory)
     {
         if (!empty($directory) && file_exists(MODX_PATH.$directory)) {
             $dir = MODX_PATH . $directory;

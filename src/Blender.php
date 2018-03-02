@@ -10,6 +10,7 @@ namespace LCI\Blend;
 
 use modX;
 use LCI\Blend\Helpers\UserInteractionHandler;
+use LCI\Blend\Helpers\SimpleCache;
 use PHPUnit\Runner\Exception;
 
 class Blender
@@ -53,6 +54,13 @@ class Blender
     /** @var string date('Y_m_d_His') */
     protected $seeds_dir = '';
 
+    /** @var int  */
+    protected $xpdo_version = 3;
+
+    protected $blend_class_object = 'BlendMigrations';
+
+    protected $blend_package = 'BlendMigrations';
+
     /**
      * Stockpile constructor.
      *
@@ -68,6 +76,15 @@ class Blender
 
         $this->userInteractionHandler = $userInteractionHandler;
 
+        if (version_compare($this->modx_version_info['full_version'], '3.0') >= 0 ) {
+            $this->xpdo_version = 3;
+            $this->blend_class_object = 'LCI\\Blend\\Model\\xPDO\\BlendMigrations';
+            $this->blend_package = 'LCI\\Blend\\Model\\xPDO';
+
+        } else {
+            $this->xpdo_version = 2;
+        }
+
         $blend_modx_migration_dir = dirname(__DIR__);
         if (isset($config['blend_modx_migration_dir'])) {
             $blend_modx_migration_dir = $config['blend_modx_migration_dir'];
@@ -77,7 +94,7 @@ class Blender
             'migration_templates_dir' => __DIR__. '/migration_templates/',
             'migrations_dir' => $blend_modx_migration_dir.'database/migrations/',
             'seeds_dir' => $blend_modx_migration_dir.'database/seeds/',
-            'model_dir' => __DIR__ . (version_compare($this->modx_version_info['full_version'], '3.0') >= 0 ? '/xpdo/' : '/xpdo2/'),
+            'model_dir' => __DIR__ . ($this->xpdo_version >= 3 ? '/' : '/xpdo2/'),
             'extras' => [
                 'tagger' => false
             ]
@@ -93,7 +110,20 @@ class Blender
             $this->tagger = $this->modx->getService('tagger', 'Tagger', $tagger_path, []);
         }
 
-        $this->modx->addPackage('blend', $this->config['model_dir']);
+        if ($this->xpdo_version >= 3) {
+            $this->modx->setPackage($this->blend_package, $this->config['model_dir']);
+
+        } else {
+            $this->modx->addPackage($this->blend_package, $this->config['model_dir']);
+        }
+    }
+
+    /**
+     * @return string
+     */
+    public function getBlendClassObject()
+    {
+        return $this->blend_class_object;
     }
 
     /**
@@ -152,11 +182,16 @@ class Blender
     }
 
     /**
+     * @param null $directory_key
      * @return string
      */
-    public function getSeedsDirectory()
+    public function getSeedsDirectory($directory_key=null)
     {
-        return $this->config['seeds_dir'];
+        $seed_path = $this->config['seeds_dir'];
+        if (!empty($directory_key)) {
+            $seed_path .= trim($directory_key, '/') . DIRECTORY_SEPARATOR;
+        }
+        return $seed_path;
     }
 
     /**
@@ -182,7 +217,7 @@ class Blender
             $blendMigrations = [];
 
             /** @var \xPDOQuery $query */
-            $query = $this->modx->newQuery('BlendMigrations');
+            $query = $this->modx->newQuery($this->blend_class_object);
             if ($id > 0 ) {
                 $query->where(['id' => $id]);
             } elseif (!empty($name)) {
@@ -195,7 +230,7 @@ class Blender
             }
             $query->prepare();
             //echo 'SQL: '.$query->toSQL();
-            $migrationCollection = $this->modx->getCollection('BlendMigrations', $query);
+            $migrationCollection = $this->modx->getCollection($this->blend_class_object, $query);
 
             /** @var \BlendMigrations $migration */
             foreach ($migrationCollection as $migration) {
@@ -982,26 +1017,32 @@ class Blender
         $migration_name = 'install_blender';
         $custom_migration_dir = __DIR__.'/migration/';
 
-        $this->runInstallMigration($migration_name, $custom_migration_dir, $method, $prompt);
+        $this->runInstallMigration($migration_name, $custom_migration_dir, null, $method, $prompt);
     }
 
     /**
      * @param string $migration_name
-     * @param string|null $custom_migration_dir
+     * @param string|null $custom_migration_path
+     * @param string|null $seed_root_path
      * @param string $method
      * @param bool $prompt
      */
-    protected function runInstallMigration($migration_name, $custom_migration_dir=null, $method='up', $prompt=false)
+    protected function runInstallMigration($migration_name, $custom_migration_path=null, $seed_root_path=null, $method='up', $prompt=false)
     {
         // new blender for each instance
         $config = $this->config;
 
-        $config['migrations_dir'] = $custom_migration_dir;
+        if (!empty($custom_migration_path)) {
+            $config['migrations_dir'] = $custom_migration_path;
+        }
+        if (!empty($seed_root_path)) {
+            $config['seeds_dir'] = $seed_root_path;
+        }
 
         $blender = new Blender($this->modx, $this->getUserInteractionHandler(), $config);
 
         /** @var Migrations $migrationProcessClass */
-        $migrationProcessClass = $this->loadMigrationClass($migration_name, $blender);
+        $migrationProcessClass = $blender->loadMigrationClass($migration_name, $blender);
 
         if (!$migrationProcessClass instanceof Migrations) {
             $this->out('File is not an instance of LCI\Blend\Migrations: '.$migration_name, true);
@@ -1012,7 +1053,7 @@ class Blender
             $migrationProcessClass->up();
 
             /** @var \BlendMigrations $migration */
-            $migration = $this->modx->newObject('BlendMigrations');
+            $migration = $this->modx->newObject($this->blend_class_object);
             if ($migration) {
                 $migration->set('name', $migration_name);
                 $migration->set('type', 'master');
@@ -1051,7 +1092,7 @@ class Blender
             $migrationProcessClass->down();
 
             /** @var \BlendMigrations $migration */
-            $migration = $this->modx->getObject('BlendMigrations', ['name' => $migration_name]);
+            $migration = $this->modx->getObject($this->blend_class_object, ['name' => $migration_name]);
             if ($migration) {
                 $migration->set('name', $migration_name);
                 $migration->set('description', $migrationProcessClass->getDescription());
@@ -1072,7 +1113,7 @@ class Blender
         $version = '';
         switch ($branch) {
             case '3.x':
-                $version = 'v3_0_dev_install';
+                $version = 'v3_0_0_dev_install';
                 break;
 
         }
@@ -1097,11 +1138,12 @@ class Blender
      * @param string $method
      * @param bool $prompt
      */
-    protected function runModxInstallMigration($migration_name='v3_0_dev_install', $method='up', $prompt=false)
+    protected function runModxInstallMigration($migration_name= 'v3_0_0_dev_install', $method='up', $prompt=false)
     {
         $custom_migration_dir = __DIR__.'/database/modx/migration/';
+        $seeds_root_path = __DIR__.'/database/modx/seeds/';
 
-        $this->runInstallMigration($migration_name, $custom_migration_dir, $method, $prompt);
+        $this->runInstallMigration($migration_name, $custom_migration_dir, $seeds_root_path, $method, $prompt);
     }
 
     /**
@@ -1109,17 +1151,8 @@ class Blender
      */
     protected function cacheUserInstallConfig($version_key, $config=[])
     {
-        $cacheOptions = [
-            \xPDO::OPT_CACHE_KEY => 'modx'
-        ];
-
-        // now cache it:
-        $this->modx->cacheManager->set(
-            'install-config-'.$version_key,
-            $config,
-            0,
-            $cacheOptions
-        );
+        $simpleCache = new SimpleCache(BLEND_CACHE_DIR . 'modx/');
+        $simpleCache->set('install-config-'.$version_key, $config);
     }
 
     /**
@@ -1152,7 +1185,7 @@ class Blender
                     $migrationProcessClass->up();
 
                     /** @var \BlendMigrations $migration */
-                    $migration = $this->modx->newObject('BlendMigrations');
+                    $migration = $this->modx->newObject($this->blend_class_object);
                     if ($migration) {
                         $migration->set('name', $migration_name);
                         $migration->set('type', 'master');
@@ -1175,7 +1208,7 @@ class Blender
                     $migrationProcessClass->down();
 
                     /** @var \BlendMigrations $migration */
-                    $migration = $this->modx->getObject('BlendMigrations', ['name' => $migration_name]);
+                    $migration = $this->modx->getObject($this->blend_class_object, ['name' => $migration_name]);
                     if ($migration) {
                         $migration->set('name', $migration_name);
                         $migration->set('description', $migrationProcessClass->getDescription());
@@ -1214,7 +1247,7 @@ class Blender
     public function isBlendInstalledInModx()
     {
         try {
-            $table = $this->modx->getTableName('BlendMigrations');
+            $table = $this->modx->getTableName($this->blend_class_object);
             if ($this->modx->query("SELECT 1 FROM {$table} LIMIT 1") === false) {
                 return false;
             }
@@ -1224,7 +1257,7 @@ class Blender
         }
 
         /** @var \xPDOQuery $query */
-        $query = $this->modx->newQuery('BlendMigrations');
+        $query = $this->modx->newQuery($this->blend_class_object);
         $query->select('id');
         $query->where([
             'name' => 'install_blender',
@@ -1232,8 +1265,8 @@ class Blender
         ]);
         $query->sortBy('name');
 
-        $installMigration = $this->modx->getObject('BlendMigrations', $query);
-        if ($installMigration instanceof \BlendMigrations) {
+        $installMigration = $this->modx->getObject($this->blend_class_object, $query);
+        if ($installMigration instanceof \BlendMigrations || $installMigration instanceof \LCI\Blend\Model\xPDO\BlendMigrations) {
             return true;
         }
 
@@ -1320,7 +1353,7 @@ class Blender
     public function retrieveMigrationFiles()
     {
         // 1. Get all migrations currently in DB:
-        $migrationCollection = $this->modx->getCollection('BlendMigrations');
+        $migrationCollection = $this->modx->getCollection($this->blend_class_object);
 
         $blendMigrations = [];
 
@@ -1345,7 +1378,7 @@ class Blender
                     $migrationProcessClass = $this->loadMigrationClass($name, $this);
 
                     /** @var \BlendMigrations $migration */
-                    $migration = $this->modx->newObject('BlendMigrations');
+                    $migration = $this->modx->newObject($this->blend_class_object);
                     $migration->set('name', $name);
                     $migration->set('status', 'ready');
                     if ($migrationProcessClass instanceof Migrations) {
@@ -1495,13 +1528,13 @@ class Blender
         if (file_exists($this->getMigrationDirectory().$class_name.'.php')) {
             $this->out($this->getMigrationDirectory() . $class_name . '.php migration file already exists', true);
 
-        } elseif (is_object($this->modx->getObject('BlendMigrations', ['name' => $class_name]))) {
+        } elseif (is_object($this->modx->getObject($this->blend_class_object, ['name' => $class_name]))) {
             $this->out($class_name . ' migration already has been created in the blend_migrations table', true);
 
         } else {
             try {
                 $write = file_put_contents($this->getMigrationDirectory() . $class_name . '.php', $file_contents);
-                $migration = $this->modx->newObject('BlendMigrations');
+                $migration = $this->modx->newObject($this->blend_class_object);
                 if ($migration && $log) {
                     $migration->set('name', $class_name);
                     $migration->set('type', 'master');
@@ -1539,7 +1572,7 @@ class Blender
         if (file_exists($migration_file)) {
             if (unlink($migration_file)) {
                 $removed = true;
-                $migration = $this->modx->getObject('BlendMigrations', ['name' => $class_name]);
+                $migration = $this->modx->getObject($this->blend_class_object, ['name' => $class_name]);
                 if (is_object($migration) && $migration->remove()) {
                     $this->out($class_name . ' migration has been removed from the blend_migrations table');
 

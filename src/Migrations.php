@@ -31,6 +31,9 @@ abstract class Migrations
     /** @var string name of Author of the Migration */
     protected $author = '';
 
+    /** @var string  */
+    protected $method = 'up';
+
     /**
      * Migrations constructor.
      *
@@ -69,6 +72,8 @@ abstract class Migrations
      */
     public function down()
     {
+        $this->method = 'down';
+
         // Child class needs to override and implement this
         $this->modx->log(
             modX::LOG_LEVEL_ERROR,

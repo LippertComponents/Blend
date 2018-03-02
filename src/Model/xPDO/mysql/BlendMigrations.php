@@ -1,16 +1,16 @@
 <?php
-namespace blend\mysql;
+namespace LCI\Blend\Model\xPDO\mysql;
 
 use xPDO\xPDO;
 
-class BlendMigrations extends \blend\BlendMigrations
+class BlendMigrations extends \LCI\Blend\Model\xPDO\BlendMigrations
 {
 
     public static $metaMap = array (
-        'package' => 'blend',
-        'version' => '1.1',
+        'package' => 'LCI\\Blend\\Model\\xPDO',
+        'version' => '3.0',
         'table' => 'blend_migrations',
-        'extends' => 'xPDOSimpleObject',
+        'extends' => 'xPDO\\Om\\xPDOSimpleObject',
         'fields' => 
         array (
             'name' => NULL,
