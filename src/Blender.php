@@ -91,7 +91,7 @@ class Blender
         }
 
         $this->config = [
-            'migration_templates_dir' => __DIR__. '/migration_templates/',
+            'migration_templates_dir' => __DIR__. '/Migrations/templates/',
             'migrations_dir' => $blend_modx_migration_dir.'database/migrations/',
             'seeds_dir' => $blend_modx_migration_dir.'database/seeds/',
             'model_dir' => __DIR__ . ($this->xpdo_version >= 3 ? '/' : '/xpdo2/'),
