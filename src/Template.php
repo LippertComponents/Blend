@@ -195,7 +195,7 @@ class Template extends Element
      * @param string $name
      * @return $this
      */
-    public function setTemplateName(string $name)
+    public function setTemplateName($name)
     {
         $this->name = $name;
         return $this;

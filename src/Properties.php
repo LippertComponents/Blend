@@ -37,7 +37,7 @@ class Properties
      *
      * @return $this
      */
-    public function setProperty(string $name, $value)
+    public function setProperty($name, $value)
     {
         $this->data[$name] = $value;
 

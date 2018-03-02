@@ -118,7 +118,7 @@ class SystemSetting
     /**
      * @return bool
      */
-    public function isExists(): bool
+    public function isExists()
     {
         $this->loadObject();
         return $this->exists;
@@ -127,7 +127,7 @@ class SystemSetting
     /**
      * @return bool
      */
-    public function isChanged(): bool
+    public function isChanged()
     {
         $this->loadObject();
         if ( $this->systemSetting->get('namespace') != $this->getNamespace() ||
@@ -145,7 +145,7 @@ class SystemSetting
     /**
      * @return string
      */
-    public function getNamespace(): string
+    public function getNamespace()
     {
         return $this->namespace;
     }
@@ -155,7 +155,7 @@ class SystemSetting
      *
      * @return SystemSetting
      */
-    public function setNamespace(string $namespace): SystemSetting
+    public function setNamespace($namespace)
     {
         $this->namespace = $namespace;
         return $this;
@@ -164,7 +164,7 @@ class SystemSetting
     /**
      * @return string
      */
-    public function getType(): string
+    public function getType()
     {
         return $this->type;
     }
@@ -175,7 +175,7 @@ class SystemSetting
      *
      * @return SystemSetting
      */
-    public function setType(string $type): SystemSetting
+    public function setType($type)
     {
         $this->type = $type;
         return $this;
@@ -184,7 +184,7 @@ class SystemSetting
     /**
      * @return string
      */
-    public function getName(): string
+    public function getName()
     {
         return $this->name;
     }
@@ -196,7 +196,7 @@ class SystemSetting
      *
      * @return SystemSetting
      */
-    public function setName(string $name): SystemSetting
+    public function setName($name)
     {
         $this->name = $name;
         return $this;
@@ -208,7 +208,7 @@ class SystemSetting
      *
      * @return SystemSetting
      */
-    public function setKey(string $key): SystemSetting
+    public function setKey($key)
     {
         return $this->setName($key);
     }
@@ -216,7 +216,7 @@ class SystemSetting
     /**
      * @return string
      */
-    public function getArea(): string
+    public function getArea()
     {
         return $this->area;
     }
@@ -226,7 +226,7 @@ class SystemSetting
      *
      * @return SystemSetting
      */
-    public function setArea(string $area): SystemSetting
+    public function setArea($area)
     {
         $this->area = $area;
         return $this;
@@ -262,7 +262,7 @@ class SystemSetting
     /**
      * @return string
      */
-    public function getEditedOn(): string
+    public function getEditedOn()
     {
         return $this->edited_on;
     }
@@ -272,7 +272,7 @@ class SystemSetting
      *
      * @return SystemSetting
      */
-    public function setEditedOn(string $edited_on): SystemSetting
+    public function setEditedOn($edited_on)
     {
         $this->edited_on = $edited_on;
         return $this;
@@ -386,7 +386,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setBoolSetting(bool $value): SystemSetting
+    public function setBoolSetting($value)
     {
         $this->setName('**');
         $this->loadObject(true);
@@ -401,7 +401,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function coreIntSetting(int $value): SystemSetting
+    public function coreIntSetting($value)
     {
         $this->setName('**');
         $this->loadObject(true);
@@ -416,7 +416,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function coreStringSetting(string $value): SystemSetting
+    public function coreStringSetting($value)
     {
         $this->setName('**');
         $this->loadObject(true);
@@ -441,7 +441,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreAccessCategoryEnabled(bool $value): SystemSetting
+    public function setCoreAccessCategoryEnabled($value)
     {
         $this->setName('access_category_enabled');
         $this->loadObject(true);
@@ -458,7 +458,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreAccessContextEnabled(bool $value): SystemSetting
+    public function setCoreAccessContextEnabled($value)
     {
         $this->setName('access_context_enabled');
         $this->loadObject(true);
@@ -475,7 +475,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreAccessPoliciesVersion(string $value): SystemSetting
+    public function setCoreAccessPoliciesVersion($value)
     {
         $this->setName('access_policies_version');
         $this->loadObject(true);
@@ -493,7 +493,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreAccessResourceGroupEnabled(bool $value): SystemSetting
+    public function setCoreAccessResourceGroupEnabled($value)
     {
         $this->setName('access_resource_group_enabled');
         $this->loadObject(true);
@@ -510,7 +510,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreAllowForwardAcrossContexts(bool $value): SystemSetting
+    public function setCoreAllowForwardAcrossContexts($value)
     {
         $this->setName('allow_forward_across_contexts');
         $this->loadObject(true);
@@ -527,7 +527,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreAllowManagerLoginForgotPassword(bool $value): SystemSetting
+    public function setCoreAllowManagerLoginForgotPassword($value)
     {
         $this->setName('allow_manager_login_forgot_password');
         $this->loadObject(true);
@@ -544,7 +544,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreAllowMultipleEmails(bool $value): SystemSetting
+    public function setCoreAllowMultipleEmails($value)
     {
         $this->setName('allow_multiple_emails');
         $this->loadObject(true);
@@ -561,7 +561,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreAllowTagsInPost(bool $value): SystemSetting
+    public function setCoreAllowTagsInPost($value)
     {
         $this->setName('allow_tags_in_post');
         $this->loadObject(true);
@@ -578,7 +578,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreAllowTvEval(bool $value): SystemSetting
+    public function setCoreAllowTvEval($value)
     {
         $this->setName('allow_tv_eval');
         $this->loadObject(true);
@@ -595,7 +595,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreAnonymousSessions(bool $value): SystemSetting
+    public function setCoreAnonymousSessions($value)
     {
         $this->setName('anonymous_sessions');
         $this->loadObject(true);
@@ -612,7 +612,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreArchiveWith(bool $value): SystemSetting
+    public function setCoreArchiveWith($value)
     {
         $this->setName('archive_with');
         $this->loadObject(true);
@@ -629,7 +629,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreAutoCheckPkgUpdates(bool $value): SystemSetting
+    public function setCoreAutoCheckPkgUpdates($value)
     {
         $this->setName('auto_check_pkg_updates');
         $this->loadObject(true);
@@ -646,7 +646,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreAutoCheckPkgUpdatesCacheExpire(string $value): SystemSetting
+    public function setCoreAutoCheckPkgUpdatesCacheExpire($value)
     {
         $this->setName('auto_check_pkg_updates_cache_expire');
         $this->loadObject(true);
@@ -664,7 +664,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreAutoIsfolder(bool $value): SystemSetting
+    public function setCoreAutoIsfolder($value)
     {
         $this->setName('auto_isfolder');
         $this->loadObject(true);
@@ -681,7 +681,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreAutoMenuindex(bool $value): SystemSetting
+    public function setCoreAutoMenuindex($value)
     {
         $this->setName('auto_menuindex');
         $this->loadObject(true);
@@ -698,7 +698,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreAutomaticAlias(bool $value): SystemSetting
+    public function setCoreAutomaticAlias($value)
     {
         $this->setName('automatic_alias');
         $this->loadObject(true);
@@ -715,7 +715,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreBaseHelpUrl(string $value): SystemSetting
+    public function setCoreBaseHelpUrl($value)
     {
         $this->setName('base_help_url');
         $this->loadObject(true);
@@ -733,7 +733,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreBlockedMinutes(string $value): SystemSetting
+    public function setCoreBlockedMinutes($value)
     {
         $this->setName('blocked_minutes');
         $this->loadObject(true);
@@ -751,7 +751,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreCacheActionMap(bool $value): SystemSetting
+    public function setCoreCacheActionMap($value)
     {
         $this->setName('cache_action_map');
         $this->loadObject(true);
@@ -768,7 +768,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreCacheAliasMap(bool $value): SystemSetting
+    public function setCoreCacheAliasMap($value)
     {
         $this->setName('cache_alias_map');
         $this->loadObject(true);
@@ -785,7 +785,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreCacheContextSettings(bool $value): SystemSetting
+    public function setCoreCacheContextSettings($value)
     {
         $this->setName('cache_context_settings');
         $this->loadObject(true);
@@ -802,7 +802,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreCacheDb(bool $value): SystemSetting
+    public function setCoreCacheDb($value)
     {
         $this->setName('cache_db');
         $this->loadObject(true);
@@ -819,7 +819,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreCacheDbExpires(string $value): SystemSetting
+    public function setCoreCacheDbExpires($value)
     {
         $this->setName('cache_db_expires');
         $this->loadObject(true);
@@ -837,7 +837,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreCacheDbSession(bool $value): SystemSetting
+    public function setCoreCacheDbSession($value)
     {
         $this->setName('cache_db_session');
         $this->loadObject(true);
@@ -854,7 +854,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreCacheDbSessionLifetime(string $value): SystemSetting
+    public function setCoreCacheDbSessionLifetime($value)
     {
         $this->setName('cache_db_session_lifetime');
         $this->loadObject(true);
@@ -872,7 +872,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreCacheDefault(bool $value): SystemSetting
+    public function setCoreCacheDefault($value)
     {
         $this->setName('cache_default');
         $this->loadObject(true);
@@ -889,7 +889,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreCacheDisabled(bool $value): SystemSetting
+    public function setCoreCacheDisabled($value)
     {
         $this->setName('cache_disabled');
         $this->loadObject(true);
@@ -906,7 +906,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreCacheExpires(string $value): SystemSetting
+    public function setCoreCacheExpires($value)
     {
         $this->setName('cache_expires');
         $this->loadObject(true);
@@ -924,7 +924,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreCacheFormat(string $value): SystemSetting
+    public function setCoreCacheFormat($value)
     {
         $this->setName('cache_format');
         $this->loadObject(true);
@@ -942,7 +942,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreCacheHandler(string $value): SystemSetting
+    public function setCoreCacheHandler($value)
     {
         $this->setName('cache_handler');
         $this->loadObject(true);
@@ -960,7 +960,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreCacheLangJs(bool $value): SystemSetting
+    public function setCoreCacheLangJs($value)
     {
         $this->setName('cache_lang_js');
         $this->loadObject(true);
@@ -977,7 +977,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreCacheLexiconTopics(bool $value): SystemSetting
+    public function setCoreCacheLexiconTopics($value)
     {
         $this->setName('cache_lexicon_topics');
         $this->loadObject(true);
@@ -994,7 +994,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreCacheNoncoreLexiconTopics(bool $value): SystemSetting
+    public function setCoreCacheNoncoreLexiconTopics($value)
     {
         $this->setName('cache_noncore_lexicon_topics');
         $this->loadObject(true);
@@ -1011,7 +1011,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreCacheResource(bool $value): SystemSetting
+    public function setCoreCacheResource($value)
     {
         $this->setName('cache_resource');
         $this->loadObject(true);
@@ -1028,7 +1028,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreCacheResourceExpires(string $value): SystemSetting
+    public function setCoreCacheResourceExpires($value)
     {
         $this->setName('cache_resource_expires');
         $this->loadObject(true);
@@ -1046,7 +1046,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreCacheScripts(bool $value): SystemSetting
+    public function setCoreCacheScripts($value)
     {
         $this->setName('cache_scripts');
         $this->loadObject(true);
@@ -1063,7 +1063,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreCacheSystemSettings(bool $value): SystemSetting
+    public function setCoreCacheSystemSettings($value)
     {
         $this->setName('cache_system_settings');
         $this->loadObject(true);
@@ -1080,7 +1080,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreClearCacheRefreshTrees(bool $value): SystemSetting
+    public function setCoreClearCacheRefreshTrees($value)
     {
         $this->setName('clear_cache_refresh_trees');
         $this->loadObject(true);
@@ -1097,7 +1097,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreCompressCss(bool $value): SystemSetting
+    public function setCoreCompressCss($value)
     {
         $this->setName('compress_css');
         $this->loadObject(true);
@@ -1114,7 +1114,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreCompressJs(bool $value): SystemSetting
+    public function setCoreCompressJs($value)
     {
         $this->setName('compress_js');
         $this->loadObject(true);
@@ -1131,7 +1131,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreCompressJsMaxFiles(string $value): SystemSetting
+    public function setCoreCompressJsMaxFiles($value)
     {
         $this->setName('compress_js_max_files');
         $this->loadObject(true);
@@ -1149,7 +1149,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreConfirmNavigation(bool $value): SystemSetting
+    public function setCoreConfirmNavigation($value)
     {
         $this->setName('confirm_navigation');
         $this->loadObject(true);
@@ -1166,7 +1166,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreContainerSuffix(string $value): SystemSetting
+    public function setCoreContainerSuffix($value)
     {
         $this->setName('container_suffix');
         $this->loadObject(true);
@@ -1184,7 +1184,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreContextTreeSort(bool $value): SystemSetting
+    public function setCoreContextTreeSort($value)
     {
         $this->setName('context_tree_sort');
         $this->loadObject(true);
@@ -1201,7 +1201,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreContextTreeSortby(string $value): SystemSetting
+    public function setCoreContextTreeSortby($value)
     {
         $this->setName('context_tree_sortby');
         $this->loadObject(true);
@@ -1219,7 +1219,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreContextTreeSortdir(string $value): SystemSetting
+    public function setCoreContextTreeSortdir($value)
     {
         $this->setName('context_tree_sortdir');
         $this->loadObject(true);
@@ -1237,7 +1237,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreCultureKey(string $value): SystemSetting
+    public function setCoreCultureKey($value)
     {
         $this->setName('cultureKey');
         $this->loadObject(true);
@@ -1255,7 +1255,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreDateTimezone(string $value): SystemSetting
+    public function setCoreDateTimezone($value)
     {
         $this->setName('date_timezone');
         $this->loadObject(true);
@@ -1273,7 +1273,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreDebug(string $value): SystemSetting
+    public function setCoreDebug($value)
     {
         $this->setName('debug');
         $this->loadObject(true);
@@ -1291,7 +1291,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreDefaultContentType(string $value): SystemSetting
+    public function setCoreDefaultContentType($value)
     {
         $this->setName('default_content_type');
         $this->loadObject(true);
@@ -1309,7 +1309,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreDefaultContext(string $value): SystemSetting
+    public function setCoreDefaultContext($value)
     {
         $this->setName('default_context');
         $this->loadObject(true);
@@ -1327,7 +1327,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreDefaultDuplicatePublishOption(string $value): SystemSetting
+    public function setCoreDefaultDuplicatePublishOption($value)
     {
         $this->setName('default_duplicate_publish_option');
         $this->loadObject(true);
@@ -1345,7 +1345,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreDefaultMediaSource(string $value): SystemSetting
+    public function setCoreDefaultMediaSource($value)
     {
         $this->setName('default_media_source');
         $this->loadObject(true);
@@ -1363,7 +1363,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreDefaultPerPage(string $value): SystemSetting
+    public function setCoreDefaultPerPage($value)
     {
         $this->setName('default_per_page');
         $this->loadObject(true);
@@ -1381,7 +1381,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreDefaultTemplate(string $value): SystemSetting
+    public function setCoreDefaultTemplate($value)
     {
         $this->setName('default_template');
         $this->loadObject(true);
@@ -1399,7 +1399,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreDefaultUsername(string $value): SystemSetting
+    public function setCoreDefaultUsername($value)
     {
         $this->setName('default_username');
         $this->loadObject(true);
@@ -1417,7 +1417,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreEditorCssPath(string $value): SystemSetting
+    public function setCoreEditorCssPath($value)
     {
         $this->setName('editor_css_path');
         $this->loadObject(true);
@@ -1435,7 +1435,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreEditorCssSelectors(string $value): SystemSetting
+    public function setCoreEditorCssSelectors($value)
     {
         $this->setName('editor_css_selectors');
         $this->loadObject(true);
@@ -1453,7 +1453,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreEmailsender(string $value): SystemSetting
+    public function setCoreEmailsender($value)
     {
         $this->setName('emailsender');
         $this->loadObject(true);
@@ -1471,7 +1471,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreEmailsubject(string $value): SystemSetting
+    public function setCoreEmailsubject($value)
     {
         $this->setName('emailsubject');
         $this->loadObject(true);
@@ -1489,7 +1489,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreEnableDragdrop(bool $value): SystemSetting
+    public function setCoreEnableDragdrop($value)
     {
         $this->setName('enable_dragdrop');
         $this->loadObject(true);
@@ -1506,7 +1506,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreEnableGravatar(bool $value): SystemSetting
+    public function setCoreEnableGravatar($value)
     {
         $this->setName('enable_gravatar');
         $this->loadObject(true);
@@ -1523,7 +1523,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreErrorPage(string $value): SystemSetting
+    public function setCoreErrorPage($value)
     {
         $this->setName('error_page');
         $this->loadObject(true);
@@ -1541,7 +1541,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreExtensionPackages(string $value): SystemSetting
+    public function setCoreExtensionPackages($value)
     {
         $this->setName('extension_packages');
         $this->loadObject(true);
@@ -1559,7 +1559,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreFailedLoginAttempts(string $value): SystemSetting
+    public function setCoreFailedLoginAttempts($value)
     {
         $this->setName('failed_login_attempts');
         $this->loadObject(true);
@@ -1577,7 +1577,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreFeEditorLang(string $value): SystemSetting
+    public function setCoreFeEditorLang($value)
     {
         $this->setName('fe_editor_lang');
         $this->loadObject(true);
@@ -1595,7 +1595,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreFeedModxNews(string $value): SystemSetting
+    public function setCoreFeedModxNews($value)
     {
         $this->setName('feed_modx_news');
         $this->loadObject(true);
@@ -1613,7 +1613,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreFeedModxNewsEnabled(bool $value): SystemSetting
+    public function setCoreFeedModxNewsEnabled($value)
     {
         $this->setName('feed_modx_news_enabled');
         $this->loadObject(true);
@@ -1630,7 +1630,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreFeedModxSecurity(string $value): SystemSetting
+    public function setCoreFeedModxSecurity($value)
     {
         $this->setName('feed_modx_security');
         $this->loadObject(true);
@@ -1648,7 +1648,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreFeedModxSecurityEnabled(bool $value): SystemSetting
+    public function setCoreFeedModxSecurityEnabled($value)
     {
         $this->setName('feed_modx_security_enabled');
         $this->loadObject(true);
@@ -1665,7 +1665,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreFilemanagerPath(string $value): SystemSetting
+    public function setCoreFilemanagerPath($value)
     {
         $this->setName('filemanager_path');
         $this->loadObject(true);
@@ -1683,7 +1683,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreFilemanagerPathRelative(bool $value): SystemSetting
+    public function setCoreFilemanagerPathRelative($value)
     {
         $this->setName('filemanager_path_relative');
         $this->loadObject(true);
@@ -1700,7 +1700,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreFilemanagerUrl(string $value): SystemSetting
+    public function setCoreFilemanagerUrl($value)
     {
         $this->setName('filemanager_url');
         $this->loadObject(true);
@@ -1718,7 +1718,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreFilemanagerUrlRelative(bool $value): SystemSetting
+    public function setCoreFilemanagerUrlRelative($value)
     {
         $this->setName('filemanager_url_relative');
         $this->loadObject(true);
@@ -1735,7 +1735,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreForgotLoginEmail(string $value): SystemSetting
+    public function setCoreForgotLoginEmail($value)
     {
         $this->setName('forgot_login_email');
         $this->loadObject(true);
@@ -1753,7 +1753,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreFormCustomizationUseAllGroups(bool $value): SystemSetting
+    public function setCoreFormCustomizationUseAllGroups($value)
     {
         $this->setName('form_customization_use_all_groups');
         $this->loadObject(true);
@@ -1770,7 +1770,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreForwardMergeExcludes(string $value): SystemSetting
+    public function setCoreForwardMergeExcludes($value)
     {
         $this->setName('forward_merge_excludes');
         $this->loadObject(true);
@@ -1788,7 +1788,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreFriendlyAliasLowercaseOnly(bool $value): SystemSetting
+    public function setCoreFriendlyAliasLowercaseOnly($value)
     {
         $this->setName('friendly_alias_lowercase_only');
         $this->loadObject(true);
@@ -1805,7 +1805,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreFriendlyAliasMaxLength(string $value): SystemSetting
+    public function setCoreFriendlyAliasMaxLength($value)
     {
         $this->setName('friendly_alias_max_length');
         $this->loadObject(true);
@@ -1823,7 +1823,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreFriendlyAliasRealtime(bool $value): SystemSetting
+    public function setCoreFriendlyAliasRealtime($value)
     {
         $this->setName('friendly_alias_realtime');
         $this->loadObject(true);
@@ -1840,7 +1840,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreFriendlyAliasRestrictChars(string $value): SystemSetting
+    public function setCoreFriendlyAliasRestrictChars($value)
     {
         $this->setName('friendly_alias_restrict_chars');
         $this->loadObject(true);
@@ -1858,7 +1858,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreFriendlyAliasRestrictCharsPattern(string $value): SystemSetting
+    public function setCoreFriendlyAliasRestrictCharsPattern($value)
     {
         $this->setName('friendly_alias_restrict_chars_pattern');
         $this->loadObject(true);
@@ -1876,7 +1876,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreFriendlyAliasStripElementTags(bool $value): SystemSetting
+    public function setCoreFriendlyAliasStripElementTags($value)
     {
         $this->setName('friendly_alias_strip_element_tags');
         $this->loadObject(true);
@@ -1893,7 +1893,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreFriendlyAliasTranslit(string $value): SystemSetting
+    public function setCoreFriendlyAliasTranslit($value)
     {
         $this->setName('friendly_alias_translit');
         $this->loadObject(true);
@@ -1911,7 +1911,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreFriendlyAliasTranslitClass(string $value): SystemSetting
+    public function setCoreFriendlyAliasTranslitClass($value)
     {
         $this->setName('friendly_alias_translit_class');
         $this->loadObject(true);
@@ -1929,7 +1929,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreFriendlyAliasTranslitClassPath(string $value): SystemSetting
+    public function setCoreFriendlyAliasTranslitClassPath($value)
     {
         $this->setName('friendly_alias_translit_class_path');
         $this->loadObject(true);
@@ -1947,7 +1947,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreFriendlyAliasTrimChars(string $value): SystemSetting
+    public function setCoreFriendlyAliasTrimChars($value)
     {
         $this->setName('friendly_alias_trim_chars');
         $this->loadObject(true);
@@ -1965,7 +1965,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreFriendlyAliasWordDelimiter(string $value): SystemSetting
+    public function setCoreFriendlyAliasWordDelimiter($value)
     {
         $this->setName('friendly_alias_word_delimiter');
         $this->loadObject(true);
@@ -1983,7 +1983,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreFriendlyAliasWordDelimiters(string $value): SystemSetting
+    public function setCoreFriendlyAliasWordDelimiters($value)
     {
         $this->setName('friendly_alias_word_delimiters');
         $this->loadObject(true);
@@ -2001,7 +2001,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreFriendlyUrls(bool $value): SystemSetting
+    public function setCoreFriendlyUrls($value)
     {
         $this->setName('friendly_urls');
         $this->loadObject(true);
@@ -2018,7 +2018,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreFriendlyUrlsStrict(bool $value): SystemSetting
+    public function setCoreFriendlyUrlsStrict($value)
     {
         $this->setName('friendly_urls_strict');
         $this->loadObject(true);
@@ -2035,7 +2035,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreGlobalDuplicateUriCheck(bool $value): SystemSetting
+    public function setCoreGlobalDuplicateUriCheck($value)
     {
         $this->setName('global_duplicate_uri_check');
         $this->loadObject(true);
@@ -2052,7 +2052,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreHidemenuDefault(bool $value): SystemSetting
+    public function setCoreHidemenuDefault($value)
     {
         $this->setName('hidemenu_default');
         $this->loadObject(true);
@@ -2069,7 +2069,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreInlineHelp(bool $value): SystemSetting
+    public function setCoreInlineHelp($value)
     {
         $this->setName('inline_help');
         $this->loadObject(true);
@@ -2086,7 +2086,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreLinkTagScheme(string $value): SystemSetting
+    public function setCoreLinkTagScheme($value)
     {
         $this->setName('link_tag_scheme');
         $this->loadObject(true);
@@ -2104,7 +2104,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreLocale(string $value): SystemSetting
+    public function setCoreLocale($value)
     {
         $this->setName('locale');
         $this->loadObject(true);
@@ -2122,7 +2122,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreLockTtl(string $value): SystemSetting
+    public function setCoreLockTtl($value)
     {
         $this->setName('lock_ttl');
         $this->loadObject(true);
@@ -2140,7 +2140,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreLogLevel(string $value): SystemSetting
+    public function setCoreLogLevel($value)
     {
         $this->setName('log_level');
         $this->loadObject(true);
@@ -2158,7 +2158,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreLogSnippetNotFound(bool $value): SystemSetting
+    public function setCoreLogSnippetNotFound($value)
     {
         $this->setName('log_snippet_not_found');
         $this->loadObject(true);
@@ -2175,7 +2175,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreLogTarget(string $value): SystemSetting
+    public function setCoreLogTarget($value)
     {
         $this->setName('log_target');
         $this->loadObject(true);
@@ -2193,7 +2193,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreMailCharset(string $value): SystemSetting
+    public function setCoreMailCharset($value)
     {
         $this->setName('mail_charset');
         $this->loadObject(true);
@@ -2211,7 +2211,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreMailEncoding(string $value): SystemSetting
+    public function setCoreMailEncoding($value)
     {
         $this->setName('mail_encoding');
         $this->loadObject(true);
@@ -2229,7 +2229,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreMailSmtpAuth(bool $value): SystemSetting
+    public function setCoreMailSmtpAuth($value)
     {
         $this->setName('mail_smtp_auth');
         $this->loadObject(true);
@@ -2246,7 +2246,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreMailSmtpHelo(string $value): SystemSetting
+    public function setCoreMailSmtpHelo($value)
     {
         $this->setName('mail_smtp_helo');
         $this->loadObject(true);
@@ -2264,7 +2264,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreMailSmtpHosts(string $value): SystemSetting
+    public function setCoreMailSmtpHosts($value)
     {
         $this->setName('mail_smtp_hosts');
         $this->loadObject(true);
@@ -2282,7 +2282,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreMailSmtpKeepalive(bool $value): SystemSetting
+    public function setCoreMailSmtpKeepalive($value)
     {
         $this->setName('mail_smtp_keepalive');
         $this->loadObject(true);
@@ -2299,7 +2299,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreMailSmtpPass(string $value): SystemSetting
+    public function setCoreMailSmtpPass($value)
     {
         $this->setName('mail_smtp_pass');
         $this->loadObject(true);
@@ -2317,7 +2317,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreMailSmtpPort(string $value): SystemSetting
+    public function setCoreMailSmtpPort($value)
     {
         $this->setName('mail_smtp_port');
         $this->loadObject(true);
@@ -2335,7 +2335,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreMailSmtpPrefix(string $value): SystemSetting
+    public function setCoreMailSmtpPrefix($value)
     {
         $this->setName('mail_smtp_prefix');
         $this->loadObject(true);
@@ -2353,7 +2353,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreMailSmtpSingleTo(bool $value): SystemSetting
+    public function setCoreMailSmtpSingleTo($value)
     {
         $this->setName('mail_smtp_single_to');
         $this->loadObject(true);
@@ -2370,7 +2370,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreMailSmtpTimeout(string $value): SystemSetting
+    public function setCoreMailSmtpTimeout($value)
     {
         $this->setName('mail_smtp_timeout');
         $this->loadObject(true);
@@ -2388,7 +2388,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreMailSmtpUser(string $value): SystemSetting
+    public function setCoreMailSmtpUser($value)
     {
         $this->setName('mail_smtp_user');
         $this->loadObject(true);
@@ -2406,7 +2406,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreMailUseSmtp(bool $value): SystemSetting
+    public function setCoreMailUseSmtp($value)
     {
         $this->setName('mail_use_smtp');
         $this->loadObject(true);
@@ -2423,7 +2423,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreMainNavParent(string $value): SystemSetting
+    public function setCoreMainNavParent($value)
     {
         $this->setName('main_nav_parent');
         $this->loadObject(true);
@@ -2441,7 +2441,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreManagerDateFormat(string $value): SystemSetting
+    public function setCoreManagerDateFormat($value)
     {
         $this->setName('manager_date_format');
         $this->loadObject(true);
@@ -2459,7 +2459,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreManagerDirection(string $value): SystemSetting
+    public function setCoreManagerDirection($value)
     {
         $this->setName('manager_direction');
         $this->loadObject(true);
@@ -2477,7 +2477,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreManagerFaviconUrl(string $value): SystemSetting
+    public function setCoreManagerFaviconUrl($value)
     {
         $this->setName('manager_favicon_url');
         $this->loadObject(true);
@@ -2495,7 +2495,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreManagerJsCacheFileLocking(bool $value): SystemSetting
+    public function setCoreManagerJsCacheFileLocking($value)
     {
         $this->setName('manager_js_cache_file_locking');
         $this->loadObject(true);
@@ -2512,7 +2512,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreManagerJsCacheMaxAge(string $value): SystemSetting
+    public function setCoreManagerJsCacheMaxAge($value)
     {
         $this->setName('manager_js_cache_max_age');
         $this->loadObject(true);
@@ -2530,7 +2530,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreManagerJsDocumentRoot(string $value): SystemSetting
+    public function setCoreManagerJsDocumentRoot($value)
     {
         $this->setName('manager_js_document_root');
         $this->loadObject(true);
@@ -2548,7 +2548,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreManagerJsZlibOutputCompression(bool $value): SystemSetting
+    public function setCoreManagerJsZlibOutputCompression($value)
     {
         $this->setName('manager_js_zlib_output_compression');
         $this->loadObject(true);
@@ -2565,7 +2565,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreManagerLangAttribute(string $value): SystemSetting
+    public function setCoreManagerLangAttribute($value)
     {
         $this->setName('manager_lang_attribute');
         $this->loadObject(true);
@@ -2583,7 +2583,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreManagerLanguage(string $value): SystemSetting
+    public function setCoreManagerLanguage($value)
     {
         $this->setName('manager_language');
         $this->loadObject(true);
@@ -2601,7 +2601,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreManagerLoginUrlAlternate(string $value): SystemSetting
+    public function setCoreManagerLoginUrlAlternate($value)
     {
         $this->setName('manager_login_url_alternate');
         $this->loadObject(true);
@@ -2619,7 +2619,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreManagerTheme(string $value): SystemSetting
+    public function setCoreManagerTheme($value)
     {
         $this->setName('manager_theme');
         $this->loadObject(true);
@@ -2637,7 +2637,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreManagerTimeFormat(string $value): SystemSetting
+    public function setCoreManagerTimeFormat($value)
     {
         $this->setName('manager_time_format');
         $this->loadObject(true);
@@ -2655,7 +2655,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreManagerUseFullname(bool $value): SystemSetting
+    public function setCoreManagerUseFullname($value)
     {
         $this->setName('manager_use_fullname');
         $this->loadObject(true);
@@ -2672,7 +2672,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreManagerWeekStart(string $value): SystemSetting
+    public function setCoreManagerWeekStart($value)
     {
         $this->setName('manager_week_start');
         $this->loadObject(true);
@@ -2690,7 +2690,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreMgrSourceIcon(string $value): SystemSetting
+    public function setCoreMgrSourceIcon($value)
     {
         $this->setName('mgr_source_icon');
         $this->loadObject(true);
@@ -2708,7 +2708,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreMgrTreeIconContext(string $value): SystemSetting
+    public function setCoreMgrTreeIconContext($value)
     {
         $this->setName('mgr_tree_icon_context');
         $this->loadObject(true);
@@ -2726,7 +2726,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreModxBrowserDefaultSort(string $value): SystemSetting
+    public function setCoreModxBrowserDefaultSort($value)
     {
         $this->setName('modx_browser_default_sort');
         $this->loadObject(true);
@@ -2744,7 +2744,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreModxBrowserDefaultViewmode(string $value): SystemSetting
+    public function setCoreModxBrowserDefaultViewmode($value)
     {
         $this->setName('modx_browser_default_viewmode');
         $this->loadObject(true);
@@ -2762,7 +2762,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreModxBrowserTreeHideFiles(bool $value): SystemSetting
+    public function setCoreModxBrowserTreeHideFiles($value)
     {
         $this->setName('modx_browser_tree_hide_files');
         $this->loadObject(true);
@@ -2779,7 +2779,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreModxBrowserTreeHideTooltips(bool $value): SystemSetting
+    public function setCoreModxBrowserTreeHideTooltips($value)
     {
         $this->setName('modx_browser_tree_hide_tooltips');
         $this->loadObject(true);
@@ -2796,7 +2796,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreModxCharset(string $value): SystemSetting
+    public function setCoreModxCharset($value)
     {
         $this->setName('modx_charset');
         $this->loadObject(true);
@@ -2814,7 +2814,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreParserRecurseUncacheable(bool $value): SystemSetting
+    public function setCoreParserRecurseUncacheable($value)
     {
         $this->setName('parser_recurse_uncacheable');
         $this->loadObject(true);
@@ -2831,7 +2831,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCorePasswordGeneratedLength(string $value): SystemSetting
+    public function setCorePasswordGeneratedLength($value)
     {
         $this->setName('password_generated_length');
         $this->loadObject(true);
@@ -2849,7 +2849,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCorePasswordMinLength(string $value): SystemSetting
+    public function setCorePasswordMinLength($value)
     {
         $this->setName('password_min_length');
         $this->loadObject(true);
@@ -2867,7 +2867,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCorePhpthumbAllowSrcAboveDocroot(bool $value): SystemSetting
+    public function setCorePhpthumbAllowSrcAboveDocroot($value)
     {
         $this->setName('phpthumb_allow_src_above_docroot');
         $this->loadObject(true);
@@ -2884,7 +2884,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCorePhpthumbCacheMaxage(string $value): SystemSetting
+    public function setCorePhpthumbCacheMaxage($value)
     {
         $this->setName('phpthumb_cache_maxage');
         $this->loadObject(true);
@@ -2902,7 +2902,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCorePhpthumbCacheMaxfiles(string $value): SystemSetting
+    public function setCorePhpthumbCacheMaxfiles($value)
     {
         $this->setName('phpthumb_cache_maxfiles');
         $this->loadObject(true);
@@ -2920,7 +2920,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCorePhpthumbCacheMaxsize(string $value): SystemSetting
+    public function setCorePhpthumbCacheMaxsize($value)
     {
         $this->setName('phpthumb_cache_maxsize');
         $this->loadObject(true);
@@ -2938,7 +2938,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCorePhpthumbCacheSourceEnabled(bool $value): SystemSetting
+    public function setCorePhpthumbCacheSourceEnabled($value)
     {
         $this->setName('phpthumb_cache_source_enabled');
         $this->loadObject(true);
@@ -2955,7 +2955,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCorePhpthumbDocumentRoot(string $value): SystemSetting
+    public function setCorePhpthumbDocumentRoot($value)
     {
         $this->setName('phpthumb_document_root');
         $this->loadObject(true);
@@ -2973,7 +2973,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCorePhpthumbErrorBgcolor(string $value): SystemSetting
+    public function setCorePhpthumbErrorBgcolor($value)
     {
         $this->setName('phpthumb_error_bgcolor');
         $this->loadObject(true);
@@ -2991,7 +2991,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCorePhpthumbErrorFontsize(string $value): SystemSetting
+    public function setCorePhpthumbErrorFontsize($value)
     {
         $this->setName('phpthumb_error_fontsize');
         $this->loadObject(true);
@@ -3009,7 +3009,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCorePhpthumbErrorTextcolor(string $value): SystemSetting
+    public function setCorePhpthumbErrorTextcolor($value)
     {
         $this->setName('phpthumb_error_textcolor');
         $this->loadObject(true);
@@ -3027,7 +3027,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCorePhpthumbFar(string $value): SystemSetting
+    public function setCorePhpthumbFar($value)
     {
         $this->setName('phpthumb_far');
         $this->loadObject(true);
@@ -3045,7 +3045,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCorePhpthumbImagemagickPath(string $value): SystemSetting
+    public function setCorePhpthumbImagemagickPath($value)
     {
         $this->setName('phpthumb_imagemagick_path');
         $this->loadObject(true);
@@ -3063,7 +3063,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCorePhpthumbNohotlinkEnabled(bool $value): SystemSetting
+    public function setCorePhpthumbNohotlinkEnabled($value)
     {
         $this->setName('phpthumb_nohotlink_enabled');
         $this->loadObject(true);
@@ -3080,7 +3080,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCorePhpthumbNohotlinkEraseImage(bool $value): SystemSetting
+    public function setCorePhpthumbNohotlinkEraseImage($value)
     {
         $this->setName('phpthumb_nohotlink_erase_image');
         $this->loadObject(true);
@@ -3097,7 +3097,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCorePhpthumbNohotlinkTextMessage(string $value): SystemSetting
+    public function setCorePhpthumbNohotlinkTextMessage($value)
     {
         $this->setName('phpthumb_nohotlink_text_message');
         $this->loadObject(true);
@@ -3115,7 +3115,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCorePhpthumbNohotlinkValidDomains(string $value): SystemSetting
+    public function setCorePhpthumbNohotlinkValidDomains($value)
     {
         $this->setName('phpthumb_nohotlink_valid_domains');
         $this->loadObject(true);
@@ -3133,7 +3133,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCorePhpthumbNooffsitelinkEnabled(bool $value): SystemSetting
+    public function setCorePhpthumbNooffsitelinkEnabled($value)
     {
         $this->setName('phpthumb_nooffsitelink_enabled');
         $this->loadObject(true);
@@ -3150,7 +3150,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCorePhpthumbNooffsitelinkEraseImage(bool $value): SystemSetting
+    public function setCorePhpthumbNooffsitelinkEraseImage($value)
     {
         $this->setName('phpthumb_nooffsitelink_erase_image');
         $this->loadObject(true);
@@ -3167,7 +3167,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCorePhpthumbNooffsitelinkRequireRefer(bool $value): SystemSetting
+    public function setCorePhpthumbNooffsitelinkRequireRefer($value)
     {
         $this->setName('phpthumb_nooffsitelink_require_refer');
         $this->loadObject(true);
@@ -3184,7 +3184,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCorePhpthumbNooffsitelinkTextMessage(string $value): SystemSetting
+    public function setCorePhpthumbNooffsitelinkTextMessage($value)
     {
         $this->setName('phpthumb_nooffsitelink_text_message');
         $this->loadObject(true);
@@ -3202,7 +3202,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCorePhpthumbNooffsitelinkValidDomains(string $value): SystemSetting
+    public function setCorePhpthumbNooffsitelinkValidDomains($value)
     {
         $this->setName('phpthumb_nooffsitelink_valid_domains');
         $this->loadObject(true);
@@ -3220,7 +3220,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCorePhpthumbNooffsitelinkWatermarkSrc(string $value): SystemSetting
+    public function setCorePhpthumbNooffsitelinkWatermarkSrc($value)
     {
         $this->setName('phpthumb_nooffsitelink_watermark_src');
         $this->loadObject(true);
@@ -3238,7 +3238,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCorePhpthumbZoomcrop(string $value): SystemSetting
+    public function setCorePhpthumbZoomcrop($value)
     {
         $this->setName('phpthumb_zoomcrop');
         $this->loadObject(true);
@@ -3256,7 +3256,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCorePreserveMenuindex(bool $value): SystemSetting
+    public function setCorePreserveMenuindex($value)
     {
         $this->setName('preserve_menuindex');
         $this->loadObject(true);
@@ -3273,7 +3273,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCorePrincipalTargets(string $value): SystemSetting
+    public function setCorePrincipalTargets($value)
     {
         $this->setName('principal_targets');
         $this->loadObject(true);
@@ -3291,7 +3291,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreProxyAuthType(string $value): SystemSetting
+    public function setCoreProxyAuthType($value)
     {
         $this->setName('proxy_auth_type');
         $this->loadObject(true);
@@ -3309,7 +3309,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreProxyHost(string $value): SystemSetting
+    public function setCoreProxyHost($value)
     {
         $this->setName('proxy_host');
         $this->loadObject(true);
@@ -3327,7 +3327,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreProxyPassword(string $value): SystemSetting
+    public function setCoreProxyPassword($value)
     {
         $this->setName('proxy_password');
         $this->loadObject(true);
@@ -3345,7 +3345,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreProxyPort(string $value): SystemSetting
+    public function setCoreProxyPort($value)
     {
         $this->setName('proxy_port');
         $this->loadObject(true);
@@ -3363,7 +3363,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreProxyUsername(string $value): SystemSetting
+    public function setCoreProxyUsername($value)
     {
         $this->setName('proxy_username');
         $this->loadObject(true);
@@ -3381,7 +3381,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCorePublishDefault(bool $value): SystemSetting
+    public function setCorePublishDefault($value)
     {
         $this->setName('publish_default');
         $this->loadObject(true);
@@ -3398,7 +3398,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreRbBaseDir(string $value): SystemSetting
+    public function setCoreRbBaseDir($value)
     {
         $this->setName('rb_base_dir');
         $this->loadObject(true);
@@ -3416,7 +3416,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreRbBaseUrl(string $value): SystemSetting
+    public function setCoreRbBaseUrl($value)
     {
         $this->setName('rb_base_url');
         $this->loadObject(true);
@@ -3434,7 +3434,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreRequestController(string $value): SystemSetting
+    public function setCoreRequestController($value)
     {
         $this->setName('request_controller');
         $this->loadObject(true);
@@ -3452,7 +3452,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreRequestMethodStrict(bool $value): SystemSetting
+    public function setCoreRequestMethodStrict($value)
     {
         $this->setName('request_method_strict');
         $this->loadObject(true);
@@ -3469,7 +3469,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreRequestParamAlias(string $value): SystemSetting
+    public function setCoreRequestParamAlias($value)
     {
         $this->setName('request_param_alias');
         $this->loadObject(true);
@@ -3487,7 +3487,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreRequestParamId(string $value): SystemSetting
+    public function setCoreRequestParamId($value)
     {
         $this->setName('request_param_id');
         $this->loadObject(true);
@@ -3505,7 +3505,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreResolveHostnames(bool $value): SystemSetting
+    public function setCoreResolveHostnames($value)
     {
         $this->setName('resolve_hostnames');
         $this->loadObject(true);
@@ -3522,7 +3522,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreResourceTreeNodeName(string $value): SystemSetting
+    public function setCoreResourceTreeNodeName($value)
     {
         $this->setName('resource_tree_node_name');
         $this->loadObject(true);
@@ -3540,7 +3540,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreResourceTreeNodeNameFallback(string $value): SystemSetting
+    public function setCoreResourceTreeNodeNameFallback($value)
     {
         $this->setName('resource_tree_node_name_fallback');
         $this->loadObject(true);
@@ -3558,7 +3558,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreResourceTreeNodeTooltip(string $value): SystemSetting
+    public function setCoreResourceTreeNodeTooltip($value)
     {
         $this->setName('resource_tree_node_tooltip');
         $this->loadObject(true);
@@ -3576,7 +3576,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreRichtextDefault(bool $value): SystemSetting
+    public function setCoreRichtextDefault($value)
     {
         $this->setName('richtext_default');
         $this->loadObject(true);
@@ -3593,7 +3593,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreSearchDefault(bool $value): SystemSetting
+    public function setCoreSearchDefault($value)
     {
         $this->setName('search_default');
         $this->loadObject(true);
@@ -3610,7 +3610,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreSendPoweredbyHeader(bool $value): SystemSetting
+    public function setCoreSendPoweredbyHeader($value)
     {
         $this->setName('send_poweredby_header');
         $this->loadObject(true);
@@ -3627,7 +3627,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreServerOffsetTime(string $value): SystemSetting
+    public function setCoreServerOffsetTime($value)
     {
         $this->setName('server_offset_time');
         $this->loadObject(true);
@@ -3645,7 +3645,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreServerProtocol(string $value): SystemSetting
+    public function setCoreServerProtocol($value)
     {
         $this->setName('server_protocol');
         $this->loadObject(true);
@@ -3663,7 +3663,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreSessionCookieDomain(string $value): SystemSetting
+    public function setCoreSessionCookieDomain($value)
     {
         $this->setName('session_cookie_domain');
         $this->loadObject(true);
@@ -3681,7 +3681,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreSessionCookieHttponly(bool $value): SystemSetting
+    public function setCoreSessionCookieHttponly($value)
     {
         $this->setName('session_cookie_httponly');
         $this->loadObject(true);
@@ -3698,7 +3698,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreSessionCookieLifetime(string $value): SystemSetting
+    public function setCoreSessionCookieLifetime($value)
     {
         $this->setName('session_cookie_lifetime');
         $this->loadObject(true);
@@ -3716,7 +3716,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreSessionCookiePath(string $value): SystemSetting
+    public function setCoreSessionCookiePath($value)
     {
         $this->setName('session_cookie_path');
         $this->loadObject(true);
@@ -3734,7 +3734,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreSessionCookieSecure(bool $value): SystemSetting
+    public function setCoreSessionCookieSecure($value)
     {
         $this->setName('session_cookie_secure');
         $this->loadObject(true);
@@ -3751,7 +3751,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreSessionGcMaxlifetime(string $value): SystemSetting
+    public function setCoreSessionGcMaxlifetime($value)
     {
         $this->setName('session_gc_maxlifetime');
         $this->loadObject(true);
@@ -3769,7 +3769,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreSessionHandlerClass(string $value): SystemSetting
+    public function setCoreSessionHandlerClass($value)
     {
         $this->setName('session_handler_class');
         $this->loadObject(true);
@@ -3787,7 +3787,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreSessionName(string $value): SystemSetting
+    public function setCoreSessionName($value)
     {
         $this->setName('session_name');
         $this->loadObject(true);
@@ -3805,7 +3805,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreSetHeader(bool $value): SystemSetting
+    public function setCoreSetHeader($value)
     {
         $this->setName('set_header');
         $this->loadObject(true);
@@ -3822,7 +3822,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreSettingsDistro(string $value): SystemSetting
+    public function setCoreSettingsDistro($value)
     {
         $this->setName('settings_distro');
         $this->loadObject(true);
@@ -3840,7 +3840,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreSettingsVersion(string $value): SystemSetting
+    public function setCoreSettingsVersion($value)
     {
         $this->setName('settings_version');
         $this->loadObject(true);
@@ -3858,7 +3858,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreShowTvCategoriesHeader(bool $value): SystemSetting
+    public function setCoreShowTvCategoriesHeader($value)
     {
         $this->setName('show_tv_categories_header');
         $this->loadObject(true);
@@ -3875,7 +3875,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreSignupemailMessage(string $value): SystemSetting
+    public function setCoreSignupemailMessage($value)
     {
         $this->setName('signupemail_message');
         $this->loadObject(true);
@@ -3893,7 +3893,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreSiteName(string $value): SystemSetting
+    public function setCoreSiteName($value)
     {
         $this->setName('site_name');
         $this->loadObject(true);
@@ -3911,7 +3911,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreSiteStart(string $value): SystemSetting
+    public function setCoreSiteStart($value)
     {
         $this->setName('site_start');
         $this->loadObject(true);
@@ -3929,7 +3929,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreSiteStatus(bool $value): SystemSetting
+    public function setCoreSiteStatus($value)
     {
         $this->setName('site_status');
         $this->loadObject(true);
@@ -3946,7 +3946,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreSiteUnavailableMessage(string $value): SystemSetting
+    public function setCoreSiteUnavailableMessage($value)
     {
         $this->setName('site_unavailable_message');
         $this->loadObject(true);
@@ -3964,7 +3964,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreSiteUnavailablePage(string $value): SystemSetting
+    public function setCoreSiteUnavailablePage($value)
     {
         $this->setName('site_unavailable_page');
         $this->loadObject(true);
@@ -3982,7 +3982,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreStripImagePaths(bool $value): SystemSetting
+    public function setCoreStripImagePaths($value)
     {
         $this->setName('strip_image_paths');
         $this->loadObject(true);
@@ -3999,7 +3999,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreSymlinkMergeFields(bool $value): SystemSetting
+    public function setCoreSymlinkMergeFields($value)
     {
         $this->setName('symlink_merge_fields');
         $this->loadObject(true);
@@ -4016,7 +4016,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreSyncsiteDefault(bool $value): SystemSetting
+    public function setCoreSyncsiteDefault($value)
     {
         $this->setName('syncsite_default');
         $this->loadObject(true);
@@ -4033,7 +4033,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreTopmenuShowDescriptions(bool $value): SystemSetting
+    public function setCoreTopmenuShowDescriptions($value)
     {
         $this->setName('topmenu_show_descriptions');
         $this->loadObject(true);
@@ -4050,7 +4050,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreTreeDefaultSort(string $value): SystemSetting
+    public function setCoreTreeDefaultSort($value)
     {
         $this->setName('tree_default_sort');
         $this->loadObject(true);
@@ -4068,7 +4068,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreTreeRootId(int $value): SystemSetting
+    public function setCoreTreeRootId($value)
     {
         $this->setName('tree_root_id');
         $this->loadObject(true);
@@ -4085,7 +4085,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreTvsBelowContent(bool $value): SystemSetting
+    public function setCoreTvsBelowContent($value)
     {
         $this->setName('tvs_below_content');
         $this->loadObject(true);
@@ -4102,7 +4102,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreUdpermsAllowroot(bool $value): SystemSetting
+    public function setCoreUdpermsAllowroot($value)
     {
         $this->setName('udperms_allowroot');
         $this->loadObject(true);
@@ -4119,7 +4119,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreUnauthorizedPage(string $value): SystemSetting
+    public function setCoreUnauthorizedPage($value)
     {
         $this->setName('unauthorized_page');
         $this->loadObject(true);
@@ -4137,7 +4137,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreUploadFiles(string $value): SystemSetting
+    public function setCoreUploadFiles($value)
     {
         $this->setName('upload_files');
         $this->loadObject(true);
@@ -4155,7 +4155,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreUploadFlash(string $value): SystemSetting
+    public function setCoreUploadFlash($value)
     {
         $this->setName('upload_flash');
         $this->loadObject(true);
@@ -4173,7 +4173,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreUploadImages(string $value): SystemSetting
+    public function setCoreUploadImages($value)
     {
         $this->setName('upload_images');
         $this->loadObject(true);
@@ -4191,7 +4191,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreUploadMaxsize(string $value): SystemSetting
+    public function setCoreUploadMaxsize($value)
     {
         $this->setName('upload_maxsize');
         $this->loadObject(true);
@@ -4209,7 +4209,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreUploadMedia(string $value): SystemSetting
+    public function setCoreUploadMedia($value)
     {
         $this->setName('upload_media');
         $this->loadObject(true);
@@ -4227,7 +4227,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreUseAliasPath(bool $value): SystemSetting
+    public function setCoreUseAliasPath($value)
     {
         $this->setName('use_alias_path');
         $this->loadObject(true);
@@ -4244,7 +4244,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreUseBrowser(bool $value): SystemSetting
+    public function setCoreUseBrowser($value)
     {
         $this->setName('use_browser');
         $this->loadObject(true);
@@ -4261,7 +4261,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreUseContextResourceTable(bool $value): SystemSetting
+    public function setCoreUseContextResourceTable($value)
     {
         $this->setName('use_context_resource_table');
         $this->loadObject(true);
@@ -4278,7 +4278,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreUseEditor(bool $value): SystemSetting
+    public function setCoreUseEditor($value)
     {
         $this->setName('use_editor');
         $this->loadObject(true);
@@ -4295,7 +4295,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreUseFrozenParentUris(bool $value): SystemSetting
+    public function setCoreUseFrozenParentUris($value)
     {
         $this->setName('use_frozen_parent_uris');
         $this->loadObject(true);
@@ -4312,7 +4312,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreUseMultibyte(bool $value): SystemSetting
+    public function setCoreUseMultibyte($value)
     {
         $this->setName('use_multibyte');
         $this->loadObject(true);
@@ -4329,7 +4329,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreUseWeblinkTarget(bool $value): SystemSetting
+    public function setCoreUseWeblinkTarget($value)
     {
         $this->setName('use_weblink_target');
         $this->loadObject(true);
@@ -4346,7 +4346,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreUserNavParent(string $value): SystemSetting
+    public function setCoreUserNavParent($value)
     {
         $this->setName('user_nav_parent');
         $this->loadObject(true);
@@ -4364,7 +4364,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreWebpwdreminderMessage(string $value): SystemSetting
+    public function setCoreWebpwdreminderMessage($value)
     {
         $this->setName('webpwdreminder_message');
         $this->loadObject(true);
@@ -4382,7 +4382,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreWebsignupemailMessage(string $value): SystemSetting
+    public function setCoreWebsignupemailMessage($value)
     {
         $this->setName('websignupemail_message');
         $this->loadObject(true);
@@ -4400,7 +4400,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreWelcomeAction(string $value): SystemSetting
+    public function setCoreWelcomeAction($value)
     {
         $this->setName('welcome_action');
         $this->loadObject(true);
@@ -4418,7 +4418,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreWelcomeNamespace(string $value): SystemSetting
+    public function setCoreWelcomeNamespace($value)
     {
         $this->setName('welcome_namespace');
         $this->loadObject(true);
@@ -4436,7 +4436,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreWelcomeScreen(bool $value): SystemSetting
+    public function setCoreWelcomeScreen($value)
     {
         $this->setName('welcome_screen');
         $this->loadObject(true);
@@ -4453,7 +4453,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreWelcomeScreenUrl(string $value): SystemSetting
+    public function setCoreWelcomeScreenUrl($value)
     {
         $this->setName('welcome_screen_url');
         $this->loadObject(true);
@@ -4471,7 +4471,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreWhichEditor(string $value): SystemSetting
+    public function setCoreWhichEditor($value)
     {
         $this->setName('which_editor');
         $this->loadObject(true);
@@ -4489,7 +4489,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreWhichElementEditor(string $value): SystemSetting
+    public function setCoreWhichElementEditor($value)
     {
         $this->setName('which_element_editor');
         $this->loadObject(true);
@@ -4507,7 +4507,7 @@ class SystemSetting
      *
      * @return $this
      */
-    public function setCoreXhtmlUrls(bool $value): SystemSetting
+    public function setCoreXhtmlUrls($value)
     {
         $this->setName('xhtml_urls');
         $this->loadObject(true);

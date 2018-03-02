@@ -129,7 +129,7 @@ class Blender
     /**
      * @return UserInteractionHandler
      */
-    public function getUserInteractionHandler(): UserInteractionHandler
+    public function getUserInteractionHandler()
     {
         return $this->userInteractionHandler;
     }
@@ -137,7 +137,7 @@ class Blender
     /**
      * @return string
      */
-    public function getVersion(): string
+    public function getVersion()
     {
         return $this->version;
     }
@@ -164,7 +164,7 @@ class Blender
      *
      * @return Blender
      */
-    public function setSeedsDir(string $seeds_dir)
+    public function setSeedsDir($seeds_dir)
     {
         $this->seeds_dir = $seeds_dir;
         return $this;
@@ -782,10 +782,10 @@ class Blender
     public function out($message, $error=false)
     {
         if ($error) {
-            $this->userInteractionHandler->tellUser($message, $this->userInteractionHandler::MASSAGE_ERROR);
+            $this->userInteractionHandler->tellUser($message, userInteractionHandler::MASSAGE_ERROR);
 
         } else {
-            $this->userInteractionHandler->tellUser($message, $this->userInteractionHandler::MASSAGE_STRING);
+            $this->userInteractionHandler->tellUser($message, userInteractionHandler::MASSAGE_STRING);
         }
     }
 
@@ -794,7 +794,7 @@ class Blender
      */
     public function outSuccess($message)
     {
-        $this->userInteractionHandler->tellUser($message, $this->userInteractionHandler::MASSAGE_SUCCESS);
+        $this->userInteractionHandler->tellUser($message, userInteractionHandler::MASSAGE_SUCCESS);
     }
 
     /**

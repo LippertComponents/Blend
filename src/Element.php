@@ -9,8 +9,6 @@
 namespace LCI\Blend;
 
 
-use function PHPSTORM_META\type;
-
 abstract class Element
 {
     /** @var  \modx */
@@ -112,7 +110,7 @@ abstract class Element
      *
      * @return Element
      */
-    public function setDebug(bool $debug)
+    public function setDebug($debug)
     {
         $this->debug = $debug;
         return $this;
@@ -234,7 +232,7 @@ abstract class Element
      * @param string $name
      * @return $this
      */
-    public function setName(string $name)
+    public function setName($name)
     {
         $this->name = $name;
         return $this;
@@ -252,7 +250,7 @@ abstract class Element
      * @param string $description
      * @return $this
      */
-    public function setDescription(string $description)
+    public function setDescription($description)
     {
         $this->description = $description;
         return $this;
@@ -271,7 +269,7 @@ abstract class Element
      * @param bool $overwrite_static ~ if the setAsStatic is ran, false will keep the static content code, true will overwrite the static file
      * @return $this
      */
-    public function setCode(string $code, $overwrite_static=false)
+    public function setCode($code, $overwrite_static=false)
     {
         $this->code = $code;
         $this->overwrite_static = $overwrite_static;
@@ -284,7 +282,7 @@ abstract class Element
      * @param bool $overwrite_static ~ if the setAsStatic is ran, false will keep the static content code, true will overwrite the static file
      * @return $this
      */
-    public function setContent(string $code, $overwrite_static=false)
+    public function setContent($code, $overwrite_static=false)
     {
         return $this->setCode($code, $overwrite_static);
     }

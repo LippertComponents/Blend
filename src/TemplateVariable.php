@@ -65,7 +65,7 @@ class TemplateVariable extends Element
      *
      * @return $this
      */
-    public function setCaption(string $caption)
+    public function setCaption($caption)
     {
         $this->caption = $caption;
         return $this;
@@ -76,7 +76,7 @@ class TemplateVariable extends Element
      *
      * @return $this
      */
-    public function setDefaultText(string $default_text)
+    public function setDefaultText($default_text)
     {
         $this->default_text = $default_text;
         return $this;
@@ -86,7 +86,7 @@ class TemplateVariable extends Element
      *
      * @return $this
      */
-    public function setDisplay(string $display)
+    public function setDisplay($display)
     {
         $this->display = $display;
         return $this;
@@ -97,7 +97,7 @@ class TemplateVariable extends Element
      *
      * @return $this
      */
-    public function setElements(string $elements)
+    public function setElements($elements)
     {
         $this->elements = $elements;
         return $this;
@@ -126,7 +126,7 @@ class TemplateVariable extends Element
      *
      * @return $this
      */
-    public function setType(string $type)
+    public function setType($type)
     {
         $this->type = $type;
         return $this;

@@ -68,7 +68,7 @@ class Resource
      *
      * @return $this
      */
-    public function setDebug(bool $debug)
+    public function setDebug($debug)
     {
         $this->debug = $debug;
         return $this;
@@ -111,7 +111,7 @@ class Resource
      * @param string $context_key
      * @return \LCI\Blend\Resource
      */
-    public function setContextKey(string $context_key)
+    public function setContextKey($context_key)
     {
         $this->context_key = $context_key;
         return $this;
