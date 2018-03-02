@@ -6,7 +6,7 @@ for Laravel.
 
 **This is a CLI tool. Most code references are for SSH/command line/terminal. To create custom Migrations you 
 should be knowledgeable of PHP and MODX. A good IDE like PHPStorm will help you auto complete available methods for 
-custom migrations.**
+custom migrations. Using the [Symfony/Console](https://symfony.com/doc/3.4/components/console.html) component for CLI.**
 
 ## Goals
 
@@ -66,14 +66,14 @@ Go the bin directory, you may need to copy the sample.config.php file to just co
 ### Step 3
 CD to the bin directory and try 
 
-If you used git: ```php BlenderCli.php``` or ```php BlenderCli.php --help```
+If you used git: ```php console.php``` or ```php console.php --help```
 
 If you used composer ```php blend``` or ```php blend --help```
 
 You should see a help menu, then do ```php blend --install``` to install. 
 
-Migration help & usage info ```php blend --help --migrate``` or using the short command
-```php blend -m -h``` and for seeds ```php blend --help --seed``` or with the short command ```php blend -s -h```
+Migration help & usage info ```php blend  blend:migrate --help``` and for seeds ```php blend blend:seed --help``` or
+ with the short option use ```-h``` rather than ```--help```
 
 
 ## Examples
@@ -83,17 +83,17 @@ See the [tests/database/migrations](tests/database/migrations) directory for bas
 ### Seed complete site 
 
 Create a Migration and seeds for all elements, resources and system settings:  
-```php blend --seed --object site --name InitSite```
+```php blend blend:seed --object site --name InitSite```
 
-Same as above, but in short command  
-```php blend -s -o a -n InitSite```
+Same as above, but with short options  
+```php blend blend:seed -o a -n InitSite```
 
 ### Create a custom migration file
 
 1. Generate an empty migration file:  
- ```php blend --migrate --generate --name MyChunks```  
- Same as above but in short format
- ```php blend -m -g -n MyChunks```
+ ```php blend blend:migrate --generate --name MyChunks```  
+ Same as above but with short options
+ ```php blend blend:migrate -g -n MyChunks```
 2. There will now be a file: ```MODX~core/components/blend/database/migrations/MyChunks.php``` open in your IDE
 3. You will want to something like the below example for the up method. The up method creates or updates:  
 ```php
@@ -139,20 +139,18 @@ if ( $blendChunk->revertBlend() ) {
 }
 ```
 5. Now save your file and you can test it out by running all migrations:  
- ```php blend --migrate```  
- Same as above but in short format
- ```php blend -m```  
+ ```php blend blend:migrate```    
  And then roll it back:  
- ```php blend --migrate --method down``` or in short format ```php blend -m -x down```
+ ```php blend blend:migrate --method down``` 
 
 ---
 
 ### Templates & related TVs
 In this example you want to export some templates and the related TVs.
 
-1. Run ```php blend --seed --object template``` or short command ```php blend -s -o t``` you will then be prompted to
+1. Run ```php blend blend:seed --object template``` or with short options ```php blend blend:seed -o t``` you will then be prompted to
  enter in a comma separated list of template IDs or names that you wish to seed. Note you can also use the ```--name MyName```
- option if you don't want the timestamped names and directories. 
+ option if you would like readable timestamped names and directories. 
 2. Something like ```MODX~core/components/blend/database/migrations/m2017_11_14_160105_Template.php``` will be created along 
 with the a new directory containing the seed data:  
 ```MODX~core/components/blend/database/seeds/2017_11_14_160105/elements```  
@@ -171,20 +169,20 @@ should now show there.
 ### Resource seeds
 
 Select Resources, for prompt to ask for comma separated list of IDs  
-```php blend --seed --object resource```
+```php blend blend:seed --object resource```
 
 Only do resource with ID 2  
-```php blend --seed --object resource --id 2```
+```php blend blend:seed --object resource --id 2```
 
 Only do resources that have been created or modified since 2018-01-01  
-```php blend --seed --object resource --date 2018-01-01```
+```php blend blend:seed --object resource --date 2018-01-01```
 
 Name your seeds to a version or bug number:  
-```php blend --seed --object resource --date 2018-01-01 --name Issue1234```
+```php blend blend:seed --object resource --date 2018-01-01 --name Issue1234```
 
 In this example export some resources
 
-1. Run ```php blend --seed``` you will then be prompted for enter in a comma separated list of resource IDs to 
+1. Run ```php blend blend:seed``` you will then be prompted for enter in a comma separated list of resource IDs to 
 include.
 
 2. Something like ```MODX~core/components/blend/database/migrations/m2017_11_14_162358_Resource.php``` will be created along 
@@ -206,7 +204,8 @@ should show up there.
 ## Road map 
 
 - v1.0 
-  - Update/Install MODX
+  - Install MODX (3.x for git is complete)
+  - Update
   - Add TV convenience methods for building custom migrations 
   - Media Sources, seed and migrate
   - Convert all System Setting to have values that are name key vs int key, templates, resources, ect.
