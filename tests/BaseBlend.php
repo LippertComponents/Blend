@@ -1,5 +1,5 @@
 <?php
-declare(strict_types=1);
+//declare(strict_types=1);
 
 use PHPUnit\Framework\TestCase;
 use LCI\Blend\Blender;
@@ -110,7 +110,7 @@ class BaseBlend extends TestCase
      * @param string $string
      * @return mixed
      */
-    protected function removeDateFromStringArrayValue(string $string, $key='editedon')
+    protected function removeDateFromStringArrayValue($string, $key='editedon')
     {
         $pattern = '/(\''.$key.'\' => \')(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})(\')/';
         $string = preg_replace($pattern, '\''.$key.'\' => null', $string);

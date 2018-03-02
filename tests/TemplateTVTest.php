@@ -1,10 +1,5 @@
 <?php
-declare(strict_types=1);
-
-use PHPUnit\Framework\TestCase;
-use LCI\Blend\Blender;
-use LCI\Blend\TemplateVariable;
-use League\CLImate\CLImate;
+//declare(strict_types=1);
 
 final class TemplateTVTest extends BaseBlend
 {
