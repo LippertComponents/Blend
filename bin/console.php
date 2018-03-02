@@ -112,8 +112,8 @@ if (BlendConsole::isModxInstalled()) {
         $application->add(new Seed);
     }
 
-    $application->add(new ModxUpgrade);
-    $application->add(new ModxInstallPackage);
+    //$application->add(new ModxUpgrade);
+    //$application->add(new ModxInstallPackage);
     $application->add(new RefreshCache);
 
 } else {
