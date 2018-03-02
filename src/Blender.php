@@ -59,7 +59,7 @@ class Blender
 
     protected $blend_class_object = 'BlendMigrations';
 
-    protected $blend_package = 'BlendMigrations';
+    protected $blend_package = 'blend';
 
     /**
      * Stockpile constructor.
