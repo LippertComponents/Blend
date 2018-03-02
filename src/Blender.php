@@ -1015,7 +1015,7 @@ class Blender
     public function install($method='up', $prompt=false)
     {
         $migration_name = 'install_blender';
-        $custom_migration_dir = __DIR__.'/migration/';
+        $custom_migration_dir = __DIR__.'/Migrations/Blend/';
 
         $this->runInstallMigration($migration_name, $custom_migration_dir, null, $method, $prompt);
     }
