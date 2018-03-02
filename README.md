@@ -1,6 +1,6 @@
 # Blend
 
-This project aims to import/export resources and elements from one MODX instance to another MODX. Working with 
+This project aims to import/export resources and elements from one MODX instance to another. Working with 
 workflows from local > dev > staging > production(master). Also attempting to be similar to what Migrate is 
 for Laravel. 
 
@@ -21,23 +21,24 @@ needed for testing.
 
 ## Use case
 
-Example 1: You have a local or dev set up and you make some new resources, snippets, chunks, ect.
+Example 1: You have a local or dev Modx environment set up and you make some new resources, snippets, chunks, ect.
 But there is a constant creation of resources on the production site from the content creation team. You cannot ask the 
-content production team to stop for days or weeks while you coe up the next new feature. Now with Blend it is easy to 
+content production team to stop for days or weeks while you code up the next new feature. Now with Blend it is easy to 
 add in your new feature independent of the resource IDs. 
 
 Example 2: You are going to do a complete new version of you site and you want to keep a few things from the old site. 
-So you export what is needed and then torch the rest. Now you can modify the exported seeds and then import into a 
+So you export what is needed and then torch the rest. Now you can modify the exported seeds and import into a 
 new MODX install.
 
 ## Introduction
 
 - What are Migrations?  
-  Think of migrations as creating instructions for a data to be imported or modified.
+  Think of migrations as creating instructions for data to be imported or modified.
   Migrations can be used like version control for the MODX database, allowing your team to easily modify and share the changes to 
   elements (chunks, plugins, snippets, templates and template variables), resource(pages) and system settings as well as your 
-  custom tables. If you manually migrate a MODX element from dev to production, then migrations will help you track and insure 
+  custom tables. If you manually migrate a MODX element from dev to production, then migrations will help you track and ensure 
   consistent results.
+  
 - What are Seeds?  
   Currently seeds are generated files that contain the selected elements (chunks, plugins, snippets, templates and 
   template variables), resource(pages) and/or system settings as data exports of your system that can be used in another.
@@ -94,7 +95,7 @@ Same as above, but in short command
  Same as above but in short format
  ```php blend -m -g -n MyChunks```
 2. There will now be a file: ```MODX~core/components/blend/database/migrations/MyChunks.php``` open in your IDE
-3. You will want to something like below for the up method. The up method creates or updates:  
+3. You will want to something like the below example for the up method. The up method creates or updates:  
 ```php
 <?php
 // Manual set up of a chunk:
@@ -118,7 +119,7 @@ if ($myChunk->blend(true)) {
     $this->blender->out(print_r($myChunk->getErrorMessages(), true), true);
 }
 ```
-4. To allow for a rollback you will need to code the exact oppisite in the down method. 
+4. To allow for a rollback you will need to code the exact opposite in the down method. 
 The down method is for remove or downgrade.  
 ```php
 <?php
@@ -137,7 +138,7 @@ if ( $blendChunk->revertBlend() ) {
     $this->blender->out($blendChunk->getName().' setting was not reverted', true);
 }
 ```
-5. Now save your file and then you can test is out by running all migrations:  
+5. Now save your file and you can test it out by running all migrations:  
  ```php blend --migrate```  
  Same as above but in short format
  ```php blend -m```  
@@ -155,11 +156,11 @@ In this example you want to export some templates and the related TVs.
 2. Something like ```MODX~core/components/blend/database/migrations/m2017_11_14_160105_Template.php``` will be created along 
 with the a new directory containing the seed data:  
 ```MODX~core/components/blend/database/seeds/2017_11_14_160105/elements```  
-This directory holds both the Template and the dependant TV seeds. You could run the migration but not much should happen
-since you just exported the data. But if you moved the directories to another MODX install and ran the migration they 
+This directory holds both the Template and the dependant TV seeds. You could run the migration, but not much should happen
+since you just exported the data. If you moved the directories to another MODX install and ran the migration they 
 should now show there.  
 3. If you want to customize the content on export before the seeds are created you can write a 
-[plugin](https://docs.modx.com/revolution/2.x/developing-in-modx/basic-development/plugins), these event are available:
+[plugin](https://docs.modx.com/revolution/2.x/developing-in-modx/basic-development/plugins), these events are available:
 
    - OnBlendSeedElement
    - OnBlendELementBeforeSave
@@ -192,7 +193,7 @@ with the a new directory:
 ```MODX~core/components/blend/database/seeds/2017_11_14_162358/resources``` 
 
 This directory holds both the resource seeds. You could run the migration but not much should happen
-since you just exported the data. But if you moved the directories to another MODX install and ran the migration they 
+since you just exported the data. If you moved the directories to another MODX install and ran the migration they 
 should show up there.
 
 3. If you want to customize the content on export write a 
