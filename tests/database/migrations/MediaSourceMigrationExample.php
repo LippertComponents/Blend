@@ -22,7 +22,6 @@ class MediaSourceMigrationExample extends Migrations
             ->setSeedsDir($this->getSeedsDir())
             ->setDescription('This is my 3rd media source test, note this is limited to 255 or something and no HTML')
             ->setPropertyBasePath('/assets/path/')
-            ->setPropertyKey()
             ->setPropertyBaseUrl('/assets/url/');
         if ($testMediaSource3->blend(true)) {
             $this->blender->out($testMediaSource3->getName().' was saved correctly');

@@ -4,6 +4,7 @@
 use PHPUnit\Framework\TestCase;
 use LCI\Blend\Blender;
 use LCI\Blend\Helpers\EmptyUserInteractionHandler;
+use LCI\Blend\Helpers\SimpleCache;
 
 class BaseBlend extends TestCase
 {
@@ -29,7 +30,21 @@ class BaseBlend extends TestCase
      */
     public static function setUpBeforeClass()
     {
+        // copy from database.. to temp/database/...
+        $fileHelper = new SimpleCache(BLEND_MODX_MIGRATION_PATH.'temp/');
+        $fileHelper->copyDirectory(BLEND_MODX_MIGRATION_PATH.'database/', BLEND_MODX_MIGRATION_PATH.'temp/database/');
+    }
 
+    /**
+     * This method is called after the last test of this test class is run.
+     */
+    public static function tearDownAfterClass()
+    {
+        if (BLEND_CLEAN_UP) {
+            // delete files form temp:
+            $fileHelper = new SimpleCache(BLEND_MODX_MIGRATION_PATH.'temp/');
+            $fileHelper->deleteDirectory(BLEND_MODX_MIGRATION_PATH.'temp/database/');
+        }
     }
 
     /**
@@ -65,7 +80,7 @@ class BaseBlend extends TestCase
 
         $this->consoleUserInteractionHandler = new EmptyUserInteractionHandler();
 
-        $this->blender = new Blender($this->modx, $this->consoleUserInteractionHandler, ['blend_modx_migration_dir' => BLEND_MODX_MIGRATION_PATH]);
+        $this->blender = new Blender($this->modx, $this->consoleUserInteractionHandler, ['blend_modx_migration_dir' => BLEND_MODX_MIGRATION_PATH.'temp/']);
 
         if ($this->install_blend) {
             $this->blender->install();

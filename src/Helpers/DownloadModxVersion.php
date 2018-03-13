@@ -9,10 +9,7 @@
 namespace LCI\Blend\Helpers;
 
 use GuzzleHttp\Client;
-use FilesystemIterator;
 use League\Flysystem\Exception;
-use RecursiveDirectoryIterator;
-use RecursiveIteratorIterator;
 use ZipArchive;
 
 use Composer\Console\Application;
@@ -24,6 +21,8 @@ use Symfony\Component\Console\Output\ConsoleOutput;
 
 class DownloadModxVersion
 {
+    use Files;
+
     const RELEASE_ARCHIVE = [
         'v2.6.1-pl' => '2017-12-14',
         'v2.6.0-pl' => '2017-11-01',
@@ -138,6 +137,9 @@ class DownloadModxVersion
         return $this->moveGitFiles(false);
     }
 
+    /**
+     * @param string $remote
+     */
     protected function getFromGit($remote)
     {
         if ($this->output instanceof OutputInterface) {
@@ -154,7 +156,9 @@ class DownloadModxVersion
         // @TODO errors
     }
 
-
+    /**
+     *
+     */
     protected function loadGuzzle()
     {
         $this->guzzleClient = new Client([
@@ -206,11 +210,11 @@ class DownloadModxVersion
 
             if ($remove_build) {
                 // delete the _build:
-                $this->deleteDirectory('_build');
+                $this->deleteDirectory(MODX_PATH . '_build');
             }
             if ($remove_setup) {
                 // delete the setup:
-                $this->deleteDirectory('setup');
+                $this->deleteDirectory(MODX_PATH . 'setup');
             }
 
             // run composer update:
@@ -227,82 +231,20 @@ class DownloadModxVersion
         return false;
     }
 
+    /**
+     * @param int $file_count ~ count of files in the directory
+     */
     protected function copyExtractedDirectory($file_count=4000)
     {
         $source = BLEND_CACHE_DIR.'revolution-'.$this->git_project_version;
         $destination = MODX_PATH;
 
-        if (!is_dir($destination)) {
-            mkdir($destination, 0700);
-        }
-
-        /** @var \RecursiveDirectoryIterator $directoryIterator */
-        $directoryIterator = new RecursiveDirectoryIterator($source, FilesystemIterator::SKIP_DOTS);
-
-        if ($this->output instanceof OutputInterface) {
-            $this->output->writeln('Now copying extracted files to '.$destination.' File count: '.$file_count);
-            $progress = new ProgressBar($this->output, $file_count);
-            $progress->start();
-
-            $progress->setRedrawFrequency(10);
-        }
-
-
-        /** @var RecursiveIteratorIterator $recursiveIteratorIterator */
-        $recursiveIteratorIterator = new RecursiveIteratorIterator($directoryIterator, RecursiveIteratorIterator::SELF_FIRST);
-
-        /** @var \DirectoryIterator $item */
-        foreach ($recursiveIteratorIterator as $item) {
-            if ($item->isDir()) {
-                if (is_dir($destination. DIRECTORY_SEPARATOR. $recursiveIteratorIterator->getSubPathName())) {
-                    continue;
-                }
-                mkdir($destination . DIRECTORY_SEPARATOR . $recursiveIteratorIterator->getSubPathName());
-
-            } else {
-                copy($item, $destination . DIRECTORY_SEPARATOR . $recursiveIteratorIterator->getSubPathName());
-            }
-
-            if (isset($progress) && $progress instanceof ProgressBar) {
-                $progress->advance();
-            }
-
-        }
-
-        if (isset($progress) && $progress instanceof ProgressBar) {
-            // ensures that the progress bar is at 100%
-            $progress->finish();
-            $this->output->writeln('');
-        }
-
+        $this->copyDirectory($source, $destination, $file_count);
     }
 
     /**
-     * @param string $directory
-     * @return bool
+     *
      */
-    public function deleteDirectory($directory)
-    {
-        if (!empty($directory) && file_exists(MODX_PATH.$directory)) {
-            $dir = MODX_PATH . $directory;
-
-            /** @var \RecursiveDirectoryIterator $directoryIterator */
-            $directoryIterator = new RecursiveDirectoryIterator($dir, FilesystemIterator::SKIP_DOTS);
-
-            /** @var RecursiveIteratorIterator $recursiveIteratorIterator */
-            $recursiveIteratorIterator = new RecursiveIteratorIterator($directoryIterator, RecursiveIteratorIterator::CHILD_FIRST);
-
-            /** @var  $file */
-            foreach ($recursiveIteratorIterator as $file) {
-                $file->isDir() ? rmdir($file) : unlink($file);
-            }
-
-            return true;
-        }
-
-        return false;
-    }
-
     public function updateComposer()
     {
         // Composer\Factory::getHomeDir() method

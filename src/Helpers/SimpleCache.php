@@ -12,6 +12,7 @@ use LCI\Blend\Helpers\DownloadModxVersion;
 
 class SimpleCache
 {
+    use Files;
 
     protected $directory = __DIR__;
 
@@ -70,8 +71,7 @@ class SimpleCache
 
         } else {
             // clean the directory:
-            $directoryHelper = new DownloadModxVersion();
-            $directoryHelper->deleteDirectory($this->directory);
+            $this->deleteDirectory(MODX_PATH . $this->directory);
         }
     }
 
