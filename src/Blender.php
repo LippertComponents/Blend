@@ -9,6 +9,7 @@
 namespace LCI\Blend;
 
 use modX;
+use LCI\Blend\Blendable\MediaSource;
 use LCI\Blend\Helpers\UserInteractionHandler;
 use LCI\Blend\Helpers\SimpleCache;
 use PHPUnit\Runner\Exception;
@@ -347,6 +348,72 @@ class Blender
 
             } else {
                 $this->out($blendChunk->getName().' chunk was not reverted', true);
+            }
+        }
+    }
+
+    /**
+     * @param string $name
+     * @return \LCI\Blend\Blendable\MediaSource
+     */
+    public function getBlendableMediaSource($name)
+    {
+        /** @var MediaSource $mediaSource */
+        $mediaSource =  new MediaSource($this->modx, $this);
+        return $mediaSource
+            ->setName($name)
+            ->setSeedsDir($this->getSeedsDir());
+    }
+
+    /**
+     * @param array $media_sources
+     * @param string $seeds_dir
+     */
+    public function blendManyMediaSources($media_sources=[], $seeds_dir='')
+    {
+        // will update if element does exist or create new
+        foreach ($media_sources as $seed_key) {
+            /** @var MediaSource $blendMediaSource */
+            $blendMediaSource = new MediaSource($this->modx, $this);
+            if (!empty($seeds_dir)) {
+                $blendMediaSource->setSeedsDir($seeds_dir);
+            }
+            if ($blendMediaSource->blendFromSeed($seed_key)) {
+                $this->out($seed_key.' has been blended into ID: ');
+
+            } elseif($blendMediaSource->isExists()) {
+                // @TODO add Compare as option
+                $this->out($seed_key.' media source already exists', true);
+                if ($this->prompt('Would you like to update?', 'Y') === 'Y') {
+                    if ($blendMediaSource->blendFromSeed($seed_key, true)) {
+                        $this->out($seed_key.' has been blended');
+                    }
+                }
+            } else {
+                $this->out('There was an error saving '.$seed_key, true);
+            }
+        }
+    }
+
+    /**
+     * @param array $media_sources
+     * @param string $seeds_dir
+     */
+    public function revertBlendManyMediaSources($media_sources=[], $seeds_dir='')
+    {
+        // will update if system setting does exist or create new
+        foreach ($media_sources as $seed_key) {
+            /** @var MediaSource $blendMediaSource */
+            $blendMediaSource = new MediaSource($this->modx, $this);
+            if (!empty($seeds_dir)) {
+                $blendMediaSource->setSeedsDir($seeds_dir);
+            }
+
+            if ( $blendMediaSource->revertBlendFromSeed($seed_key) ) {
+                $this->out($blendMediaSource->getName().' media source has been reverted to '.$seeds_dir);
+
+            } else {
+                $this->out($blendMediaSource->getName().' media source was not reverted', true);
             }
         }
     }
@@ -833,6 +900,37 @@ class Blender
 
         if ($create_migration_file) {
             $this->writeMigrationClassFile('chunk', $keys, $server_type, $name);
+        }
+        return $keys;
+    }
+
+    /**
+     * @param \xPDOQuery|array|null $criteria
+     * @param string $server_type
+     * @param string $name
+     * @param bool $create_migration_file
+     *
+     * @return array
+     */
+    public function makeMediaSourceSeeds($criteria, $server_type='master', $name=null, $create_migration_file=true)
+    {
+        $keys = [];
+        $collection = $this->modx->getCollection('modMediaSource', $criteria);
+
+        foreach ($collection as $mediaSource) {
+            /** @var MediaSource $blendMediaSource */
+            $blendMediaSource = new MediaSource($this->modx, $this);
+            $seed_key = $blendMediaSource
+                ->setSeedsDir($this->getMigrationName('mediaSource', $name))
+                ->seed($mediaSource);
+            $this->out("Media Source: ".$mediaSource->get('name').' Key: '.$seed_key);
+            $keys[] = $seed_key;
+        }
+
+        //print_r($keys);exit();
+
+        if ($create_migration_file) {
+            $this->writeMigrationClassFile('mediaSource', $keys, $server_type, $name);
         }
         return $keys;
     }
@@ -1429,10 +1527,14 @@ class Blender
     {
         $dir_name = 'm'.$this->seeds_dir.'_';
         if (empty($name)) {
-            $dir_name .= ucfirst(strtolower($type));
-        } else {
-            $dir_name .= preg_replace('/[^A-Za-z0-9\_]/', '', str_replace(['/', ' '], '_', $name));
+            $name = ucfirst(strtolower($type));
+            if ($name == 'Mediasource') {
+                $name = 'MediaSource';
+            }
         }
+
+        $dir_name .= preg_replace('/[^A-Za-z0-9\_]/', '', str_replace(['/', ' '], '_', $name));
+
         return $dir_name;
     }
 
@@ -1467,6 +1569,13 @@ class Blender
                 $placeholders['chunkData'] = $this->prettyVarExport($class_data);
                 $placeholders['classUpInners'] = '$this->blender->blendManyChunks($this->chunks, $this->getSeedsDir());';
                 $placeholders['classDownInners'] = '$this->blender->revertBlendManyChunks($this->chunks, $this->getSeedsDir());';
+                break;
+
+            case 'mediaSource':
+                $migration_template = 'mediaSource.txt';
+                $placeholders['mediaSourceData'] = $this->prettyVarExport($class_data);
+                $placeholders['classUpInners'] = '$this->blender->blendManyMediaSources($this->media_sources, $this->getSeedsDir());';
+                $placeholders['classDownInners'] = '$this->blender->revertBlendManyMediaSources($this->media_sources, $this->getSeedsDir());';
                 break;
 
             case 'plugin':
@@ -1670,7 +1779,17 @@ class Blender
      */
     public function getElementSeedKeyFromName($name, $type)
     {
-        return $type.'_'.str_replace('/', '#', $name);
+        return $type.'_'.$this->getSeedKeyFromName($name);
+    }
+
+    /**
+     * @param string $name
+     * @return string
+     */
+    public function getSeedKeyFromName($name)
+    {
+        // @TODO review
+        return str_replace('/', '#', $name);
     }
 
     /**
