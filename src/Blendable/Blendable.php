@@ -18,6 +18,9 @@ abstract class Blendable implements BlendableInterface
     /** @var  Blender */
     protected $blender;
 
+    /** @var string ~ blend or revert */
+    protected $type = 'blend';
+
     /** @var string  */
     protected $opt_cache_key = '';
 
@@ -45,6 +48,9 @@ abstract class Blendable implements BlendableInterface
     /** @var string  */
     protected $unique_key_column = 'name';
 
+    /** @var array set when a change of name/alias has been done */
+    protected $unique_key_history = [];
+
     /** @var array ~ this should match data to be inserted via xPDO, ex [column_name => value, ...] */
     protected $blendable_xpdo_simple_object_data = [
         'name' => ''
@@ -52,6 +58,9 @@ abstract class Blendable implements BlendableInterface
 
     /** @var array ~ ['setMethodName' => 'setMethodActualName', 'setDoNotUseMethod' => false] overwrite in child classes */
     protected $load_from_array_aliases = [];
+
+    /** @var array ~ list any fields/columns to be ignored on making seeds, like id */
+    protected $ignore_seed_fields = ['id'];
 
     /** @var array ~ xPDOSimpleObject->fromArray() */
     protected $current_xpdo_simple_object_data = [];
@@ -70,8 +79,9 @@ abstract class Blendable implements BlendableInterface
      *
      * @param \modx $modx
      * @param Blender $blender
+     * @param string|array $unique_value
      */
-    public function __construct(\modx $modx, Blender $blender)
+    public function __construct(\modx $modx, Blender $blender, $unique_value='')
     {
         $this->modx = $modx;
         $this->blender = $blender;
@@ -83,6 +93,9 @@ abstract class Blendable implements BlendableInterface
             \xPDO::OPT_CACHE_KEY => $this->opt_cache_key,
             \xPDO::OPT_CACHE_PATH => $this->blender->getSeedsDirectory()
         ];
+
+        $this->setUniqueCriteria($unique_value);
+        $this->loadObject();
     }
 
     /**
@@ -151,32 +164,299 @@ abstract class Blendable implements BlendableInterface
     }
 
     /**
+     * @param string $type ~ seed or revert
      * @return string
      */
-    public function getName()
+    public function getSeedKey($type='seed')
     {
-        return $this->blendable_xpdo_simple_object_data['name'];
+        $name = $this->blendable_xpdo_simple_object_data['name'];
+        if (method_exists($this, 'getName')) {
+            $name = $this->getName();
+        }
+        $key = $this->blender->getSeedKeyFromName($name);
+
+        switch ($type) {
+            case 'revert':
+                $seed_key = 'revert-' . $key;
+                break;
+
+            case 'seed':
+                // no break
+            default:
+                $seed_key = $key;
+        }
+
+        return $seed_key;
     }
 
     /**
-     * @param string $name
+     * @param string $seed_key
+     * @param bool $overwrite
+     *
+     * @return bool
+     */
+    public function blendFromSeed($seed_key, $overwrite=false)
+    {
+        $this->loadObjectDataFromSeed($seed_key);
+        return $this->blend($overwrite);
+    }
+
+    /**
+     * @param bool $overwrite
+     *
+     * @return bool
+     */
+    public function blend($overwrite=false)
+    {
+        if ($this->type == 'blend') {
+            /** @var \LCI\Blend\Blendable\Blendable $currentVersion */
+            $currentVersion = $this->getCurrentVersion();
+            $currentVersion->seed('revert');
+        }
+
+        $this->modx->invokeEvent(
+            'OnBlendBeforeSave',
+            [
+                'blender' => $this->blender,
+                'blendable' => $this,
+                'data' => &$this->blendable_xpdo_simple_object_data,
+                'type' => $this->type,
+                'xPDOClass' => $this->xpdo_simple_object_class,
+                'xPDOSimleObject' => &$this->xPDOSimpleObject
+            ]
+        );
+
+        $save = $this->save($overwrite);
+
+        if ($save) {
+            $this->modx->invokeEvent(
+                'OnBlendAfterSave',
+                [
+                    'blender' => $this->blender,
+                    'blendable' => $this,
+                    'data' => &$this->blendable_xpdo_simple_object_data,
+                    'type' => $this->type,
+                    'xPDOClass' => $this->xpdo_simple_object_class,
+                    'xPDOSimleObject' => &$this->xPDOSimpleObject
+                ]
+            );
+        } else {
+            $this->blender->out('Error did not save ', true);
+        }
+        return $save;
+    }
+
+    /**
+     * @param bool $make_revert_seed
+     * @return bool
+     */
+    public function delete($make_revert_seed=true)
+    {
+        if ($make_revert_seed) {
+            $this->seed('revert');
+        }
+        $removed = false;
+
+        if ($this->xPDOSimpleObject->remove()) {
+            $this->attachRelatedPiecesAfterSave();
+            if ($this->isDebug()) {
+                $this->blender->out($this->getName() . ' has been removed/deleted');
+            }
+            $removed = true;
+
+        } else {
+            if ($this->isDebug()) {
+                $this->blender->out($this->getName() . ' did not remove/delete', true);
+            }
+        }
+
+        return $removed;
+    }
+
+    /**
+     * @return bool
+     */
+    public function revertBlend()
+    {
+        $seed_key = $this->getSeedKey('revert');
+        $this->type = 'revert';
+        if (!$this->loadObjectDataFromSeed($seed_key)) {
+            return $this->delete(false);
+        }
+
+        return $this->blend(true);
+    }
+
+    /**
+     * @param string $type ~ seed or revert
+     * @return string ~ the related seed key
+     */
+    public function seed($type='seed')
+    {
+        $data = false;
+        // No IDs! must get the alias and get a seed key,
+        $seed_key = $this->getSeedKey($type);
+
+        if (is_object($this->xPDOSimpleObject)) {
+            $this->current_xpdo_simple_object_data = $this->xPDOSimpleObject->toArray();
+
+            foreach ($this->current_xpdo_simple_object_data as $column => $value) {
+                if (in_array($column, $this->ignore_seed_fields)) {
+                    continue;
+                }
+                // Any child class can create a seed method, an example for modResource:
+                // seedTemplate(1) and would return the string name
+                $method = 'seed' . $this->makeStudyCase($column);
+                if (method_exists($this, $method)) {
+                    $value = $this->$method($value);
+                }
+                $this->blendable_xpdo_simple_object_data[$column] = $value;
+            }
+
+            $this->seedRelated();
+
+            $data = [
+                'columns' => $this->blendable_xpdo_simple_object_data,
+                'primaryKeyHistory' => $this->unique_key_history,
+                'related' => $this->related_data
+            ];
+        } elseif ($type == 'seed') {
+            if ($this->isDebug()) {
+                $this->blender->out('Data not found to make seed: '.$seed_key);
+            }
+        }
+
+        // https://docs.modx.com/revolution/2.x/developing-in-modx/other-development-resources/class-reference/modx/modx.invokeevent
+        $this->modx->invokeEvent(
+            'OnBlendSeed',
+            [
+                'blender' => $this->blender,
+                'blendable' => $this,
+                'type' => $type,
+                'xPDOClass' => $this->xpdo_simple_object_class,
+                'xPDOSimpleObject' => &$this->xPDOSimpleObject,
+                'data' => &$data
+            ]
+        );
+
+        // now cache it:
+        $this->modx->cacheManager->set(
+            $seed_key,
+            $data,
+            $this->cache_life,
+            $this->cacheOptions
+        );
+
+        return $seed_key;
+    }
+
+    /**
+     * @param bool $overwrite
+     *
+     * @return bool
+     */
+    protected function save($overwrite=false)
+    {
+        $saved = false;
+
+        if (is_object($this->xPDOSimpleObject)) {
+            if (!$overwrite) {
+                $this->error = true;
+                $this->error_messages['exits'] = $this->xpdo_simple_object_class.': ' .
+                    $this->blendable_xpdo_simple_object_data['name'] . ' already exists ';
+                return $saved;
+            }
+        } else {
+            $this->xPDOSimpleObject = $this->modx->newObject($this->xpdo_simple_object_class);
+        }
+
+        $this->xPDOSimpleObject->set($this->unique_key_column, $this->blendable_xpdo_simple_object_data[$this->unique_key_column]);
+
+        foreach ($this->blendable_xpdo_simple_object_data as $column => $value) {
+            // Any child class can create a convert method, an example for modResource:
+            // convertTemplate('String name') and would return the numeric ID
+            $method = 'convert'.$this->makeStudyCase($column);
+            if (method_exists($this, $method)) {
+                $value = $this->$method($value);
+            }
+            $this->xPDOSimpleObject->set($column, $value);
+        }
+
+        if (method_exists($this, 'getPropertiesData')) {
+            $this->xPDOSimpleObject->set('properties', $this->getPropertiesData());
+        }
+
+        $this->attachRelatedPieces();
+
+        if ($this->xPDOSimpleObject->save()) {
+            $this->attachRelatedPiecesAfterSave();
+            if ($this->isDebug()) {
+                $this->blender->out($this->getName() . ' has been installed/saved');
+            }
+            $saved = true;
+
+        } else {
+            if ($this->isDebug()) {
+                $this->blender->out($this->getName() . ' did not install/update', true);
+            }
+
+        }
+
+        return $saved;
+    }
+
+    protected function getUniqueCriteria()
+    {
+        return [
+            $this->unique_key_column => $this->blendable_xpdo_simple_object_data[$this->unique_key_column]
+        ];
+    }
+
+    /**
+     * @param string|array $criteria
+     */
+    protected function setUniqueCriteria($criteria)
+    {
+        $this->blendable_xpdo_simple_object_data[$this->unique_key_column] = $criteria;
+    }
+
+    /**
+     * Will load an existing xPDOSimpleObject if it exists, child class needs to class this one
      * @return $this
      */
-    public function setName($name)
+    protected function loadObject()
     {
-        $this->blendable_xpdo_simple_object_data['name'] = $name;
+        $this->xPDOSimpleObject = $this->modx->getObject($this->xpdo_simple_object_class, $this->getUniqueCriteria());
+
+        if (is_object($this->xPDOSimpleObject)) {
+            $this->exists = true;
+            $this->current_xpdo_simple_object_data = $this->xPDOSimpleObject->toArray();
+            $this->loadFromArray($this->current_xpdo_simple_object_data);
+            // load related data:
+            $this->loadRelatedData();
+        }
+
         return $this;
     }
 
     /**
-     * @param array $data
+     * @param array $data ~ convert the db data object to blend portable data
      *
      * @return $this
      */
-    public function loadFromArray($data=[])
+    protected function loadFromArray($data=[])
     {
         foreach ($data as $column => $value) {
-            $method_name = 'set'.$this->makeStudyCase($column);
+            $method_name = 'seed'.$this->makeStudyCase($column);
+
+            if (method_exists($this, $method_name) && !is_null($value)) {
+                if ($this->isDebug()) {
+                    $this->blender->out(__METHOD__.' call: '.$method_name.' V: '.$value);
+                }
+                $value = $this->$method_name($value);
+            }
+
+            $method_name = 'setField'.$this->makeStudyCase($column);
 
             if (isset($this->load_from_array_aliases[$method_name])) {
                 $method_name = $this->load_from_array_aliases[$method_name];
@@ -200,128 +480,6 @@ abstract class Blendable implements BlendableInterface
     }
 
     /**
-     * @param bool $overwrite
-     *
-     * @return bool
-     */
-    public function save($overwrite=false)
-    {
-        $saved = false;
-
-        $this->xPDOSimpleObject = $this->modx->getObject(
-            $this->xpdo_simple_object_class,
-            [
-                $this->unique_key_column => $this->blendable_xpdo_simple_object_data[$this->unique_key_column]
-            ]
-        );
-        if (is_object($this->xPDOSimpleObject)) {
-            if (!$overwrite) {
-                $this->error = true;
-                $this->error_messages['exits'] = $this->xpdo_simple_object_class.': ' .
-                    $this->blendable_xpdo_simple_object_data['name'] . ' already exists ';
-                return $saved;
-            }
-        } else {
-            $this->xPDOSimpleObject = $this->modx->newObject($this->xpdo_simple_object_class);
-        }
-
-        $this->xPDOSimpleObject->set($this->unique_key_column, $this->blendable_xpdo_simple_object_data[$this->unique_key_column]);
-
-        foreach ($this->blendable_xpdo_simple_object_data as $column => $value) {
-            $this->xPDOSimpleObject->set($column, $value);
-        }
-
-        if (method_exists($this, 'getPropertiesData')) {
-            $this->xPDOSimpleObject->set('properties', $this->getPropertiesData());
-        }
-
-        $this->relatedPieces();
-        if ($this->xPDOSimpleObject->save()) {
-            $this->relatedPiecesAfterSave();
-            if ($this->isDebug()) {
-                //echo ' SAVED ';exit();
-                $this->blender->out($this->getName() . ' has been installed/saved');
-            }
-            $saved = true;
-        } else {
-            if ($this->isDebug()) {
-                //echo ' NO!! ';exit();
-                $this->blender->out($this->getName() . ' did not install/update', true);
-            }
-
-        }
-
-        return $saved;
-    }
-
-    /**
-     * @param \xPDOSimpleObject|\xPDO\Om\xPDOSimpleObject $xPDOobject
-     * @return string ~ the related seed key
-     */
-    public function seed($xPDOSimpleObject)
-    {
-        $this->xPDOSimpleObject = $xPDOSimpleObject;
-        // No IDs! must get the alias and get a seed key,
-        $seed_key = $this->blender->getSeedKeyFromName($this->xPDOSimpleObject->get('name'));
-        $this->current_xpdo_simple_object_data = $this->xPDOSimpleObject->toArray();
-
-        $this->seedRelated($this->xPDOSimpleObject);
-        $this->current_xpdo_simple_object_data['related_data'] = $this->related_data;
-
-        // https://docs.modx.com/revolution/2.x/developing-in-modx/other-development-resources/class-reference/modx/modx.invokeevent
-        $this->modx->invokeEvent(
-            'OnBlendSeed',
-            [
-                'blender' => $this->blender,
-                'blendable' => $this,
-                'xPDOClass' => $this->xpdo_simple_object_class,
-                'xPDOSimpleObject' => &$this->xPDOSimpleObject,
-                'data' => &$this->current_xpdo_simple_object_data
-            ]
-        );
-
-        // now cache it:
-        $this->modx->cacheManager->set(
-            $seed_key,
-            $this->current_xpdo_simple_object_data,
-            $this->cache_life,
-            $this->cacheOptions
-        );
-
-        return $seed_key;
-    }
-    /**
-     * @param string $name
-     *
-     * @return bool|\xPDOSimpleObject|\xPDO\Om\xPDOSimpleObject $xPDOobject
-     */
-    public function getObjectFromName($name)
-    {
-        return $this->modx->getObject($this->xpdo_simple_object_class, [$this->unique_key_column => $name]);
-    }
-
-    /**
-     * Will load an existing modElement into element
-     * @param string $name
-     *
-     * @return $this
-     */
-    public function loadObjectFromName($name)
-    {
-        $this->xPDOSimpleObject = $this->getObjectFromName($name);
-
-        if (is_object($this->xPDOSimpleObject)) {
-            $this->exists = true;
-            $this->current_xpdo_simple_object_data = $this->xPDOSimpleObject->toArray();
-            $this->loadFromArray($this->current_xpdo_simple_object_data);
-            // load related data:
-            $this->loadRelatedData();
-        }
-
-        return $this;
-    }
-
-    /**
      * Override in child classes
      */
     protected function loadRelatedData()
@@ -330,162 +488,27 @@ abstract class Blendable implements BlendableInterface
     }
 
     /**
-     * @return array
-     */
-    public function getArrayForCopy()
-    {
-        $copy = $this->current_xpdo_simple_object_data;
-        $copy['related_data'] = $this->related_data;
-        return $copy;
-    }
-
-    /**
-     * @param string $seed_key
-     * @param bool $overwrite
-     *
-     * @return bool
-     */
-    public function blendFromSeed($seed_key, $overwrite=false)
-    {
-        $this->loadObjectDataFromSeed($seed_key);
-        return $this->blend($overwrite);
-    }
-
-    /**
-     * @param bool $overwrite
-     *
-     * @return bool
-     */
-    public function blend($overwrite=false)
-    {
-        $save = false;
-        // does it exist
-        $name = $this->getName();
-
-        $down = false;
-        /** @var \LCI\Blend\Blendable\Blendable $currentVersion */
-        $currentVersion = $this->loadCurrentVersion($name);
-        if ($currentVersion->isExists()) {
-            $this->exists = true;
-            if (!$overwrite) {
-                return $save;
-            }
-            $down = $currentVersion->getArrayForCopy();
-        } else {
-            $this->exists = false;
-        }
-
-        unset($this->current_xpdo_simple_object_data['id']);
-
-        $this->modx->invokeEvent(
-            'OnBlendBeforeSave',
-            [
-                'blender' => $this->blender,
-                'blendable' => $this,
-                'xPDOClass' => $this->xpdo_simple_object_class,
-                'xPDOSimleObject' => &$this->xPDOSimpleObject,
-                'data' => &$this->current_xpdo_simple_object_data
-            ]
-        );
-
-        // load from array:
-        if (count($this->current_xpdo_simple_object_data)) {
-            $this->loadFromArray($this->current_xpdo_simple_object_data);
-        }
-        $save = $this->save($overwrite);
-
-        if ($save) {
-            // write current DB version to disk:
-            $this->modx->cacheManager->set(
-                'down-'.$this->getSeedKey(),
-                $down,
-                $this->cache_life,
-                $this->cacheOptions
-            );
-            $this->modx->invokeEvent(
-                'OnBlendAfterSave',
-                [
-                    'blender' => $this->blender,
-                    'blendable' => $this,
-                    'xPDOClass' => $this->xpdo_simple_object_class,
-                    'xPDOSimleObject' => &$this->xPDOSimpleObject,
-                    'data' => &$this->current_xpdo_simple_object_data
-                ]
-            );
-        } else {
-            $this->blender->out('Error did not save ', true);
-        }
-        return $save;
-    }
-
-    /**
-     * @return string
-     */
-    public function getSeedKey()
-    {
-        return $this->blender->getSeedKeyFromName($this->getName());
-    }
-    /**
      * @param string $seed_key
      *
-     * @return bool
-     */
-    public function revertBlendFromSeed($seed_key)
-    {
-        $this->loadObjectDataFromSeed($seed_key);
-        return $this->revertBlend();
-    }
-
-    /**
-     * @return bool
-     */
-    public function revertBlend()
-    {
-        $reverted = false;
-
-        $this->xPDOSimpleObject = $this->getObjectFromName($this->getName());
-        if (!is_object($this->xPDOSimpleObject)) {
-            $this->xPDOSimpleObject = $this->modx->getObject($this->xpdo_simple_object_class);
-        }
-        // 1. get previous data from cache:
-        $data = $this->modx->cacheManager->get('down-'.$this->getSeedKey(), $this->cacheOptions);
-
-        if (!$data) {
-            if ($this->isDebug()) {
-                $this->blender->out('Remove old' . $this->getName());
-            }
-            $reverted = $this->xPDOSimpleObject->remove();
-
-        } elseif (is_array($data)) {
-            if ($this->isDebug()) {
-                $this->blender->out('Restore to old ' . $this->getName());
-            }
-            // load old data:
-            $this->xPDOSimpleObject->fromArray($data);
-            $reverted = $this->xPDOSimpleObject->save();
-        }
-
-        if ($reverted || $data === false) {
-            $this->revertRelatedPieces($data);
-        }
-
-        return $reverted;
-    }
-
-    /**
-     * @param string $seed_key
-     *
-     * @return $this
+     * @return bool|array
      */
     protected function loadObjectDataFromSeed($seed_key)
     {
-        $this->current_xpdo_simple_object_data = $this->modx->cacheManager->get($seed_key, $this->cacheOptions);
-        if ($this->current_xpdo_simple_object_data == false) {
-            $this->blender->out('Error: Seed could not be found: '.$seed_key.' aborting', true);
-            exit();
+        // @TODO refactor!!
+        $data = $this->modx->cacheManager->get($seed_key, $this->cacheOptions);
+        if ($data == false) {
+            if ($this->type == 'blend') {
+                $this->blender->out('Error: Seed could not be found: '.$seed_key.' aborting', true);
+                exit();
+            }
+
+        } else {
+            $this->blendable_xpdo_simple_object_data = $data['columns'];
+            $this->unique_key_history = $data['primaryKeyHistory'];
+            $this->related_data = $data['related'];
         }
-        $this->loadFromArray($this->current_xpdo_simple_object_data);
-        return $this;
+
+        return $data;
     }
 
     /**
@@ -502,32 +525,38 @@ abstract class Blendable implements BlendableInterface
         return $StudyName;
     }
 
-    protected function relatedPieces()
+    /**
+     * This method is called just before blend/save()
+     */
+    protected function attachRelatedPieces()
     {
 
     }
 
     /**
-     * @param array|bool $data ~ the data loaded from the down seed
+     * This method is called just after a successful blend/save()
+     */
+    protected function attachRelatedPiecesAfterSave()
+    {
+
+    }
+
+    /**
+     * @param array|bool $data ~ the data loaded from the revert seed
      */
     protected function revertRelatedPieces($data)
     {
 
     }
 
-    protected function relatedPiecesAfterSave()
-    {
-
-    }
-
     /**
-     * @param \xPDOSimpleObject|\xPDO\Om\xPDOSimpleObject $xPDOSimpleObject
      *
-     * @return \xPDOSimpleObject|\xPDO\Om\xPDOSimpleObject $xPDOSimpleObject
      */
-    protected function seedRelated($xPDOSimpleObject)
+    protected function seedRelated()
     {
-        return $xPDOSimpleObject;
+        // load related data:
+        $this->loadRelatedData();
+
     }
 
     /**

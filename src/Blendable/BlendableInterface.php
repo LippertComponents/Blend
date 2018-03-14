@@ -18,8 +18,9 @@ interface BlendableInterface
      *
      * @param \modx $modx
      * @param Blender $blender
+     * @param string|array $unique_value ~ ex: name or criteria
      */
-    public function __construct(\modx $modx, Blender $blender);
+    public function __construct(\modx $modx, Blender $blender, $unique_value);
 
     /**
      * @return bool
@@ -52,6 +53,11 @@ interface BlendableInterface
     public function isExists();
 
     /**
+     * @return $this ~ new self()
+     */
+    public function getCurrentVersion();
+
+    /**
      * @param string $seed_key
      * @param bool $overwrite ~ overwrite existing data object
      *
@@ -67,25 +73,9 @@ interface BlendableInterface
     public function blend($overwrite=false);
 
     /**
-     * @param string $name
-     *
-     * @return $this ~ new self()
-     */
-    public function loadCurrentVersion($name);
-
-    /**
-     * @param array $data
-     *
-     * @return $this
-     */
-    public function loadFromArray($data=[]);
-
-    /**
-     * @param string $seed_key
-     *
      * @return bool
      */
-    public function revertBlendFromSeed($seed_key);
+    public function delete();
 
     /**
      * @return bool
@@ -93,9 +83,8 @@ interface BlendableInterface
     public function revertBlend();
 
     /**
-     * @param \xPDOSimpleObject|\xPDO\Om\xPDOSimpleObject $xPDOobject
      * @return string ~ the related seed key
      */
-    public function seed($xPDOSimpleObject);
+    public function seed();
 
 }

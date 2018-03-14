@@ -13,7 +13,7 @@ trait DescriptionGetterAndSetter
     /**
      * @return string
      */
-    public function getDescription()
+    public function getFieldDescription()
     {
         return $this->blendable_xpdo_simple_object_data['description'];
     }
@@ -22,7 +22,7 @@ trait DescriptionGetterAndSetter
      * @param string $description
      * @return $this
      */
-    public function setDescription($description)
+    public function setFieldDescription($description)
     {
         $this->blendable_xpdo_simple_object_data['description'] = $description;
         return $this;
