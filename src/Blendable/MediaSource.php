@@ -13,7 +13,7 @@ class MediaSource extends Blendable
 {
     use BlendableProperties;
     use DescriptionGetterAndSetter;
-    // return $this->blender->getElementSeedKeyFromName($this->getName(), $this->xpdo_simple_object_class)
+    // return $this->blender->getElementSeedKeyFromName($this->getFieldName(), $this->xpdo_simple_object_class)
 
     /** @var string  */
     protected $opt_cache_key = 'media-sources';
@@ -43,9 +43,27 @@ class MediaSource extends Blendable
     // create methods to match the column data:
 
     /**
+     * @return string
+     */
+    public function getFieldName()
+    {
+        return $this->blendable_xpdo_simple_object_data['name'];
+    }
+
+    /**
+     * @param string $name
+     * @return $this
+     */
+    public function setFieldName($name)
+    {
+        $this->blendable_xpdo_simple_object_data['name'] = $name;
+        return $this;
+    }
+
+    /**
      * @return bool
      */
-    public function getClassKey()
+    public function getFieldClassKey()
     {
         return $this->blendable_xpdo_simple_object_data['class_key'];
     }
@@ -54,7 +72,7 @@ class MediaSource extends Blendable
      * @param string $class_key
      * @return $this
      */
-    public function setClassKey($class_key)
+    public function setFieldClassKey($class_key)
     {
         $this->blendable_xpdo_simple_object_data['class_key'] = $class_key;
         return $this;
@@ -63,7 +81,7 @@ class MediaSource extends Blendable
     /**
      * @return bool
      */
-    public function getIsStream()
+    public function getFieldIsStream()
     {
         return $this->blendable_xpdo_simple_object_data['is_stream'];
     }
@@ -72,7 +90,7 @@ class MediaSource extends Blendable
      * @param bool $bool
      * @return $this
      */
-    public function setIsStream($bool)
+    public function setFieldIsStream($bool)
     {
         $this->blendable_xpdo_simple_object_data['is_stream'] = (int)$bool;
         return $this;
@@ -271,15 +289,12 @@ class MediaSource extends Blendable
     }
 
     /**
-     * @param string $name
-     *
      * @return Blendable
      */
-    public function loadCurrentVersion($name)
+    public function getCurrentVersion()
     {
         /** @var MediaSource $mediaSource */
-        $mediaSource = new self($this->modx, $this->blender);
-        $mediaSource->setSeedsDir($this->getSeedsDir());
-        return $mediaSource->loadObjectFromName($name);
+        $mediaSource = new self($this->modx, $this->blender, $this->getFieldName());
+        return $mediaSource->setSeedsDir($this->getSeedsDir());
     }
 }

@@ -17,7 +17,7 @@ final class MediaSourceTest extends BaseBlend
         $testMediaSource1 = $this->blender->getBlendableMediaSource($media_source_name);
         $testMediaSource1
             ->setSeedsDir($media_source_name)
-            ->setDescription($ms_description);
+            ->setFieldDescription($ms_description);
 
         $blended = $testMediaSource1->blend(true);
         $this->assertEquals(
@@ -29,7 +29,7 @@ final class MediaSourceTest extends BaseBlend
         // Validate data:
         if ($blended) {
             /** @var \LCI\Blend\Blendable\MediaSource $blendMediaSource */
-            $blendMediaSource = $testMediaSource1->loadCurrentVersion($media_source_name);
+            $blendMediaSource = $testMediaSource1->getCurrentVersion();
             $this->assertInstanceOf(
                 '\LCI\Blend\Blendable\MediaSource',
                 $blendMediaSource,
@@ -39,20 +39,14 @@ final class MediaSourceTest extends BaseBlend
             if ($blendMediaSource instanceof \LCI\Blend\Blendable\MediaSource) {
                 $this->assertEquals(
                     $media_source_name,
-                    $blendMediaSource->getName(),
+                    $blendMediaSource->getFieldName(),
                     'Compare media source name'
                 );
 
                 $this->assertEquals(
                     $ms_description,
-                    $blendMediaSource->getDescription(),
+                    $blendMediaSource->getFieldDescription(),
                     'Compare media source description'
-                );
-
-                $this->assertEquals(
-                    true,
-                    $blendMediaSource->revertBlend(),
-                    'Revert blend'
                 );
             }
         }
@@ -95,7 +89,7 @@ final class MediaSourceTest extends BaseBlend
         if (file_exists($seed_file)) {
             $generated_data = require_once $seed_file;
         }
-        unset($generated_data['id']);
+        unset($generated_data['columns']['id']);
 
         $this->assertEquals(
             $fixed_data,
@@ -106,6 +100,24 @@ final class MediaSourceTest extends BaseBlend
         $this->blender->setSeedsDir($actual_timestamp);
     }
 
+    /**
+     * @depends testMakeMediaSourceSeeds
+     */
+    public function testRevertMediSource()
+    {
+        $media_source_name = 'testMediaSource1';
+
+        /** @var \LCI\Blend\Blendable\MediaSource $testMediaSource1 */
+        $blendMediaSource = $this->blender->getBlendableMediaSource($media_source_name);
+        $blendMediaSource
+            ->setSeedsDir($media_source_name);
+
+        $this->assertEquals(
+            true,
+            $blendMediaSource->revertBlend(),
+            'Revert blend'
+        );
+    }
     /**
      * @depends testMakeMediaSourceSeeds
      */

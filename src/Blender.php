@@ -359,9 +359,9 @@ class Blender
     public function getBlendableMediaSource($name)
     {
         /** @var MediaSource $mediaSource */
-        $mediaSource =  new MediaSource($this->modx, $this);
+        $mediaSource =  new MediaSource($this->modx, $this, $name);
         return $mediaSource
-            ->setName($name)
+            ->setFieldName($name)
             ->setSeedsDir($this->getSeedsDir());
     }
 
@@ -919,10 +919,10 @@ class Blender
 
         foreach ($collection as $mediaSource) {
             /** @var MediaSource $blendMediaSource */
-            $blendMediaSource = new MediaSource($this->modx, $this);
+            $blendMediaSource = new MediaSource($this->modx, $this, $mediaSource->get('name'));
             $seed_key = $blendMediaSource
                 ->setSeedsDir($this->getMigrationName('mediaSource', $name))
-                ->seed($mediaSource);
+                ->seed();
             $this->out("Media Source: ".$mediaSource->get('name').' Key: '.$seed_key);
             $keys[] = $seed_key;
         }

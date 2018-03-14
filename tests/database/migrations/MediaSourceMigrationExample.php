@@ -20,15 +20,15 @@ class MediaSourceMigrationExample extends Migrations
         $testMediaSource3 = $this->blender->getBlendableMediaSource('testMediaSource3');
         $testMediaSource3
             ->setSeedsDir($this->getSeedsDir())
-            ->setDescription('This is my 3rd media source test, note this is limited to 255 or something and no HTML')
+            ->setFieldDescription('This is my 3rd media source test, note this is limited to 255 or something and no HTML')
             ->setPropertyBasePath('/assets/path/')
             ->setPropertyBaseUrl('/assets/url/');
         if ($testMediaSource3->blend(true)) {
-            $this->blender->out($testMediaSource3->getName().' was saved correctly');
+            $this->blender->out($testMediaSource3->getFieldName().' was saved correctly');
 
         } else {
             //error
-            $this->blender->out($testMediaSource3->getName().' did not save correctly ', true);
+            $this->blender->out($testMediaSource3->getFieldName().' did not save correctly ', true);
             $this->blender->out(print_r($testMediaSource3->getErrorMessages(), true), true);
         }
     }
@@ -44,10 +44,10 @@ class MediaSourceMigrationExample extends Migrations
         $testMediaSource3 = $this->blender->getBlendableMediaSource('testMediaSource3');
 
         if ( $testMediaSource3->setSeedsDir($this->getSeedsDir())->revertBlend() ) {
-            $this->blender->out($testMediaSource3->getName().' setting has been reverted to '.$this->getSeedsDir());
+            $this->blender->out($testMediaSource3->getFieldName().' setting has been reverted to '.$this->getSeedsDir());
 
         } else {
-            $this->blender->out($testMediaSource3->getName().' setting was not reverted', true);
+            $this->blender->out($testMediaSource3->getFieldName().' setting was not reverted', true);
         }
     }
 
