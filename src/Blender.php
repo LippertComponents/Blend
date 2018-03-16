@@ -10,6 +10,7 @@ namespace LCI\Blend;
 
 use modX;
 use LCI\Blend\Blendable\MediaSource;
+use LCI\Blend\Blendable\Resource;
 use LCI\Blend\Helpers\UserInteractionHandler;
 use LCI\Blend\Helpers\SimpleCache;
 use PHPUnit\Runner\Exception;
@@ -358,7 +359,7 @@ class Blender
      */
     public function getBlendableMediaSource($name)
     {
-        /** @var MediaSource $mediaSource */
+        /** @var \LCI\Blend\Blendable\MediaSource $mediaSource */
         $mediaSource =  new MediaSource($this->modx, $this, $name);
         return $mediaSource
             ->setFieldName($name)
@@ -632,6 +633,18 @@ class Blender
     }
 
     /**
+     * @param string $alias
+     * @param  string $context
+     * @return \LCI\Blend\Blendable\Resource
+     */
+    public function getBlendableResource($alias, $context='web')
+    {
+        /** @var \LCI\Blend\Blendable\Resource $mediaSource */
+        $resource =  new Resource($this->modx, $this, $alias, $context);
+        return $resource
+            ->setSeedsDir($this->getSeedsDir());
+    }
+    /**
      * @param array $resources
      * @param string $seeds_dir
      * @param bool $overwrite
@@ -644,9 +657,8 @@ class Blender
         // will update if resource does exist or create new
         foreach ($resources as $context => $seeds) {
             foreach ($seeds as $seed_key) {
-                /** @var \LCI\Blend\Resource $blendResource */
-                $blendResource = new Resource($this->modx, $this);
-                $blendResource->setContextKey($context);
+                /** @var \LCI\Blend\Blendable\Resource $blendResource */
+                $blendResource = new Resource($this->modx, $this, $this->getAliasFromSeedKey($seed_key), $context);
 
                 if (!empty($seeds_dir)) {
                     $blendResource->setSeedsDir($seeds_dir);
@@ -665,6 +677,7 @@ class Blender
                     }
                 } else {
                     $this->out('There was an error saving ' . $seed_key, true);
+                    echo 'There was an error saving ' . $seed_key; exit();
                     $saved = false;
                 }
             }
@@ -686,14 +699,13 @@ class Blender
         // will update if resource does exist or create new
         foreach ($resources as $context => $seeds) {
             foreach ($seeds as $seed_key) {
-                /** @var \LCI\Blend\Resource $blendResource */
-                $blendResource = new Resource($this->modx, $this);
-                $blendResource->setContextKey($context);
+                /** @var \LCI\Blend\Blendable\Resource $blendResource */
+                $blendResource = new Resource($this->modx, $this, $this->getAliasFromSeedKey($seed_key), $context);
 
                 if (!empty($seeds_dir)) {
                     $blendResource->setSeedsDir($seeds_dir);
                 }
-                if ($blendResource->revertBlendFromSeed($seed_key)) {
+                if ($blendResource->revertBlend()) {
                     $this->out($seed_key . ' has been reverted ');
 
                 } else {
@@ -927,8 +939,6 @@ class Blender
             $keys[] = $seed_key;
         }
 
-        //print_r($keys);exit();
-
         if ($create_migration_file) {
             $this->writeMigrationClassFile('mediaSource', $keys, $server_type, $name);
         }
@@ -980,10 +990,9 @@ class Blender
 
         $collection = $this->modx->getCollection('modResource', $criteria);
         foreach ($collection as $resource) {
-            $blendResource = new Resource($this->modx, $this);
+            $blendResource = new Resource($this->modx, $this, $resource->get('alias'), $resource->get('context_key'));
             $seed_key = $blendResource
                 ->setSeedsDir($this->getMigrationName('resource', $name))
-                ->setContextKey($resource->get('context_key'))
                 ->seed($resource);
             $this->out("ID: ".$resource->get('id').' Key: '.$seed_key);
 

@@ -75,7 +75,7 @@ abstract class Blendable implements BlendableInterface
     protected $debug = false;
 
     /**
-     * Element constructor.
+     * Blendable constructor.
      *
      * @param \modx $modx
      * @param Blender $blender
@@ -471,7 +471,7 @@ abstract class Blendable implements BlendableInterface
                     $this->blender->out(__METHOD__.' call: '.$method_name.' V: '.$value);
                 }
                 $this->$method_name($value);
-
+                
             } elseif($this->isDebug()) {
                 $this->blender->out(__METHOD__.' missing: '.$method_name.' V: '.$value, true);
             }
@@ -494,7 +494,6 @@ abstract class Blendable implements BlendableInterface
      */
     protected function loadObjectDataFromSeed($seed_key)
     {
-        // @TODO refactor!!
         $data = $this->modx->cacheManager->get($seed_key, $this->cacheOptions);
         if ($data == false) {
             if ($this->type == 'blend') {

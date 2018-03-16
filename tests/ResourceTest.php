@@ -6,6 +6,98 @@ final class ResourceTest extends BaseBlend
     /** @var bool  */
     protected $install_blend = true;
 
+    public function testGetBlendableResource()
+    {
+        //$this->modx->loadClass('sources.modMediaSource');
+
+        $alias = 'blendable-resource';
+        $content = 'Content, can put in HTML here';
+        $description = 'This is description, don\'t put in HTML here';
+        $long_title = 'Long title';
+        $page_title = 'Page Title';
+
+
+        /** @var \LCI\Blend\Blendable\Resource $blendableResource */
+        $blendableResource = $this->blender->getBlendableResource($alias);
+        $blendableResource
+            ->setSeedsDir(BLEND_TEST_SEEDS_DIR)
+            ->setFieldContent($content)
+            ->setFieldDescription($description)
+            ->setFieldLongtitle($long_title)
+            ->setFieldPagetitle($page_title);
+
+        $blended = $blendableResource->blend(true);
+        $this->assertEquals(
+            true,
+            $blended,
+            $alias.' resource blend attempted'
+        );
+
+        // Validate data/convenience methods:
+        if ($blended) {
+            /** @var \LCI\Blend\Blendable\Resource $blendResource */
+            $blendResource = $this->blender->getBlendableResource($alias);
+            $this->assertInstanceOf(
+                '\LCI\Blend\Blendable\Resource',
+                $blendResource,
+                'Validate instance was created \LCI\Blend\Blendable\Resource'
+            );
+
+            if ($blendResource instanceof \LCI\Blend\Blendable\Resource) {
+                $this->assertEquals(
+                    $alias,
+                    $blendResource->getFieldAlias(),
+                    'Compare resource alias'
+                );
+
+                $this->assertEquals(
+                    $content,
+                    $blendResource->getFieldContent(),
+                    'Compare content'
+                );
+
+                $this->assertEquals(
+                    $description,
+                    $blendResource->getFieldDescription(),
+                    'Compare description'
+                );
+
+                $this->assertEquals(
+                    $long_title,
+                    $blendResource->getFieldLongtitle(),
+                    'Compare long title'
+                );
+
+                $this->assertEquals(
+                    $page_title,
+                    $blendResource->getFieldPagetitle(),
+                    'Compare page title'
+                );
+            }
+        }
+    }
+
+    /**
+     * @depends testGetBlendableResource
+     */
+    public function testRevertGetBlendableResource()
+    {
+        //$this->modx->loadClass('sources.modMediaSource');
+
+        $alias = 'blendable-resource';
+
+        /** @var \LCI\Blend\Blendable\Resource $blendableResource */
+        $blendableResource = $this->blender->getBlendableResource($alias);
+        $blendableResource->setSeedsDir(BLEND_TEST_SEEDS_DIR);
+
+        $this->assertEquals(
+            true,
+            $blendableResource->revertBlend(),
+            $alias.' resource revertBlend attempted'
+        );
+    }
+
+
     public function testBlendManyResources()
     {
         $resource_seeds = [
@@ -113,6 +205,8 @@ final class ResourceTest extends BaseBlend
         $actual_timestamp = $this->blender->getSeedsDir();
         $this->blender->setSeedsDir(BLEND_TEST_SEEDS_DIR);
 
+        $seeds_directory = $this->blender->getMigrationName('resource');
+
         $seeds = $this->blender->makeResourceSeeds(['alias:IN' => $aliases]);
 
         $this->assertEquals(
@@ -125,16 +219,16 @@ final class ResourceTest extends BaseBlend
         foreach ($test_resources as $alias => $test_resource) {
             $fixed_data = require_once BLEND_COMPARE_DIRECTORY . 'testResource'.$count.'.seed.php';
             $generated_data = false;
-            $seed_file = $this->blender->getSeedsDirectory() . BLEND_TEST_SEEDS_DIR . DIRECTORY_SEPARATOR . 'resources' . DIRECTORY_SEPARATOR . 'web'. DIRECTORY_SEPARATOR . $alias.'.cache.php';
+            $seed_file = $this->blender->getSeedsDirectory($seeds_directory) . 'resources' . DIRECTORY_SEPARATOR . 'web'. DIRECTORY_SEPARATOR . $alias.'.cache.php';
             if (file_exists($seed_file)) {
                 $generated_data = require_once $seed_file;
             }
-            unset($generated_data['id'], $generated_data['createdon']);
+            unset($generated_data['columns']['id'], $generated_data['columns']['createdon'], $generated_data['columns']['alias_visible']);
 
             $this->assertEquals(
                 $fixed_data,
                 $generated_data,
-                'Comparing existing testResource'.$count++.' seed file with generated seed file'
+                'Comparing existing testResource'.$count++.' seed file with generated seed file: '.$seed_file.PHP_EOL
             );
         }
 
