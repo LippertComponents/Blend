@@ -6,22 +6,24 @@ final class PluginTest extends BaseBlend
     /** @var bool  */
     protected $install_blend = true;
 
-    public function testBlendOneRawPlugin()
+    public function testGetBlendablePlugin()
     {
         $plugin_name = 'testPlugin1';
         $plugin_description = 'This is my first test  plugin, note this is limited to 255 or something and no HTML';
         $plugin_code = '<?php $eventName = $modx->event->name; ';
         $plugin_event = 'OnUserActivate';
 
-        /** @var \LCI\Blend\Plugin $testPlugin1 */
-        $testPlugin1 = $this->blender->blendOneRawPlugin($plugin_name);
+        /** @var \LCI\Blend\Blendable\Plugin $testPlugin1 */
+        $testPlugin1 = $this->blender->getBlendablePlugin($plugin_name);
         $testPlugin1
             ->setSeedsDir($plugin_name)
-            ->setDescription($plugin_description)
-            ->setCategoryFromNames('Parent Plugin Cat=>Child Plugin Cat')
-            ->setCode($plugin_code, true)
+            ->setFieldDescription($plugin_description)
+            ->setFieldCategory('Parent Plugin Cat=>Child Plugin Cat')
+            ->setFieldCode($plugin_code, true)
             ->setAsStatic('core/components/mysite/elements/plugins/myPlugin.tpl')
             ->attachOnEvent($plugin_event);
+
+        $related = $testPlugin1->getRelatedData();
 
         $blended = $testPlugin1->blend(true);
         $this->assertEquals(
@@ -32,30 +34,30 @@ final class PluginTest extends BaseBlend
 
         // Validate data:
         if ($blended) {
-            /** @var \LCI\Blend\Plugin $blendPlugin */
-            $blendPlugin = $testPlugin1->loadCurrentVersion($plugin_name);
+            /** @var \LCI\Blend\Blendable\Plugin $blendPlugin */
+            $blendPlugin = $testPlugin1->getCurrentVersion();
             $this->assertInstanceOf(
-                '\LCI\Blend\Plugin',
+                '\LCI\Blend\Blendable\Plugin',
                 $blendPlugin,
-                'Validate instance was created \LCI\Blend\Plugin'
+                'Validate instance was created \LCI\Blend\Blendable\Plugin'
             );
 
-            if ($blendPlugin instanceof \LCI\Blend\Plugin) {
+            if ($blendPlugin instanceof \LCI\Blend\Blendable\Plugin) {
                 $this->assertEquals(
                     $plugin_name,
-                    $blendPlugin->getName(),
+                    $blendPlugin->getFieldName(),
                     'Compare plugin name'
                 );
 
                 $this->assertEquals(
                     $plugin_description,
-                    $blendPlugin->getDescription(),
+                    $blendPlugin->getFieldDescription(),
                     'Compare plugin description'
                 );
 
                 $this->assertEquals(
                     $this->removePHPtags($plugin_code),
-                    $blendPlugin->getCode(),
+                    $blendPlugin->getFieldCode(),
                     'Compare plugin code'
                 );
 
@@ -104,6 +106,7 @@ final class PluginTest extends BaseBlend
                 'content' => $plugin_code
             ]);
 
+            /**
             $event = $this->modx->newObject('modPluginEvent');
             $event->fromArray([
                 'event' => $plugin_event,
@@ -112,11 +115,27 @@ final class PluginTest extends BaseBlend
             ]);
             $events = [$event];
             $testPlugin2->addMany($events, 'PluginEvents');
+            */
             $testPlugin2->save();
+
+            $pluginEvent = $this->modx->newObject('modPluginEvent');
+
+            $pluginEvent->set('event', $plugin_event);
+            $pluginEvent->set('pluginid', $testPlugin2->get('id'));
+            $pluginEvent->set('priority', 0);
+            $pluginEvent->set('propertyset', 0);
+
+            $this->assertEquals(
+                true,
+                $pluginEvent->save(),
+                'Attempting to attach event to testPlugin2'
+            );
         }
 
         $actual_timestamp = $this->blender->getSeedsDir();
         $this->blender->setSeedsDir(BLEND_TEST_SEEDS_DIR);
+
+        $seeds_directory = $this->blender->getMigrationName('plugin');
 
         $this->blender->makePluginSeeds(['name' => $plugin_name]);
 
@@ -128,7 +147,7 @@ final class PluginTest extends BaseBlend
 
         $fixed_data = require_once BLEND_COMPARE_DIRECTORY.'testPlugin2.seed.php';
         $generated_data = false;
-        $seed_file = $this->blender->getSeedsDirectory().BLEND_TEST_SEEDS_DIR.DIRECTORY_SEPARATOR.'elements'.DIRECTORY_SEPARATOR.'modPlugin_testPlugin2.cache.php';
+        $seed_file = $this->blender->getSeedsDirectory($seeds_directory) . 'elements' . DIRECTORY_SEPARATOR . 'plugins'. DIRECTORY_SEPARATOR .$plugin_name.'.cache.php';
         if (file_exists($seed_file)) {
             $generated_data = require_once $seed_file;
         }
@@ -143,6 +162,9 @@ final class PluginTest extends BaseBlend
         $this->blender->setSeedsDir($actual_timestamp);
     }
 
+    /**
+     * @depends testMakePluginSeeds
+     */
     public function testCleanUpMakePluginSeeds()
     {
         $actual_timestamp = $this->blender->getSeedsDir();
@@ -205,6 +227,9 @@ final class PluginTest extends BaseBlend
         }
     }
 
+    /**
+     * @depends testPluginMigration
+     */
     public function testPluginRevertMigration()
     {
         $migration = 'PluginMigrationExample';

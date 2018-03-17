@@ -11,7 +11,7 @@ class m2018_01_10_093000_Plugin extends Migrations
 {
     /** @var array  */
     protected $plugins = array (
-      0 => 'modPlugin_testPlugin2',
+      0 => 'testPlugin2',
     );
 
     /**

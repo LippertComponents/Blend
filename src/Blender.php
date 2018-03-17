@@ -11,6 +11,7 @@ namespace LCI\Blend;
 use modX;
 use LCI\Blend\Blendable\Chunk;
 use LCI\Blend\Blendable\MediaSource;
+use LCI\Blend\Blendable\Plugin;
 use LCI\Blend\Blendable\Resource;
 use LCI\Blend\Blendable\Snippet;
 use LCI\Blend\Helpers\UserInteractionHandler;
@@ -423,15 +424,13 @@ class Blender
     /**
      * Use this method with your IDE to help manually build a Plugin with PHP
      * @param string $name
-     * @return Plugin
+     * @return \LCI\Blend\Blendable\Plugin
      */
-    public function blendOneRawPlugin($name)
+    public function getBlendablePlugin($name)
     {
-        /** @var Plugin $plugin */
-        $plugin =  new Plugin($this->modx, $this);
-        return $plugin
-            ->setName($name)
-            ->setSeedsDir($this->getSeedsDir());
+        /** @var \LCI\Blend\Blendable\Plugin $plugin */
+        $plugin =  new Plugin($this->modx, $this, $name);
+        return $plugin->setSeedsDir($this->getSeedsDir());
     }
 
     /**
@@ -442,7 +441,8 @@ class Blender
     {
         // will update if element does exist or create new
         foreach ($plugins as $seed_key) {
-            $blendPlugin = new Plugin($this->modx, $this);
+            /** @var \LCI\Blend\Blendable\Plugin $blendPlugin */
+            $blendPlugin = new Plugin($this->modx, $this, $this->getNameFromSeedKey($seed_key));
             if (!empty($seeds_dir)) {
                 $blendPlugin->setSeedsDir($seeds_dir);
             }
@@ -471,17 +471,17 @@ class Blender
     {
         // will update if system setting does exist or create new
         foreach ($plugins as $seed_key) {
-            /** @var Plugin $systemSetting */
+            /** @var \LCI\Blend\Blendable\Plugin $systemSetting */
             $blendPlugin = new Plugin($this->modx, $this);
             if (!empty($seeds_dir)) {
                 $blendPlugin->setSeedsDir($seeds_dir);
             }
 
-            if ( $blendPlugin->revertBlendFromSeed($seed_key) ) {
-                $this->out($blendPlugin->getName().' plugin has been reverted to '.$seeds_dir);
+            if ( $blendPlugin->revertBlend() ) {
+                $this->out($blendPlugin->getFieldName().' plugin has been reverted to '.$seeds_dir);
 
             } else {
-                $this->out($blendPlugin->getName().' plugin was not reverted', true);
+                $this->out($blendPlugin->getFieldName().' plugin was not reverted', true);
             }
         }
     }
@@ -958,11 +958,11 @@ class Blender
         $collection = $this->modx->getCollection('modPlugin', $criteria);
 
         foreach ($collection as $plugin) {
-            /** @var Plugin $blendPlugin */
-            $blendPlugin = new Plugin($this->modx, $this);
+            /** @var \LCI\Blend\Blendable\Plugin $blendPlugin */
+            $blendPlugin = new Plugin($this->modx, $this, $plugin->get('name'));
             $seed_key = $blendPlugin
                 ->setSeedsDir($this->getMigrationName('plugin', $name))
-                ->seedElement($plugin);
+                ->seed();
             $this->out("Plugin: ".$plugin->get('name').' Key: '.$seed_key);
             $keys[] = $seed_key;
         }

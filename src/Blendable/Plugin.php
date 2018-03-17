@@ -6,13 +6,16 @@
  * Time: 2:44 PM
  */
 
-namespace LCI\Blend;
+namespace LCI\Blend\Blendable;
 
 
 class Plugin extends Element
 {
+    /** @var string  */
+    protected $opt_cache_key = 'elements/plugins';
+
     /** @var string ~ the xPDO class name */
-    protected $element_class = 'modPlugin';
+    protected $xpdo_simple_object_class = 'modPlugin';
 
     /** @var array  */
     protected $on_event_names = [];
@@ -21,16 +24,14 @@ class Plugin extends Element
     protected $remove_on_event_names = [];
 
     /**
-     * @param string $name
-     *
-     * @return Plugin
+     * @return \LCI\Blend\Blendable\Plugin
      */
-    public function loadCurrentVersion($name)
+    public function getCurrentVersion()
     {
-        /** @var Plugin $element */
-        $element = new self($this->modx, $this->blender);
-        $element->setSeedsDir($this->getSeedsDir());
-        return $element->loadElementFromName($name);
+        /** @var \LCI\Blend\Blendable\Plugin $plugin */
+        $plugin = new self($this->modx, $this->blender, $this->getFieldName());
+        return $plugin
+            ->setSeedsDir($this->getSeedsDir());
     }
 
     /**
@@ -41,7 +42,7 @@ class Plugin extends Element
      */
     public function attachOnEvent($event_name, $priority=0, $property_set=0)
     {
-        $this->on_event_names[] = [
+        $this->related_data[] = [
             'event' => $event_name,
             'priority' => $priority,
             'propertyset' => $property_set
@@ -52,12 +53,12 @@ class Plugin extends Element
     /**
      * @param string $event_name
      *
-     * @return mixed
+     * @return $this
      */
     public function removeOnEvent($event_name)
     {
-        $this->remove_on_event_names = $event_name;
-        return $event_name;
+        $this->remove_on_event_names[] = $event_name;
+        return $this;
     }
     /**
      * Override in child classes
@@ -66,44 +67,35 @@ class Plugin extends Element
     {
         // get all related Events:
         $events = [];
-        if ($this->element instanceof \modPlugin) {
-            $pluginEvents = $this->element->getMany('PluginEvents');
+        if ($this->xPDOSimpleObject instanceof \modPlugin) {
+            $pluginEvents = $this->xPDOSimpleObject->getMany('PluginEvents');
             /** @var \modPluginEvent $event */
             foreach ($pluginEvents as $event) {
-                $events[] = $event->toArray();
+                $data = $event->toArray();
+                unset($data['id'], $data['pluginid']);
+                $events[] = $data;
             }
+
             // will be loaded via setOnEvents from blend()
             $this->related_data = $events;
         }
     }
 
-    protected function relatedPieces()
+    protected function attachRelatedPiecesAfterSave()
     {
-        if (count($this->on_event_names) > 0) {
-            /*
-            @TODO this fails testing? MODX bug?
-            $events = [];
-            foreach ($this->on_event_names as $event_data) {
-                $event = $this->modx->newObject('modPluginEvent');
-                $event->fromArray($event_data);
-
-                $events[] = $event;
-            }
-            $this->element->addMany($events, 'PluginEvents');
-            */
+        // remove any:
+        $removePluginEvents = $this->xPDOSimpleObject->getMany('PluginEvents', ['events:IN' => $this->remove_on_event_names]);
+        foreach ($removePluginEvents as $event) {
+            //$event->remove();
         }
-        // @TODO remove
-    }
 
-    protected function relatedPiecesAfterSave()
-    {
-        if (count($this->on_event_names) > 0) {
+        if (count($this->related_data) > 0) {
             $events = [];
-            foreach ($this->on_event_names as $event_data) {
+            foreach ($this->related_data as $event_data) {
 
                 $pluginEvent = $this->modx->newObject('modPluginEvent');
                 $pluginEvent->set('event', $event_data['event']);
-                $pluginEvent->set('pluginid', $this->element->get('id'));
+                $pluginEvent->set('pluginid', $this->xPDOSimpleObject->get('id'));
                 $priority = (!empty($event_data['priority']) ? $event_data['priority'] : 0);
                 $pluginEvent->set('priority', (int)$priority);
                 $pluginEvent->set('propertyset', (int)(!empty($event_data['propertyset']) ? $event_data['propertyset'] : 0));
@@ -112,7 +104,7 @@ class Plugin extends Element
                     $this->blender->out('Plugin did not attached the event: '.$event_data['event']);
                 }
             }
-            $this->element->addMany($events, 'PluginEvents');
+            $this->xPDOSimpleObject->addMany($events, 'PluginEvents');
         }
     }
 
@@ -125,8 +117,9 @@ class Plugin extends Element
      */
     protected function setRelatedData($data)
     {
+        // @TODO Not used?
         if (is_array($data)) {
-            foreach ($data as $event) {
+            foreach ($data as $count => $event) {
                 if (isset($event['remove']) && $event['remove']) {
                     $this->removeOnEvent($event['event']);
 
@@ -139,23 +132,21 @@ class Plugin extends Element
         return $this;
     }
     /**
-     * @param \modPlugin $plugin
-     *
-     * @return \modPlugin
+     * @TODO Not used?
      */
-    protected function seedRelated($plugin)
+    protected function seedRelated()
     {
         // get all related Events:
         $events = [];
-        $pluginEvents = $plugin->getMany('PluginEvents');
+        $pluginEvents = $this->xPDOSimpleObject->getMany('PluginEvents');
         /** @var \modPluginEvent $event */
         foreach ($pluginEvents as $event) {
-            $events[] = $event->toArray();
+            $data = $event->toArray();
+            unset($data['id'], $data['pluginid']);
+            $events[] = $data;
 
         }
         // will be loaded via setOnEvents from blend()
         $this->related_data = $events;
-
-        return $plugin;
     }
 }

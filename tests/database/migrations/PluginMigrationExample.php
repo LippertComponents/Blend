@@ -18,22 +18,22 @@ class PluginMigrationExample extends Migrations
     {
         $plugin_event = 'OnWebPageInit';
 
-        /** @var \LCI\Blend\Plugin $testPlugin3 */
-        $testPlugin3 = $this->blender->blendOneRawPlugin('testPlugin3');
+        /** @var \LCI\Blend\Blendable\Plugin $testPlugin3 */
+        $testPlugin3 = $this->blender->getBlendablePlugin('testPlugin3');
         $testPlugin3
             ->setSeedsDir($this->getSeedsDir())
-            ->setDescription('This is my 3rd test plugin, note this is limited to 255 or something and no HTML')
-            ->setCategoryFromNames('Parent Plugin Cat=>Child Plugin Cat')
-            ->setCode('<?php $eventName = $modx->event->name;//3rd ')
+            ->setFieldDescription('This is my 3rd test plugin, note this is limited to 255 or something and no HTML')
+            ->setFieldCategory('Parent Plugin Cat=>Child Plugin Cat')
+            ->setFieldCode('<?php $eventName = $modx->event->name;//3rd ')
             ->attachOnEvent($plugin_event)
             ;//->setAsStatic('core/components/mysite/elements/plugins/myPlugin3.tpl');
 
         if ($testPlugin3->blend(true)) {
-            $this->blender->out($testPlugin3->getName().' was saved correctly');
+            $this->blender->out($testPlugin3->getFieldName().' was saved correctly');
 
         } else {
             //error
-            $this->blender->out($testPlugin3->getName().' did not save correctly ', true);
+            $this->blender->out($testPlugin3->getFieldName().' did not save correctly ', true);
             $this->blender->out(print_r($testPlugin3->getErrorMessages(), true), true);
         }
     }
@@ -48,30 +48,16 @@ class PluginMigrationExample extends Migrations
         // set back to previous version of the plugin
         $name = 'testPlugin3';
 
-        $blendPlugin = new \LCI\Blend\Plugin($this->modx, $this->blender);
-        $blendPlugin
-            ->setName($name)
-            ->setSeedsDir($this->getSeedsDir());
+        /** @var \LCI\Blend\Blendable\Plugin $testPlugin3 */
+        $blendPlugin = $this->blender->getBlendablePlugin($name);
+        $blendPlugin->setSeedsDir($this->getSeedsDir());
 
         if ( $blendPlugin->revertBlend() ) {
-            $this->blender->out($blendPlugin->getName().' setting has been reverted to '.$this->getSeedsDir());
+            $this->blender->out($blendPlugin->getFieldName().' setting has been reverted to '.$this->getSeedsDir());
 
         } else {
-            $this->blender->out($blendPlugin->getName().' setting was not reverted', true);
+            $this->blender->out($blendPlugin->getFieldName().' setting was not reverted', true);
         }
-
-        /**
-         * Manually via xPDO, but no control her to what the last version may have been, assuming it did not exist:
-        /** @var bool|\modPlugin $testPlugin3 * /
-        $testPlugin3 = $this->modx->getObject('modPlugin', ['name' => $name]);
-        if ($testPlugin3 instanceof \modPlugin) {
-            if ($testPlugin3->remove()) {
-                $this->blender->out($name.' has been removed');
-            } else {
-                $this->blender->out($name.' could not be removed', true);
-            }
-        }
-         */
     }
 
     /**
