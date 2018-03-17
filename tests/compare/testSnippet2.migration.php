@@ -11,7 +11,7 @@ class m2018_01_10_093000_Snippet extends Migrations
 {
     /** @var array  */
     protected $snippets = array (
-      0 => 'modSnippet_testSnippet2',
+      0 => 'testSnippet2',
     );
 
     /**

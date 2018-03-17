@@ -16,21 +16,21 @@ class SnippetMigrationExample extends Migrations
      */
     public function up()
     {
-        /** @var \LCI\Blend\Snippet $testSnippet3 */
-        $testSnippet3 = $this->blender->blendOneRawSnippet('testSnippet3');
+        /** @var \LCI\Blend\Blendable\Snippet $testSnippet3 */
+        $testSnippet3 = $this->blender->getBlendableSnippet('testSnippet3');
         $testSnippet3
             ->setSeedsDir($this->getSeedsDir())
-            ->setDescription('This is my 3rd test snippet, note this is limited to 255 or something and no HTML')
-            ->setCategoryFromNames('Parent Snippet Cat=>Child Snippet Cat')
-            ->setCode('<?php return \'This is the 3rd test Snippet!\'; ')
+            ->setFieldDescription('This is my 3rd test snippet, note this is limited to 255 or something and no HTML')
+            ->setFieldCategory('Parent Snippet Cat=>Child Snippet Cat')
+            ->setFieldCode('<?php return \'This is the 3rd test Snippet!\'; ')
             ;//->setAsStatic('core/components/mysite/elements/snippets/mySnippet3.tpl');
 
         if ($testSnippet3->blend(true)) {
-            $this->blender->out($testSnippet3->getName().' was saved correctly');
+            $this->blender->out($testSnippet3->getFieldName().' was saved correctly');
 
         } else {
             //error
-            $this->blender->out($testSnippet3->getName().' did not save correctly ', true);
+            $this->blender->out($testSnippet3->getFieldName().' did not save correctly ', true);
             $this->blender->out(print_r($testSnippet3->getErrorMessages(), true), true);
         }
     }
@@ -43,32 +43,18 @@ class SnippetMigrationExample extends Migrations
     public function down()
     {
         // set back to previous version of the snippet
-        /** @var bool|\modSnippet $testSnippet3 */
         $name = 'testSnippet3';
 
-        $blendSnippet = new \LCI\Blend\Snippet($this->modx, $this->blender);
-        $blendSnippet
-            ->setName($name)
-            ->setSeedsDir($this->getSeedsDir());
+        /** @var \LCI\Blend\Blendable\Snippet $blendSnippet */
+        $blendSnippet = $this->blender->getBlendableSnippet($name);
+        $blendSnippet->setSeedsDir($this->getSeedsDir());
 
         if ( $blendSnippet->revertBlend() ) {
-            $this->blender->out($blendSnippet->getName().' setting has been reverted to '.$this->getSeedsDir());
+            $this->blender->out($blendSnippet->getFieldName().' setting has been reverted to '.$this->getSeedsDir());
 
         } else {
-            $this->blender->out($blendSnippet->getName().' setting was not reverted', true);
+            $this->blender->out($blendSnippet->getFieldName().' setting was not reverted', true);
         }
-
-        /**
-         * Manually via xPDO, but no control her to what the last version may have been, assuming it did not exist:
-        $testSnippet3 = $this->modx->getObject('modSnippet', ['name' => $name]);
-        if ($testSnippet3 instanceof \modSnippet) {
-            if ($testSnippet3->remove()) {
-                $this->blender->out($name.' has been removed');
-            } else {
-                $this->blender->out($name.' could not be removed', true);
-            }
-        }
-         */
     }
 
     /**

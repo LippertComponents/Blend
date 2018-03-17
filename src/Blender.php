@@ -11,6 +11,7 @@ namespace LCI\Blend;
 use modX;
 use LCI\Blend\Blendable\MediaSource;
 use LCI\Blend\Blendable\Resource;
+use LCI\Blend\Blendable\Snippet;
 use LCI\Blend\Helpers\UserInteractionHandler;
 use LCI\Blend\Helpers\SimpleCache;
 use PHPUnit\Runner\Exception;
@@ -374,7 +375,7 @@ class Blender
     {
         // will update if element does exist or create new
         foreach ($media_sources as $seed_key) {
-            /** @var MediaSource $blendMediaSource */
+            /** @var \LCI\Blend\Blendable\MediaSource $blendMediaSource */
             $blendMediaSource = new MediaSource($this->modx, $this);
             if (!empty($seeds_dir)) {
                 $blendMediaSource->setSeedsDir($seeds_dir);
@@ -404,7 +405,7 @@ class Blender
     {
         // will update if system setting does exist or create new
         foreach ($media_sources as $seed_key) {
-            /** @var MediaSource $blendMediaSource */
+            /** @var \LCI\Blend\Blendable\MediaSource $blendMediaSource */
             $blendMediaSource = new MediaSource($this->modx, $this);
             if (!empty($seeds_dir)) {
                 $blendMediaSource->setSeedsDir($seeds_dir);
@@ -488,15 +489,13 @@ class Blender
     /**
      * Use this method with your IDE to help manually build a Snippet with PHP
      * @param string $name
-     * @return Snippet
+     * @return \LCI\Blend\Blendable\Snippet
      */
-    public function blendOneRawSnippet($name)
+    public function getBlendableSnippet($name)
     {
         /** @var Snippet $snippet */
-        $snippet =  new Snippet($this->modx, $this);
-        return $snippet
-            ->setName($name)
-            ->setSeedsDir($this->getSeedsDir());
+        $snippet =  new Snippet($this->modx, $this, $name);
+        return $snippet->setSeedsDir($this->getSeedsDir());
     }
 
     /**
@@ -507,8 +506,8 @@ class Blender
     {
         // will update if element does exist or create new
         foreach ($snippets as $seed_key) {
-            /** @var Snippet $blendSnippet */
-            $blendSnippet = new Snippet($this->modx, $this);
+            /** @var \LCI\Blend\Blendable\Snippet $blendSnippet */
+            $blendSnippet = new Snippet($this->modx, $this, $this->getNameFromSeedKey($seed_key));
             if (!empty($seeds_dir)) {
                 $blendSnippet->setSeedsDir($seeds_dir);
             }
@@ -537,16 +536,16 @@ class Blender
         // will update if system setting does exist or create new
         foreach ($snippets as $seed_key) {
             /** @var Snippet $systemSetting */
-            $blendSnippet = new Snippet($this->modx, $this);
+            $blendSnippet = new Snippet($this->modx, $this, $this->getNameFromSeedKey($seed_key));
             if (!empty($seeds_dir)) {
                 $blendSnippet->setSeedsDir($seeds_dir);
             }
 
-            if ( $blendSnippet->revertBlendFromSeed($seed_key) ) {
-                $this->out($blendSnippet->getName().' snippet has been reverted to '.$seeds_dir);
+            if ( $blendSnippet->revertBlend() ) {
+                $this->out($blendSnippet->getFieldName().' snippet has been reverted to '.$seeds_dir);
 
             } else {
-                $this->out($blendSnippet->getName().' snippet was not reverted', true);
+                $this->out($blendSnippet->getFieldName().' snippet was not reverted', true);
             }
         }
     }
@@ -639,7 +638,7 @@ class Blender
      */
     public function getBlendableResource($alias, $context='web')
     {
-        /** @var \LCI\Blend\Blendable\Resource $mediaSource */
+        /** @var \LCI\Blend\Blendable\Resource $resource */
         $resource =  new Resource($this->modx, $this, $alias, $context);
         return $resource
             ->setSeedsDir($this->getSeedsDir());
@@ -1023,16 +1022,16 @@ class Blender
         $collection = $this->modx->getCollection('modSnippet', $criteria);
 
         foreach ($collection as $snippet) {
-            /** @var Snippet $blendSnippet */
-            $blendSnippet = new Snippet($this->modx, $this);
+            /** @var \LCI\Blend\Blendable\Snippet $blendSnippet */
+            $blendSnippet = new Snippet($this->modx, $this, $snippet->get('name'));
             $seed_key = $blendSnippet
                 ->setSeedsDir($this->getMigrationName('snippet', $name))
-                ->seedElement($snippet);
+                ->seed();
             $this->out("Snippet: ".$snippet->get('name').' Key: '.$seed_key);
             $keys[] = $seed_key;
         }
 
-        if($create_migration_file) {
+        if ($create_migration_file) {
             $this->writeMigrationClassFile('snippet', $keys, $server_type, $name);
         }
         return $keys;
@@ -1782,6 +1781,7 @@ class Blender
     }
 
     /**
+     * @deprecated
      * @param string $name
      * @param string $type ~ template, template-variable, chunk, snippet or plugin
      * @return string
@@ -1799,6 +1799,15 @@ class Blender
     {
         // @TODO review
         return str_replace('/', '#', $name);
+    }
+
+    /**
+     * @param string $seed_key
+     * @return string
+     */
+    public function getNameFromSeedKey($seed_key)
+    {
+        return str_replace('#', '/', $seed_key);
     }
 
     /**

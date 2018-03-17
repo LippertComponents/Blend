@@ -6,18 +6,18 @@ final class SnippetTest extends BaseBlend
     /** @var bool  */
     protected $install_blend = true;
 
-    public function testBlendOneRawSnippet()
+    public function testGetBlendableSnippet()
     {
         $snippet_name = 'testSnippet1';
         $snippet_description = 'This is my first test  snippet, note this is limited to 255 or something and no HTML';
         $snippet_code = '<?php return \'This is a test Snippet!\'; ';
-        /** @var \LCI\Blend\Snippet $testSnippet1 */
-        $testSnippet1 = $this->blender->blendOneRawSnippet($snippet_name);
+        /** @var \LCI\Blend\Blendable\Snippet $testSnippet1 */
+        $testSnippet1 = $this->blender->getBlendableSnippet($snippet_name);
         $testSnippet1
             ->setSeedsDir($snippet_name)
-            ->setDescription($snippet_description)
-            ->setCategoryFromNames('Parent Cat=>Child Cat')
-            ->setCode($snippet_code, true)
+            ->setFieldDescription($snippet_description)
+            ->setFieldCategory('Parent Cat=>Child Cat')
+            ->setFieldCode($snippet_code, true)
             ->setAsStatic('core/components/mysite/elements/snippets/mySnippet.tpl');
 
         $blended = $testSnippet1->blend(true);
@@ -29,30 +29,30 @@ final class SnippetTest extends BaseBlend
 
         // Validate data:
         if ($blended) {
-            /** @var \LCI\Blend\Snippet $blendSnippet */
-            $blendSnippet = $testSnippet1->loadCurrentVersion($snippet_name);
+            /** @var \LCI\Blend\Blendable\Snippet $blendSnippet */
+            $blendSnippet = $testSnippet1->getCurrentVersion();
             $this->assertInstanceOf(
-                '\LCI\Blend\Snippet',
+                '\LCI\Blend\Blendable\Snippet',
                 $blendSnippet,
-                'Validate instance was created \LCI\Blend\Snippet'
+                'Validate instance was created \LCI\Blend\Blendable\Snippet'
             );
 
-            if ($blendSnippet instanceof \LCI\Blend\Snippet) {
+            if ($blendSnippet instanceof \LCI\Blend\Blendable\Snippet) {
                 $this->assertEquals(
                     $snippet_name,
-                    $blendSnippet->getName(),
+                    $blendSnippet->getFieldName(),
                     'Compare snippet name'
                 );
 
                 $this->assertEquals(
                     $snippet_description,
-                    $blendSnippet->getDescription(),
+                    $blendSnippet->getFieldDescription(),
                     'Compare snippet description'
                 );
 
                 $this->assertEquals(
                     $this->removePHPtags($snippet_code),
-                    $blendSnippet->getCode(),
+                    $blendSnippet->getFieldCode(),
                     'Compare snippet code'
                 );
 
@@ -93,6 +93,8 @@ final class SnippetTest extends BaseBlend
         $actual_timestamp = $this->blender->getSeedsDir();
         $this->blender->setSeedsDir(BLEND_TEST_SEEDS_DIR);
 
+        $seeds_directory = $this->blender->getMigrationName('snippet');
+
         $this->blender->makeSnippetSeeds(['name' => $snippet_name]);
 
         $this->assertEquals(
@@ -103,7 +105,7 @@ final class SnippetTest extends BaseBlend
 
         $fixed_data = require_once BLEND_COMPARE_DIRECTORY.'testSnippet2.seed.php';
         $generated_data = false;
-        $seed_file = $this->blender->getSeedsDirectory().BLEND_TEST_SEEDS_DIR.DIRECTORY_SEPARATOR.'elements'.DIRECTORY_SEPARATOR.'modSnippet_testSnippet2.cache.php';
+        $seed_file = $this->blender->getSeedsDirectory($seeds_directory) . 'elements' . DIRECTORY_SEPARATOR . 'snippets'. DIRECTORY_SEPARATOR .$snippet_name.'.cache.php';
         if (file_exists($seed_file)) {
             $generated_data = require_once $seed_file;
         }
@@ -118,6 +120,9 @@ final class SnippetTest extends BaseBlend
         $this->blender->setSeedsDir($actual_timestamp);
     }
 
+    /**
+     * @depends testMakeSnippetSeeds
+     */
     public function testCleanUpMakeSnippetSeeds()
     {
         $actual_timestamp = $this->blender->getSeedsDir();
@@ -180,6 +185,9 @@ final class SnippetTest extends BaseBlend
         }
     }
 
+    /**
+     * @depends testSnippetMigration
+     */
     public function testSnippetRevertMigration()
     {
         $migration = 'SnippetMigrationExample';
