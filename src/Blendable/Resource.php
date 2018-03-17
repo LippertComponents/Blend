@@ -463,6 +463,7 @@ class Resource extends Blendable
     public function setFieldContextKey($value)
     {
         $this->blendable_xpdo_simple_object_data['context_key'] = $value;
+        $this->opt_cache_key = 'resources/'.$value;
         return $this;
     }
 
