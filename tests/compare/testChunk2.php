@@ -11,7 +11,7 @@ class m2018_01_10_093000_Chunk extends Migrations
 {
     /** @var array  */
     protected $chunks = array (
-      0 => 'modChunk_testChunk2',
+      0 => 'testChunk2',
     );
 
     /**

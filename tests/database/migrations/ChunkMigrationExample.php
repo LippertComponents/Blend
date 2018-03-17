@@ -16,21 +16,20 @@ class ChunkMigrationExample extends Migrations
      */
     public function up()
     {
-        /** @var \LCI\Blend\Chunk $chunk */
-        $testChunk3 = $this->blender->blendOneRawChunk('testChunk3');
+        /** @var \LCI\Blend\Blendable\Chunk $chunk */
+        $testChunk3 = $this->blender->getBlendableChunk('testChunk3');
         $testChunk3
             ->setSeedsDir($this->getSeedsDir())
-            ->setDescription('This is my 3rd test chunk, note this is limited to 255 or something and no HTML')
-            ->setCategoryFromNames('Parent Cat=>Child Cat')
-            ->setCode('Hi [[+testPlaceholder3]], ...')
-            ;//->setAsStatic('core/components/mysite/elements/chunks/myChunk3.tpl');
+            ->setFieldDescription('This is my 3rd test chunk, note this is limited to 255 or something and no HTML')
+            ->setFieldCategory('Parent Cat=>Child Cat')
+            ->setFieldCode('Hi [[+testPlaceholder3]], ...');
 
         if ($testChunk3->blend(true)) {
-            $this->blender->out($testChunk3->getName().' was saved correctly');
+            $this->blender->out($testChunk3->getFieldName().' was saved correctly');
 
         } else {
             //error
-            $this->blender->out($testChunk3->getName().' did not save correctly ', true);
+            $this->blender->out($testChunk3->getFieldName().' did not save correctly ', true);
             $this->blender->out(print_r($testChunk3->getErrorMessages(), true), true);
         }
     }
@@ -44,31 +43,15 @@ class ChunkMigrationExample extends Migrations
     {
         $name = 'testChunk3';
 
-        $blendChunk = new \LCI\Blend\Chunk($this->modx, $this->blender);
-        $blendChunk
-            ->setName($name)
-            ->setSeedsDir($this->getSeedsDir());
+        $blendChunk = $this->blender->getBlendableChunk($name);
+        $blendChunk->setSeedsDir($this->getSeedsDir());
 
         if ( $blendChunk->revertBlend() ) {
-            $this->blender->out($blendChunk->getName().' setting has been reverted to '.$this->getSeedsDir());
+            $this->blender->out($blendChunk->getFieldName().' setting has been reverted to '.$this->getSeedsDir());
 
         } else {
-            $this->blender->out($blendChunk->getName().' setting was not reverted', true);
+            $this->blender->out($blendChunk->getFieldName().' setting was not reverted', true);
         }
-
-        /**
-         * Manually via xPDO, but no control her to what the last version may have been, assuming it did not exist:
-        /** @var bool|\modChunk $testChunk3 * /
-        $name = 'testChunk3';
-        $testChunk3 = $this->modx->getObject('modChunk', ['name' => $name]);
-        if ($testChunk3 instanceof \modChunk) {
-            if ($testChunk3->remove()) {
-                $this->blender->out($name.' has been removed');
-            } else {
-                $this->blender->out($name.' could not be removed', true);
-            }
-        }
-         */
     }
 
     /**

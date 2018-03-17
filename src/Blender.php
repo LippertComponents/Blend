@@ -9,6 +9,7 @@
 namespace LCI\Blend;
 
 use modX;
+use LCI\Blend\Blendable\Chunk;
 use LCI\Blend\Blendable\MediaSource;
 use LCI\Blend\Blendable\Resource;
 use LCI\Blend\Blendable\Snippet;
@@ -294,13 +295,11 @@ class Blender
      * @param string $name
      * @return Chunk
      */
-    public function blendOneRawChunk($name)
+    public function getBlendableChunk($name)
     {
-        /** @var Chunk $chunk */
-        $chunk =  new Chunk($this->modx, $this);
-        return $chunk
-            ->setName($name)
-            ->setSeedsDir($this->getSeedsDir());
+        /** @var \LCI\Blend\Blendable\Chunk $chunk */
+        $chunk =  new Chunk($this->modx, $this, $name);
+        return $chunk->setSeedsDir($this->getSeedsDir());
     }
     /**
      * @param array $chunks
@@ -310,7 +309,8 @@ class Blender
     {
         // will update if element does exist or create new
         foreach ($chunks as $seed_key) {
-            $blendChunk = new Chunk($this->modx, $this);
+            /** @var \LCI\Blend\Blendable\Chunk $blendChunk */
+            $blendChunk = new Chunk($this->modx, $this, $this->getNameFromSeedKey($seed_key));
             if (!empty($seeds_dir)) {
                 $blendChunk->setSeedsDir($seeds_dir);
             }
@@ -339,13 +339,13 @@ class Blender
     {
         // will update if system setting does exist or create new
         foreach ($chunks as $seed_key) {
-            /** @var Chunk $systemSetting */
-            $blendChunk = new Chunk($this->modx, $this);
+            /** @var \LCI\Blend\Blendable\Chunk $systemSetting */
+            $blendChunk = new Chunk($this->modx, $this, $this->getNameFromSeedKey($seed_key));
             if (!empty($seeds_dir)) {
                 $blendChunk->setSeedsDir($seeds_dir);
             }
 
-            if ( $blendChunk->revertBlendFromSeed($seed_key) ) {
+            if ( $blendChunk->revertBlend() ) {
                 $this->out($blendChunk->getName().' chunk has been reverted to '.$seeds_dir);
 
             } else {
@@ -900,11 +900,11 @@ class Blender
         $collection = $this->modx->getCollection('modChunk', $criteria);
 
         foreach ($collection as $chunk) {
-            /** @var Chunk $blendChunk */
-            $blendChunk = new Chunk($this->modx, $this);
+            /** @var \LCI\Blend\Blendable\Chunk $blendChunk */
+            $blendChunk = new Chunk($this->modx, $this, $chunk->get('name'));
             $seed_key = $blendChunk
                 ->setSeedsDir($this->getMigrationName('chunk', $name))
-                ->seedElement($chunk);
+                ->seed();
             $this->out("Chunk: ".$chunk->get('name').' Key: '.$seed_key);
             $keys[] = $seed_key;
         }

@@ -6,24 +6,25 @@
  * Time: 4:07 PM
  */
 
-namespace LCI\Blend;
+namespace LCI\Blend\Blendable;
 
 
 class Chunk extends Element
 {
+    /** @var string  */
+    protected $opt_cache_key = 'elements/chunks';
+
     /** @var string ~ the xPDO class name */
-    protected $element_class = 'modChunk';
+    protected $xpdo_simple_object_class = 'modChunk';
 
     /**
-     * @param string $name
-     *
-     * @return Chunk
+     * @return \LCI\Blend\Blendable\Chunk
      */
-    public function loadCurrentVersion($name)
+    public function getCurrentVersion()
     {
-        /** @var Chunk $element */
-        $element = new self($this->modx, $this->blender);
-        $element->setSeedsDir($this->getSeedsDir());
-        return $element->loadElementFromName($name);
+        /** @var \LCI\Blend\Blendable\Chunk $snippet */
+        $snippet = new self($this->modx, $this->blender, $this->getFieldName());
+        return $snippet
+            ->setSeedsDir($this->getSeedsDir());
     }
 }

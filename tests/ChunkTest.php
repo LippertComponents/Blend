@@ -11,13 +11,13 @@ final class ChunkTest extends BaseBlend
         $chunk_name = 'testChunk1';
         $chunk_description = 'This is my test chunk, note this is limited to 255 or something and no HTML';
         $chunk_code = 'Hi [[+testPlaceholder]]!';
-        /** @var \LCI\Blend\Chunk $chunk */
-        $testChunk1 = $this->blender->blendOneRawChunk($chunk_name);
+        /** @var \LCI\Blend\Blendable\Chunk $chunk */
+        $testChunk1 = $this->blender->getBlendableChunk($chunk_name);
         $testChunk1
             ->setSeedsDir($chunk_name)
-            ->setDescription($chunk_description)
-            ->setCategoryFromNames('Parent Cat=>Child Cat')
-            ->setCode($chunk_code, true)
+            ->setFieldDescription($chunk_description)
+            ->setFieldCategory('Parent Cat=>Child Cat')
+            ->setFieldCode($chunk_code, true)
             ->setAsStatic('core/components/mysite/elements/chunks/myChunk.tpl');
 
         $blended = $testChunk1->blend(true);
@@ -29,30 +29,30 @@ final class ChunkTest extends BaseBlend
 
         // Validate data:
         if ($blended) {
-            /** @var \LCI\Blend\Chunk $blendChunk */
-            $blendChunk = $testChunk1->loadCurrentVersion($chunk_name);
+            /** @var \LCI\Blend\Blendable\Chunk $blendChunk */
+            $blendChunk = $testChunk1->getCurrentVersion();
             $this->assertInstanceOf(
-                '\LCI\Blend\Chunk',
+                '\LCI\Blend\Blendable\Chunk',
                 $blendChunk,
                 'Validate instance was created \LCI\Blend\Chunk'
             );
 
-            if ($blendChunk instanceof \LCI\Blend\Chunk) {
+            if ($blendChunk instanceof \LCI\Blend\Blendable\Chunk) {
                 $this->assertEquals(
                     $chunk_name,
-                    $blendChunk->getName(),
+                    $blendChunk->getFieldName(),
                     'Compare chunk name'
                 );
 
                 $this->assertEquals(
                     $chunk_description,
-                    $blendChunk->getDescription(),
+                    $blendChunk->getFieldDescription(),
                     'Compare chunk description'
                 );
 
                 $this->assertEquals(
                     $chunk_code,
-                    $blendChunk->getCode(),
+                    $blendChunk->getFieldCode(),
                     'Compare chunk code'
                 );
 
@@ -102,6 +102,8 @@ final class ChunkTest extends BaseBlend
         $actual_timestamp = $this->blender->getSeedsDir();
         $this->blender->setSeedsDir(BLEND_TEST_SEEDS_DIR);
 
+        $seeds_directory = $this->blender->getMigrationName('chunk');
+
         $this->blender->makeChunkSeeds(['name' => $chunk_name]);
 
         $this->blender->out('DIR: '.BLEND_COMPARE_DIRECTORY.$chunk_name.'.php', true);
@@ -113,7 +115,7 @@ final class ChunkTest extends BaseBlend
 
         $fixed_data = require_once BLEND_COMPARE_DIRECTORY.'testChunk2.seed.php';
         $generated_data = false;
-        $seed_file = $this->blender->getSeedsDirectory().BLEND_TEST_SEEDS_DIR.DIRECTORY_SEPARATOR.'elements'.DIRECTORY_SEPARATOR.'modChunk_testChunk2.cache.php';
+        $seed_file = $this->blender->getSeedsDirectory($seeds_directory) . 'elements' . DIRECTORY_SEPARATOR . 'chunks'. DIRECTORY_SEPARATOR .$chunk_name.'.cache.php';
         if (file_exists($seed_file)) {
             $generated_data = require_once $seed_file;
         }
@@ -129,6 +131,7 @@ final class ChunkTest extends BaseBlend
     }
 
     /**
+     * @depends testMakeChunkSeeds
      */
     public function testCleanUpMakeChunkSeeds()
     {
