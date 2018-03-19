@@ -33,7 +33,7 @@ class Properties
 
     /**
      * @param string $name
-     * @param string|int|bool $value
+     * @param mixed $value
      *
      * @return $this
      */
