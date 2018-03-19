@@ -6,42 +6,117 @@
  * Time: 2:44 PM
  */
 
-namespace LCI\Blend;
+namespace LCI\Blend\Blendable;
 
+
+use SebastianBergmann\CodeCoverage\Report\PHP;
 
 class Template extends Element
 {
+    /** @var string  */
+    protected $opt_cache_key = 'elements/templates';
+
+    /** @var string ~ the xPDO class name */
+    protected $xpdo_simple_object_class = 'modTemplate';
+
+    /** @var string  */
+    protected $unique_key_column = 'templatename';
+
+    /** @var array  */
     protected $tv_names = [];
 
     /** @var array  */
     protected $detach_tvs = [];
 
-    protected $remove_tv_names = [];
-
-    protected $icon = '';
-
-    protected $template_type = 0;
-
-    /** @var string ~ the xPDO class name */
-    protected $element_class = 'modTemplate';
-
-    /** @var string */
-    protected $name_column_name = 'templatename';
-
     /** @var array  */
     protected $tv_seeds = [];
 
     /**
-     * @param string $name
-     *
-     * @return Template
+     * @return \LCI\Blend\Blendable\Template
      */
-    public function loadCurrentVersion($name)
+    public function getCurrentVersion()
     {
-        /** @var Template $element */
-        $element = new self($this->modx, $this->blender);
-        $element->setSeedsDir($this->getSeedsDir());
-        return $element->loadElementFromName($name);
+        /** @var \LCI\Blend\Blendable\Template $element */
+        $element = new self($this->modx, $this->blender, $this->getFieldName());
+        return $element->setSeedsDir($this->getSeedsDir());
+    }
+
+    /**
+     * @return string
+     */
+    public function getFieldIcon()
+    {
+        return $this->blendable_xpdo_simple_object_data['icon'];
+    }
+
+    /**
+     * @return string
+     */
+    public function getFieldName()
+    {
+        return $this->getFieldTemplateName();
+    }
+
+    /**
+     * @return string
+     */
+    public function getFieldTemplateName()
+    {
+        return $this->blendable_xpdo_simple_object_data['templatename'];
+    }
+
+    /**
+     * @return string
+     */
+    public function getFieldTemplateType()
+    {
+        return $this->blendable_xpdo_simple_object_data['template_type'];
+    }
+
+    /**
+     * @param string $icon
+     * @return $this
+     */
+    public function setFieldIcon($icon)
+    {
+        $this->blendable_xpdo_simple_object_data['icon'] = $icon;
+        return $this;
+    }
+    /**
+     * @param string $name
+     * @return $this
+     */
+    public function setFieldName($name)
+    {
+        return $this->setFieldTemplateName($name);
+    }
+
+    /**
+     * @param string $name
+     * @return $this
+     */
+    public function setFieldTemplateName($name)
+    {
+        $this->blendable_xpdo_simple_object_data['templatename'] = $name;
+        return $this;
+    }
+
+    /**
+     * @param string $name
+     * @return $this
+     */
+    public function setFieldTemplateType($name)
+    {
+        $this->blendable_xpdo_simple_object_data['template_type'] = $name;
+        return $this;
+    }
+
+    /**
+     * @param array $tvs
+     */
+    public function setTvs($tvs)
+    {
+        $this->tv_seeds = $tvs;
     }
 
     /**
@@ -52,7 +127,10 @@ class Template extends Element
      */
     public function attachTemplateVariable($tv_name, $rank=0)
     {
-        $this->tv_names[] = [
+        if (!isset($this->related_data['attach'])) {
+            $this->related_data['attach'] = [];
+        }
+        $this->related_data['attach'][] = [
             'name' => $tv_name,
             'rank' => $rank
         ];
@@ -65,26 +143,30 @@ class Template extends Element
      */
     public function detachTV($tv_name)
     {
-        $this->detach_tvs[] = $tv_name;
+        if (!isset($this->related_data['detach'])) {
+            $this->related_data['detach'] = [];
+        }
+        $this->related_data['detach'][] = $tv_name;
         return $this;
     }
 
-    protected function relatedPieces()
+    protected function attachRelatedPieces()
     {
-        foreach ($this->tv_seeds as $tv) {
-            // seed the TV:
-            $tvSeed = new TemplateVariable($this->modx, $this->blender);
-            $tvSeed
-                ->setSeedsDir($this->getSeedsDir())
-                ->loadElementDataFromSeed($tv['seed_key']);
-            $tvSeed->blend(true);
+        if (isset($this->related_data['seeds'])) {
+            foreach ($this->related_data['seeds'] as $tv) {
+                // blend the the TV from seed:
+                $tvSeed = new TemplateVariable($this->modx, $this->blender, $tv['name']);
+                $tvSeed
+                    ->setSeedsDir($this->getSeedsDir())
+                    ->blendFromSeed($tv['seed_key'], true);
 
-            $this->attachTemplateVariable($tv['name'], $tv['rank']);
+                $this->attachTemplateVariable($tv['name'], $tv['rank']);
+            }
         }
 
-        if (count($this->tv_names) > 0) {
+        if (isset($this->related_data['attach']) && count($this->related_data['attach']) > 0) {
             $tvs = [];
-            foreach ($this->tv_names as $tv_name_data) {
+            foreach ($this->related_data['attach'] as $tv_name_data) {
                 // get the TV:
                 $tv = $this->modx->getObject('modTemplateVar', ['name' => $tv_name_data['name']]);
                 if ($tv) {
@@ -99,23 +181,22 @@ class Template extends Element
                 }
 
             }
-            $this->element->addMany($tvs, 'TemplateVarTemplates');
+            $this->xPDOSimpleObject->addMany($tvs, 'TemplateVarTemplates');
         }
     }
 
-    protected function relatedPiecesAfterSave()
+    protected function attachRelatedPiecesAfterSave()
     {
-        if (count($this->detach_tvs) > 0) {
-            $tvs = [];
-            foreach ($this->tv_names as $tv_name) {
+        if (isset($this->related_data['detach']) && count($this->related_data['detach']) > 0) {
+            foreach ($this->related_data['detach'] as $tv_name) {
                 // get the TV:
                 $tv = $this->modx->getObject('modTemplateVar', ['name' => $tv_name]);
                 if ($tv) {
                     $templateVarTemplate = $this->modx->getObject('modTemplateVarTemplate', array(
                         'tmplvarid' => $tv->get('id'),
-                        'templateid' => $this->element->get('id'),
+                        'templateid' => $this->xPDOSimpleObject->get('id'),
                     ));
-                    if ($templateVarTemplate && $templateVarTemplate instanceof modTemplateVarTemplate) {
+                    if ($templateVarTemplate && $templateVarTemplate instanceof \modTemplateVarTemplate) {
                         $templateVarTemplate->remove();
                     }
                 }
@@ -124,88 +205,53 @@ class Template extends Element
     }
 
     /**
-     * @param array|bool $data ~ the data loaded from the down seed
+     *
      */
-    protected function revertRelatedPieces($data)
+    protected function onDeleteRevertRelatedPieces()
     {
-        $this->tv_names;
-        $revert_tvs = [];
-        if (is_array($data) && isset($data['tvs'])) {
-            $revert_tvs = $data['tvs'];
-        }
-        foreach ($this->tv_seeds as $tv) {
-            // seed the TV:
-            $tvSeed = new TemplateVariable($this->modx, $this->blender);
-            $tvSeed
-                ->setSeedsDir($this->getSeedsDir())
-                ->loadElementDataFromSeed($tv['seed_key']);
-            $tvSeed->revertBlend();
+        if (isset($this->related_data['seeds'])) {
 
-            if (is_array($data) && !in_array($tv['seed_key'], $revert_tvs)) {
-                $this->detachTV($tv['seed_key']);
+            foreach ($this->related_data['seeds'] as $tv) {
+                // seed the TV:
+                $tvSeed = new TemplateVariable($this->modx, $this->blender, $tv['name']);
+                $tvSeed
+                    ->setSeedsDir($this->getSeedsDir())
+                    ->revertBlend();
             }
         }
-
-        if (is_array($data)) {
-            $this->tv_seeds = $revert_tvs;
-            $this->relatedPieces();
-            $this->element->save();
-            $this->relatedPiecesAfterSave();
-        }
-    }
-
-    protected function setAdditionalElementColumns()
-    {
-        $this->element->save();
-        $this->element->set('icon', $this->icon);
-        $this->element->set('template_type', $this->template_type);
     }
 
     /**
-     * @param \modTemplate $template
-     *
-     * @return \modTemplate
+     * @var string $type blend or revert
      */
-    protected function seedRelated($template)
+    protected function seedRelated($type='blend')
     {
         // get all related TVs:
         $tv_keys = [];
-        $tvTemplates = $template->getMany('TemplateVarTemplates');
-        foreach ($tvTemplates as $tvTemplate) {
-            $tv = $tvTemplate->getOne('TemplateVar');
-            $tv_name = $tv->get('name');
+        if (is_object($this->xPDOSimpleObject)) {
+            $tvTemplates = $this->xPDOSimpleObject->getMany('TemplateVarTemplates');
+            foreach ($tvTemplates as $tvTemplate) {
+                $tv = $tvTemplate->getOne('TemplateVar');
+                $tv_name = $tv->get('name');
 
-            $tvSeed = new TemplateVariable($this->modx, $this->blender);
-            $seed_key = $tvSeed
-                ->setSeedsDir($this->getSeedsDir())
-                ->seedElement($tv);
-            $tv_keys[] = [
-                'seed_key' => $seed_key,
-                'name' => $tv_name,
-                'rank' => $tvTemplate->get('rank')
-            ];
-            $this->blender->out('TV '.$tv_name. ' has been seeded: '.$seed_key);
+                $tvSeed = new TemplateVariable($this->modx, $this->blender, $tv_name);
+                $seed_key = $tvSeed
+                    ->setSeedsDir($this->getSeedsDir())
+                    ->seed($this->type == 'revert' ? 'revert' : 'seed');
+
+                $tv_keys[] = [
+                    'seed_key' => $seed_key,
+                    'name' => $tv_name,
+                    'rank' => $tvTemplate->get('rank')
+                ];
+                $this->blender->out('TV ' . $tv_name . ' has been seeded: ' . $seed_key);
+            }
+
+            $this->related_data['seeds'] = $tv_keys;
+
+        } elseif ($type != 'revert') {
+            $this->related_data['seeds'] = $tv_keys;
         }
-        $this->element_data['tvs'] = $tv_keys;
 
-        return $template;
-    }
-
-    /**
-     * @param string $name
-     * @return $this
-     */
-    public function setTemplateName($name)
-    {
-        $this->name = $name;
-        return $this;
-    }
-
-    /**
-     * @param array $tvs
-     */
-    public function setTvs($tvs)
-    {
-        $this->tv_seeds = $tvs;
     }
 }

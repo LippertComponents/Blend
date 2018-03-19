@@ -14,6 +14,8 @@ use LCI\Blend\Blendable\MediaSource;
 use LCI\Blend\Blendable\Plugin;
 use LCI\Blend\Blendable\Resource;
 use LCI\Blend\Blendable\Snippet;
+use LCI\Blend\Blendable\Template;
+use LCI\Blend\Blendable\TemplateVariable;
 use LCI\Blend\Helpers\UserInteractionHandler;
 use LCI\Blend\Helpers\SimpleCache;
 use PHPUnit\Runner\Exception;
@@ -553,32 +555,31 @@ class Blender
     /**
      * Use this method with your IDE to manually build a template
      * @param string $name
-     * @return Template
+     * @return \LCI\Blend\Blendable\Template
      */
-    public function blendOneRawTemplate($name)
+    public function getBlendableTemplate($name)
     {
-        /** @var Template $template */
-        $template =  new Template($this->modx, $this);
-        return $template
-            ->setSeedsDir($this->seeds_dir)
-            ->setName($name);
+        /** @var \LCI\Blend\Blendable\Template $template */
+        $template =  new Template($this->modx, $this, $name);
+        return $template->setSeedsDir($this->seeds_dir);
     }
 
     /**
      * @param array $templates
      * @param string $seeds_dir
+     * @param bool $overwrite
      */
-    public function blendManyTemplates($templates=[], $seeds_dir='')
+    public function blendManyTemplates($templates=[], $seeds_dir='', $overwrite=false)
     {
         // will update if template does exist or create new
         foreach ($templates as $seed_key) {
 
-            /** @var Snippet $blendTemplate */
-            $blendTemplate = new Template($this->modx, $this);
+            /** @var \LCI\Blend\Blendable\Template $blendTemplate */
+            $blendTemplate = new Template($this->modx, $this, $this->getNameFromSeedKey($seed_key));
             if (!empty($seeds_dir)) {
                 $blendTemplate->setSeedsDir($seeds_dir);
             }
-            if ($blendTemplate->blendFromSeed($seed_key)) {
+            if ($blendTemplate->blendFromSeed($seed_key, $overwrite)) {
                 $this->out($seed_key.' has been blended');
 
             } elseif($blendTemplate->isExists()) {
@@ -602,17 +603,17 @@ class Blender
     {
         // will update if system setting does exist or create new
         foreach ($templates as $seed_key) {
-            /** @var Template $blendTemplate */
-            $blendTemplate = new Template($this->modx, $this);
+            /** @var \LCI\Blend\Blendable\Template $blendTemplate */
+            $blendTemplate = new Template($this->modx, $this, $this->getNameFromSeedKey($seed_key));
             if (!empty($seeds_dir)) {
                 $blendTemplate->setSeedsDir($seeds_dir);
             }
 
-            if ( $blendTemplate->revertBlendFromSeed($seed_key) ) {
-                $this->out($blendTemplate->getName().' snippet has been reverted to '.$seeds_dir);
+            if ( $blendTemplate->revertBlend() ) {
+                $this->out($blendTemplate->getFieldName().' template has been reverted to '.$seeds_dir);
 
             } else {
-                $this->out($blendTemplate->getName().' snippet was not reverted', true);
+                $this->out($blendTemplate->getFieldName().' template was not reverted', true);
             }
         }
     }
@@ -622,13 +623,11 @@ class Blender
      * @param string $name
      * @return TemplateVariable
      */
-    public function blendOneRawTemplateVariable($name)
+    public function getBlendableTemplateVariable($name)
     {
-        /** @var \LCI\Blend\TemplateVariable $tv */
-        $tv =  new TemplateVariable($this->modx, $this);
-        return $tv
-            ->setSeedsDir($this->seeds_dir)
-            ->setName($name);
+        /** @var \LCI\Blend\Blendable\TemplateVariable $tv */
+        $tv =  new TemplateVariable($this->modx, $this, $name);
+        return $tv->setSeedsDir($this->seeds_dir);
     }
 
     /**
@@ -1083,10 +1082,12 @@ class Blender
         $collection = $this->modx->getCollection('modTemplate', $criteria);
 
         foreach ($collection as $template) {
-            $blendTemplate = new Template($this->modx, $this);
+            //exit();
+            /** @var \LCI\Blend\Blendable\Template $blendTemplate */
+            $blendTemplate = new Template($this->modx, $this, $template->get('templatename'));
             $seed_key = $blendTemplate
                 ->setSeedsDir($this->getMigrationName('template', $name))
-                ->seedElement($template);
+                ->seed();
             $this->out("Template ID: ".$template->get('id').' Key: '.$seed_key);
             $keys[] = $seed_key;
         }

@@ -98,8 +98,8 @@ final class TemplateTVTest extends BaseBlend
         $testTVTemplate = $this->modx->getObject('modTemplate', ['templatename' => $template_name]);
 
         $cacheOptions = [
-            \xPDO::OPT_CACHE_KEY => 'elements',
-            \xPDO::OPT_CACHE_PATH  => $this->blender->getSeedsDirectory() . BLEND_TEST_SEEDS_DIR . '/'
+            \xPDO::OPT_CACHE_KEY => 'elements/template-variables',
+            \xPDO::OPT_CACHE_PATH  => $this->blender->getSeedsDirectory(BLEND_TEST_SEEDS_DIR)
         ];
 
         // get all related TVs:
@@ -112,10 +112,13 @@ final class TemplateTVTest extends BaseBlend
             $created_tvs[] = $tv_name;
 
             $created_data = $tv->toArray();
-            unset($created_data['id'], $created_data['related_data'], $created_data['source'], $created_data['category']);
+            unset($created_data['id'], $created_data['primaryKeyHistory'], $created_data['related'], $created_data['source'], $created_data['category']);
 
-            $seed_data = $this->modx->cacheManager->get('modTemplateVar_'.$tv_name, $cacheOptions);
-            unset($seed_data['id'], $seed_data['related_data'], $seed_data['source'], $seed_data['category']);
+            $seed_data = $data = $this->modx->cacheManager->get($tv_name, $cacheOptions);
+            if (is_array($data) && isset($data['columns'])) {
+                $seed_data = $data['columns'];
+                unset($seed_data['id'], $seed_data['primaryKeyHistory'], $seed_data['related'], $seed_data['source'], $seed_data['category']);
+            }
 
             $this->assertEquals(
                 $seed_data,
@@ -132,6 +135,9 @@ final class TemplateTVTest extends BaseBlend
         );
     }
 
+    /**
+     * @depends testCreatedTVs
+     */
     public function testRevertLoadTemplateFromSeed()
     {
         $migration = 'TVsLoadFromSeedsExample';
@@ -163,5 +169,17 @@ final class TemplateTVTest extends BaseBlend
             count($remainingTVs),
             'Compare that all TVs were removed'
         );
+    }
+
+    public function testRemoveBlend()
+    {
+        if (BLEND_CLEAN_UP) {
+            $this->blender->install('down');
+
+            $this->assertEquals(
+                false,
+                $this->blender->isBlendInstalledInModx()
+            );
+        }
     }
 }

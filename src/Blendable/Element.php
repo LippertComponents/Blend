@@ -41,7 +41,6 @@ abstract class Element extends Blendable
 
     /** @var array ~ ['setMethodName' => 'setMethodActualName', 'setDoNotUseMethod' => false] overwrite in child classes */
     protected $load_from_array_aliases = [
-        //'setFieldCategory' => 'setFieldCategoryFromNames',
         'setFieldProperties' => 'mergePropertiesFromArray'
     ];
 
@@ -65,11 +64,35 @@ abstract class Element extends Blendable
     }
 
     /**
+     * @return int
+     */
+    public function getFieldEditorType()
+    {
+        return $this->blendable_xpdo_simple_object_data['editor_type'];
+    }
+
+    /**
+     * @return bool
+     */
+    public function getFieldLocked()
+    {
+        return $this->blendable_xpdo_simple_object_data['locked'];
+    }
+
+    /**
      * @return string
      */
     public function getFieldName()
     {
         return $this->blendable_xpdo_simple_object_data['name'];
+    }
+
+    /**
+     * @return bool
+     */
+    public function getFieldPropertyPreprocess()
+    {
+        return $this->blendable_xpdo_simple_object_data['property_preprocess'];
     }
 
     // Setters:
@@ -107,6 +130,25 @@ abstract class Element extends Blendable
     {
         return $this->setFieldCode($code, $overwrite_static);
     }
+    /**
+     * @param int $value
+     * @return $this
+     */
+    public function setFieldEditorType($value)
+    {
+        $this->blendable_xpdo_simple_object_data['editor_type'] = $value;
+        return $this;
+    }
+
+    /**
+     * @param bool $value
+     * @return $this
+     */
+    public function setFieldLocked($value)
+    {
+        $this->blendable_xpdo_simple_object_data['locked'] = $value;
+        return $this;
+    }
 
     /**
      * @param string $name
@@ -115,6 +157,16 @@ abstract class Element extends Blendable
     public function setFieldName($name)
     {
         $this->blendable_xpdo_simple_object_data['name'] = $name;
+        return $this;
+    }
+
+    /**
+     * @param bool $value
+     * @return $this
+     */
+    public function setFieldPropertyPreprocess($value)
+    {
+        $this->blendable_xpdo_simple_object_data['property_preprocess'] = $value;
         return $this;
     }
 

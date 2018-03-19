@@ -11,7 +11,7 @@ class m2018_01_10_093000_Template extends Migrations
 {
     /** @var array  */
     protected $templates = array (
-      0 => 'modTemplate_testTemplate2',
+      0 => 'testTemplate2',
     );
 
     /**

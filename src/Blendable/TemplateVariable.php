@@ -6,43 +6,29 @@
  * Time: 2:44 PM
  */
 
-namespace LCI\Blend;
+namespace LCI\Blend\Blendable;
 
 
 class TemplateVariable extends Element
 {
     protected $template_names = [];
 
-    protected $remove_tv_names = [];
+    protected $detach_template_names = [];
 
-    protected $type = 'text';
-
-    protected $caption = '';
-
-    protected $elements = '';
-
-    protected $display = 'default';
-
-    protected $default_text = '';
-
-    protected $input_properties = '';
-
-    protected $output_properties = '';
+    /** @var string  */
+    protected $opt_cache_key = 'elements/template-variables';
 
     /** @var string ~ the xPDO class name */
-    protected $element_class = 'modTemplateVar';
+    protected $xpdo_simple_object_class = 'modTemplateVar';
 
     /**
-     * @param string $name
-     *
      * @return TemplateVariable
      */
-    public function loadCurrentVersion($name)
+    public function getCurrentVersion()
     {
         /** @var TemplateVariable $element */
-        $element = new self($this->modx, $this->blender);
-        $element->setSeedsDir($this->getSeedsDir());
-        return $element->loadElementFromName($name);
+        $element = new self($this->modx, $this->blender, $this->getFieldName());
+        return $element->setSeedsDir($this->getSeedsDir());
     }
 
     /**
@@ -61,79 +47,159 @@ class TemplateVariable extends Element
     }
 
     /**
-     * @param string $caption
-     *
+     * @param string $template_name detach
      * @return $this
      */
-    public function setCaption($caption)
+    public function detachFromTemplate($template_name)
     {
-        $this->caption = $caption;
+        $this->detach_template_names[] = $template_name;
         return $this;
     }
 
     /**
-     * @param string $default_text
-     *
-     * @return $this
+     * @return string
      */
-    public function setDefaultText($default_text)
+    public function getFieldCaption()
     {
-        $this->default_text = $default_text;
-        return $this;
-    }
-    /**
-     * @param string $display
-     *
-     * @return $this
-     */
-    public function setDisplay($display)
-    {
-        $this->display = $display;
-        return $this;
+        return $this->blendable_xpdo_simple_object_data['caption'];
     }
 
     /**
-     * @param string $elements
-     *
+     * @return string
+     */
+    public function getFieldDefaultText()
+    {
+        return $this->blendable_xpdo_simple_object_data['default_text'];
+    }
+
+    /**
+     * @return string
+     */
+    public function getFieldDisplay()
+    {
+        return $this->blendable_xpdo_simple_object_data['display'];
+    }
+
+    /**
+     * @return string
+     */
+    public function getFieldElements()
+    {
+        return $this->blendable_xpdo_simple_object_data['elements'];
+    }
+
+    /**
+     * @return string
+     */
+    public function getFieldInputProperties()
+    {
+        return $this->blendable_xpdo_simple_object_data['input_properties'];
+    }
+
+    /**
+     * @return string
+     */
+    public function getFieldOutputProperties()
+    {
+        return $this->blendable_xpdo_simple_object_data['output_properties'];
+    }
+
+    /**
+     * @return int
+     */
+    public function getFieldRank()
+    {
+        return $this->blendable_xpdo_simple_object_data['rank'];
+    }
+
+    /**
+     * @return string
+     */
+    public function getFieldType()
+    {
+        return $this->blendable_xpdo_simple_object_data['type'];
+    }
+
+    // Setters:
+    /**
+     * @param string $value  max characters: 80
      * @return $this
      */
-    public function setElements($elements)
+    public function setFieldCaption($value)
     {
-        $this->elements = $elements;
+        $this->blendable_xpdo_simple_object_data['caption'] = $value;
         return $this;
     }
 
     /**
-     * @param string|array $input_properties
-     */
-    public function setInputProperties($input_properties)
-    {
-        $this->input_properties = $input_properties;
-    }
-
-    /**
-     * @param string|array $output_properties
-     *
+     * @param string $value
      * @return $this
      */
-    public function setOutputProperties($output_properties)
+    public function setFieldDefaultText($value)
     {
-        $this->output_properties = $output_properties;
-        return $this;
-    }
-    /**
-     * @param string $type
-     *
-     * @return $this
-     */
-    public function setType($type)
-    {
-        $this->type = $type;
+        $this->blendable_xpdo_simple_object_data['default_text'] = $value;
         return $this;
     }
 
+    /**
+     * @param string $value  max characters: 20
+     * @return $this
+     */
+    public function setFieldDisplay($value)
+    {
+        $this->blendable_xpdo_simple_object_data['display'] = $value;
+        return $this;
+    }
 
+    /**
+     * @param string $value
+     * @return $this
+     */
+    public function setFieldElements($value)
+    {
+        $this->blendable_xpdo_simple_object_data['elements'] = $value;
+        return $this;
+    }
 
+    /**
+     * @param string $value
+     * @return $this
+     */
+    public function setFieldInputProperties($value)
+    {
+        $this->blendable_xpdo_simple_object_data['input_properties'] = $value;
+        return $this;
+    }
+
+    /**
+     * @param string $value
+     * @return $this
+     */
+    public function setFieldOutputProperties($value)
+    {
+        $this->blendable_xpdo_simple_object_data['output_properties'] = $value;
+        return $this;
+    }
+
+    /**
+     * @param int $value
+     * @return $this
+     */
+    public function setFieldRank($value)
+    {
+        $this->blendable_xpdo_simple_object_data['rank'] = $value;
+        return $this;
+    }
+
+    /**
+     * @param string $value  max characters: 20
+     * @return $this
+     */
+    public function setFieldType($value)
+    {
+        $this->blendable_xpdo_simple_object_data['type'] = $value;
+        return $this;
+    }
 
     /**
      * @param string $event_name
@@ -146,17 +212,7 @@ class TemplateVariable extends Element
         return $event_name;
     }
 
-    public function save($overwrite = false)
-    {
-        $saved = parent::save($overwrite);
-
-        if ($saved) {
-
-        }
-        return $saved;
-    }
-
-    protected function relatedPieces()
+    protected function attachRelatedPieces()
     {
         if (count($this->template_names) > 0) {
             $tvs = [];
@@ -175,20 +231,31 @@ class TemplateVariable extends Element
                 }
 
             }
-            $this->element->addMany($tvs, 'TemplateVarTemplates');
+            $this->xPDOSimpleObject->addMany($tvs, 'TemplateVarTemplates');
         }
-        // @TODO remove
-    }
 
 
-    protected function setAdditionalElementColumns()
-    {
-        $this->element->set('type', $this->type);
-        $this->element->set('caption', $this->caption);
-        $this->element->set('display', $this->display);
-        $this->element->set('default_text', $this->default_text);
-        $this->element->set('input_properties', $this->input_properties);
-        $this->element->set('output_properties', $this->output_properties);
-        $this->element->set('elements', $this->elements);
+        if (count($this->detach_template_names) > 0) {
+            $tvs = [];
+            foreach ($this->detach_template_names as $template_name) {
+                // get the TV:
+                $template = $this->modx->getObject('modTemplateVar', ['templatename' => $template_name]);
+                if ($template) {
+                    $tvt = $this->modx->getObject(
+                        'modTemplateVarTemplate',
+                        [
+                            'templateid' => $template->get('id'),
+                            'tmplvarid' => $this->xPDOSimpleObject->get('id')
+                        ]
+                    );
+
+                    if (is_object($tvt)) {
+                        $tvt->remove();
+                    }
+                } else {
+                    $this->error = true;
+                }
+            }
+        }
     }
 }

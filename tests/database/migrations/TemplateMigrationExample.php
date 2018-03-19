@@ -16,21 +16,21 @@ class TemplateMigrationExample extends Migrations
      */
     public function up()
     {
-        /** @var \LCI\Blend\Template $testTemplate3 */
-        $testTemplate3 = $this->blender->blendOneRawTemplate('testTemplate3');
+        /** @var \LCI\Blend\Blendable\Template $testTemplate3 */
+        $testTemplate3 = $this->blender->getBlendableTemplate('testTemplate3');
         $testTemplate3
             ->setSeedsDir($this->getSeedsDir())
-            ->setDescription('This is my 3rd test template, note this is limited to 255 or something and no HTML')
-            ->setCategoryFromNames('Parent Template Cat=>Child Template Cat')
-            ->setCode('<!DOCTYPE html><html lang="en"><head><title>[[*pagetitle]]</title></head><body><!-- 3rd -->[[*content]]</body></html>')
+            ->setFieldDescription('This is my 3rd test template, note this is limited to 255 or something and no HTML')
+            ->setFieldCategory('Parent Template Cat=>Child Template Cat')
+            ->setFieldCode('<!DOCTYPE html><html lang="en"><head><title>[[*pagetitle]]</title></head><body><!-- 3rd -->[[*content]]</body></html>')
             ;//->setAsStatic('core/components/mysite/elements/templates/myTemplate3.tpl');
 
         if ($testTemplate3->blend(true)) {
-            $this->blender->out($testTemplate3->getName().' was saved correctly');
+            $this->blender->out($testTemplate3->getFieldName().' was saved correctly');
 
         } else {
             //error
-            $this->blender->out($testTemplate3->getName().' did not save correctly ', true);
+            $this->blender->out($testTemplate3->getFieldCode().' did not save correctly ', true);
             $this->blender->out(print_r($testTemplate3->getErrorMessages(), true), true);
         }
     }
@@ -43,32 +43,17 @@ class TemplateMigrationExample extends Migrations
     public function down()
     {
         // set back to previous version of the template
-        /** @var bool|\modTemplate $testTemplate3 */
         $name = 'testTemplate3';
 
-        $blendTemplate = new \LCI\Blend\Template($this->modx, $this->blender);
-        $blendTemplate
-            ->setName($name)
-            ->setSeedsDir($this->getSeedsDir());
+        $blendTemplate = $this->blender->getBlendableTemplate($name);
+        $blendTemplate->setSeedsDir($this->getSeedsDir());
 
         if ( $blendTemplate->revertBlend() ) {
-            $this->blender->out($blendTemplate->getName().' setting has been reverted to '.$this->getSeedsDir());
+            $this->blender->out($blendTemplate->getFieldName().' setting has been reverted to '.$this->getSeedsDir());
 
         } else {
-            $this->blender->out($blendTemplate->getName().' setting was not reverted', true);
+            $this->blender->out($blendTemplate->getFieldName().' setting was not reverted', true);
         }
-
-        /**
-         * Manually via xPDO, but no control here to what the last version may have been, assuming it did not exist:
-        $testTemplate3 = $this->modx->getObject('modTemplate', ['name' => $name]);
-        if ($testTemplate3 instanceof \modTemplate) {
-            if ($testTemplate3->remove()) {
-                $this->blender->out($name.' has been removed');
-            } else {
-                $this->blender->out($name.' could not be removed', true);
-            }
-        }
-         */
     }
 
     /**

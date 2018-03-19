@@ -11,7 +11,7 @@ class TVsLoadFromSeedsExample extends Migrations
 {
     /** @var array  */
     protected $templates = array (
-      0 => 'modTemplate_TVAllTestTypes',
+      0 => 'TVAllTestTypes',
     );
 
     /**
@@ -21,7 +21,7 @@ class TVsLoadFromSeedsExample extends Migrations
      */
     public function up()
     {
-        $this->blender->blendManyTemplates($this->templates, $this->getSeedsDir());
+        $this->blender->blendManyTemplates($this->templates, $this->getSeedsDir(), true);
     }
 
     /**

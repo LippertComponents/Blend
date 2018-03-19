@@ -6,19 +6,19 @@ final class TemplateTest extends BaseBlend
     /** @var bool  */
     protected $install_blend = true;
 
-    public function testBlendOneRawTemplate()
+    public function testGetBlendableTemplate()
     {
         $template_name = 'testTemplate1';
         $template_description = 'This is my first test template, note this is limited to 255 or something and no HTML';
         $template_code = '<!DOCTYPE html><html lang="en"><head><title>[[*pagetitle]]</title></head><body>[[*content]]</body></html>';
 
-        /** @var \LCI\Blend\Template $testTemplate1 */
-        $testTemplate1 = $this->blender->blendOneRawTemplate($template_name);
+        /** @var \LCI\Blend\Blendable\Template $testTemplate1 */
+        $testTemplate1 = $this->blender->getBlendableTemplate($template_name);
         $testTemplate1
             ->setSeedsDir($template_name)
-            ->setDescription($template_description)
-            ->setCategoryFromNames('Parent Template Cat=>Child Template Cat')
-            ->setCode($template_code, true)
+            ->setFieldDescription($template_description)
+            ->setFieldCategory('Parent Template Cat=>Child Template Cat')
+            ->setFieldCode($template_code, true)
             ->setAsStatic('core/components/mysite/elements/templates/myTemplate.tpl');
         // @TODO add a TV here
         //->attachTemplateVariable('testTemplateVariable1');
@@ -32,30 +32,30 @@ final class TemplateTest extends BaseBlend
 
         // Validate data:
         if ($blended) {
-            /** @var \LCI\Blend\Template $blendTemplate */
-            $blendTemplate = $testTemplate1->loadCurrentVersion($template_name);
+            /** @var \LCI\Blend\Blendable\Template $blendTemplate */
+            $blendTemplate = $testTemplate1->getCurrentVersion();
             $this->assertInstanceOf(
-                '\LCI\Blend\Template',
+                '\LCI\Blend\Blendable\Template',
                 $blendTemplate,
                 'Validate instance was created \LCI\Blend\Template'
             );
 
-            if ($blendTemplate instanceof \LCI\Blend\Template) {
+            if ($blendTemplate instanceof \LCI\Blend\Blendable\Template) {
                 $this->assertEquals(
                     $template_name,
-                    $blendTemplate->getName(),
+                    $blendTemplate->getFieldName(),
                     'Compare template name'
                 );
 
                 $this->assertEquals(
                     $template_description,
-                    $blendTemplate->getDescription(),
+                    $blendTemplate->getFieldDescription(),
                     'Compare template description'
                 );
 
                 $this->assertEquals(
                     $template_code,
-                    $blendTemplate->getCode(),
+                    $blendTemplate->getFieldCode(),
                     'Compare template code'
                 );
 
@@ -98,6 +98,8 @@ final class TemplateTest extends BaseBlend
         $actual_timestamp = $this->blender->getSeedsDir();
         $this->blender->setSeedsDir(BLEND_TEST_SEEDS_DIR);
 
+        $seeds_directory = $this->blender->getMigrationName('template');
+
         $this->blender->makeTemplateSeeds(['templatename' => $template_name]);
 
         $this->assertEquals(
@@ -108,7 +110,7 @@ final class TemplateTest extends BaseBlend
 
         $fixed_data = require_once BLEND_COMPARE_DIRECTORY.'testTemplate2.seed.php';
         $generated_data = false;
-        $seed_file = $this->blender->getSeedsDirectory().BLEND_TEST_SEEDS_DIR.DIRECTORY_SEPARATOR.'elements'.DIRECTORY_SEPARATOR.'modTemplate_testTemplate2.cache.php';
+        $seed_file = $this->blender->getSeedsDirectory($seeds_directory) . 'elements' . DIRECTORY_SEPARATOR . 'templates'. DIRECTORY_SEPARATOR .$template_name.'.cache.php';
         if (file_exists($seed_file)) {
             $generated_data = require_once $seed_file;
         }
@@ -123,6 +125,9 @@ final class TemplateTest extends BaseBlend
         $this->blender->setSeedsDir($actual_timestamp);
     }
 
+    /**
+     * @depends testMakeTemplateSeeds
+     */
     public function testCleanUpMakeTemplateSeeds()
     {
         $actual_timestamp = $this->blender->getSeedsDir();
@@ -185,6 +190,9 @@ final class TemplateTest extends BaseBlend
         }
     }
 
+    /**
+     * @depends testTemplateMigration
+     */
     public function testTemplateRevertMigration()
     {
         $migration = 'TemplateMigrationExample';

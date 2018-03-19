@@ -169,7 +169,7 @@ abstract class Blendable implements BlendableInterface
      */
     public function getSeedKey($type='seed')
     {
-        $name = $this->blendable_xpdo_simple_object_data['name'];
+        $name = $this->blendable_xpdo_simple_object_data[$this->unique_key_column];
         if (method_exists($this, 'getName')) {
             $name = $this->getName();
         }
@@ -211,7 +211,9 @@ abstract class Blendable implements BlendableInterface
         if ($this->type == 'blend') {
             /** @var \LCI\Blend\Blendable\Blendable $currentVersion */
             $currentVersion = $this->getCurrentVersion();
-            $currentVersion->seed('revert');
+            $currentVersion
+                ->setRelatedData($this->related_data)
+                ->seed('revert');
         }
 
         $this->modx->invokeEvent(
@@ -256,17 +258,17 @@ abstract class Blendable implements BlendableInterface
             $this->seed('revert');
         }
         $removed = false;
-
         if ($this->xPDOSimpleObject->remove()) {
-            $this->attachRelatedPiecesAfterSave();
+
+            $this->onDeleteRevertRelatedPieces();
             if ($this->isDebug()) {
-                $this->blender->out($this->getName() . ' has been removed/deleted');
+                $this->blender->out($this->blendable_xpdo_simple_object_data[$this->unique_key_column] . ' has been removed/deleted');
             }
             $removed = true;
 
         } else {
             if ($this->isDebug()) {
-                $this->blender->out($this->getName() . ' did not remove/delete', true);
+                $this->blender->out($this->blendable_xpdo_simple_object_data[$this->unique_key_column] . ' did not remove/delete', true);
             }
         }
 
@@ -280,7 +282,7 @@ abstract class Blendable implements BlendableInterface
     {
         $seed_key = $this->getSeedKey('revert');
         $this->type = 'revert';
-        if (!$this->loadObjectDataFromSeed($seed_key)) {
+        if (!$this->loadObjectDataFromSeed($seed_key) || !$this->blendable_xpdo_simple_object_data) {
             return $this->delete(false);
         }
 
@@ -313,13 +315,28 @@ abstract class Blendable implements BlendableInterface
                 $this->blendable_xpdo_simple_object_data[$column] = $value;
             }
 
-            $this->seedRelated();
+            $this->seedRelated($type);
 
             $data = [
                 'columns' => $this->blendable_xpdo_simple_object_data,
                 'primaryKeyHistory' => $this->unique_key_history,
                 'related' => $this->related_data
             ];
+
+        } elseif ($type == 'revert') {
+
+            $this->seedRelated($type);
+
+            $data = [
+                'columns' => false,
+                'primaryKeyHistory' => [],
+                'related' => $this->related_data
+            ];
+
+            if ($this->isDebug()) {
+                $this->blender->out('Data not found to make seed: '.$seed_key);
+            }
+
         } elseif ($type == 'seed') {
             if ($this->isDebug()) {
                 $this->blender->out('Data not found to make seed: '.$seed_key);
@@ -363,7 +380,7 @@ abstract class Blendable implements BlendableInterface
             if (!$overwrite) {
                 $this->error = true;
                 $this->error_messages['exits'] = $this->xpdo_simple_object_class.': ' .
-                    $this->blendable_xpdo_simple_object_data['name'] . ' already exists ';
+                    $this->blendable_xpdo_simple_object_data[$this->unique_key_column] . ' already exists ';
                 return $saved;
             }
         } else {
@@ -541,17 +558,17 @@ abstract class Blendable implements BlendableInterface
     }
 
     /**
-     * @param array|bool $data ~ the data loaded from the revert seed
+     *
      */
-    protected function revertRelatedPieces($data)
+    protected function onDeleteRevertRelatedPieces()
     {
 
     }
 
     /**
-     *
+     * @var string $type blend or revert
      */
-    protected function seedRelated()
+    protected function seedRelated($type='blend')
     {
         // load related data:
         $this->loadRelatedData();
@@ -567,13 +584,13 @@ abstract class Blendable implements BlendableInterface
     }
 
     /**
-     * Called from loadFromArray(), for build from seeds, override in child classes
-     * @param mixed $data
+     * @param array $data
      *
      * @return $this
      */
-    protected function setRelatedData($data)
+    public function setRelatedData($data)
     {
+        $this->related_data = $data;
         return $this;
     }
 
