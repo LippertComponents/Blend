@@ -884,8 +884,13 @@ class Resource extends Blendable
         // no IDs only TV name
         $tvs = [];// TemplateVarResources modTemplateVarResource
 
-        /** @var \modTemplate $template */
-        $template = $this->xPDOSimpleObject->getOne('Template');
+        $template = false;
+        $resource_groups = [];
+        if (is_object($this->xPDOSimpleObject)) {
+            /** @var \modTemplate $template */
+            $template = $this->xPDOSimpleObject->getOne('Template');
+            $resource_groups = $this->xPDOSimpleObject->getResourceGroupNames();
+        }
         if (is_object($template)) {
 
             // get all TemplateValues
@@ -921,7 +926,7 @@ class Resource extends Blendable
         $this->related_data = [
             'extras' => $extras,
             'tvs' => $tvs,
-            'resource_groups' => $this->xPDOSimpleObject->getResourceGroupNames()
+            'resource_groups' => $resource_groups
         ];
 
         // @TODO need event to allow others to add in extras here:
