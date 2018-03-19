@@ -115,9 +115,8 @@ class Plugin extends Element
      *
      * @return $this
      */
-    protected function setRelatedData($data)
+    public function setRelatedData($data)
     {
-        // @TODO Not used?
         if (is_array($data)) {
             foreach ($data as $count => $event) {
                 if (isset($event['remove']) && $event['remove']) {
@@ -131,20 +130,23 @@ class Plugin extends Element
 
         return $this;
     }
+
     /**
-     * @TODO Not used?
+     * @var string $type blend or revert
      */
-    protected function seedRelated()
+    protected function seedRelated($type='blend')
     {
         // get all related Events:
         $events = [];
-        $pluginEvents = $this->xPDOSimpleObject->getMany('PluginEvents');
-        /** @var \modPluginEvent $event */
-        foreach ($pluginEvents as $event) {
-            $data = $event->toArray();
-            unset($data['id'], $data['pluginid']);
-            $events[] = $data;
+        if (is_object($this->xPDOSimpleObject)) {
+            $pluginEvents = $this->xPDOSimpleObject->getMany('PluginEvents');
+            /** @var \modPluginEvent $event */
+            foreach ($pluginEvents as $event) {
+                $data = $event->toArray();
+                unset($data['id'], $data['pluginid']);
+                $events[] = $data;
 
+            }
         }
         // will be loaded via setOnEvents from blend()
         $this->related_data = $events;
