@@ -99,23 +99,23 @@ Same as above, but with short options
 ```php
 <?php
 // Manual set up of a chunk:
-/** @var \LCI\Blend\Chunk $myChunk */
-$myChunk = $this->blender->blendOneRawChunk('myChunk');
+/** @var \LCI\Blend\Blendable\Chunk $myChunk */
+$myChunk = $this->blender->getBlendableChunk('myChunk');
 $myChunk
     ->setSeedsDir($this->getTimestamp())// This is needed to set the down() data
-    ->setDescription('This is my test chunk, note this is limited to 255 or something')
-    ->setCategoryFromNames('My Site=>Chunks')
-    ->setCode('[[+testPlaceholder]]')// could do file_get_contents()
+    ->setFieldDescription('This is my test chunk, note this is limited to 255 or something')
+    ->setFieldCategory('My Site=>Chunks')
+    ->setFieldCode('[[+testPlaceholder]]')// could do file_get_contents()
     //need the relative to the MODX root path here, or whatever lines up with media source ID: 1
     ->setAsStatic('core/components/mysite/elements/chunks/myChunk.tpl');
 
 // The blend() method will create a back/down data before saving to allow for easy revert with the revertBlend method
 if ($myChunk->blend(true)) {
-    $this->blender->out($myChunk->getName().' was saved correctly');
+    $this->blender->out($myChunk->getFieldName().' was saved correctly');
 
 } else {
     //error
-    $this->blender->out($myChunk->getName().' did not save correctly ', true);
+    $this->blender->out($myChunk->getFieldName().' did not save correctly ', true);
     $this->blender->out(print_r($myChunk->getErrorMessages(), true), true);
 }
 ```
@@ -126,16 +126,15 @@ The down method is for remove or downgrade.
 // Allow Blend to retrieve the data exactly how it was before the up() method did a blend()
 $name = 'myChunk';
 
-$blendChunk = new \LCI\Blend\Chunk($this->modx, $this->blender);
-$blendChunk
-    ->setName($name)
-    ->setSeedsDir($this->getTimestamp());// This is needed to retrieve the down data
+/** @var \LCI\Blend\Blendable\Chunk $blendChunk */
+$blendChunk = $this->blender->getBlendableChunk('myChunk');
+$blendChunk->setSeedsDir($this->getSeedsDir());// This is needed to retrieve the down data
 
 if ( $blendChunk->revertBlend() ) {
-    $this->blender->out($blendChunk->getName().' setting has been reverted to '.$this->getTimestamp());
+    $this->blender->out($blendChunk->getFieldName().' setting has been reverted to '.$this->getTimestamp());
 
 } else {
-    $this->blender->out($blendChunk->getName().' setting was not reverted', true);
+    $this->blender->out($blendChunk->getFieldName().' setting was not reverted', true);
 }
 ```
 5. Now save your file and you can test it out by running all migrations:  
