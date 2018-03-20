@@ -196,9 +196,10 @@ should show up there.
 3. If you want to customize the content on export write a 
 [plugin](https://docs.modx.com/revolution/2.x/developing-in-modx/basic-development/plugins), these event are available:
 
-    - OnBlendResourceBeforeSave
-    - OnBlendResourceAfterSave
-    - OnBlendSeedResource
+ - OnBlendBeforeSave
+ - OnBlendAfterSave
+ - OnBlendSeed
+ - OnBlendLoadRelatedData
 
 ## Road map 
 
