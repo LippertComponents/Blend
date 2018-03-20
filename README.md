@@ -159,9 +159,10 @@ should now show there.
 3. If you want to customize the content on export before the seeds are created you can write a 
 [plugin](https://docs.modx.com/revolution/2.x/developing-in-modx/basic-development/plugins), these events are available:
 
-   - OnBlendSeedElement
-   - OnBlendELementBeforeSave
-   - OnBlendElementAfterSave
+ - OnBlendBeforeSave
+ - OnBlendAfterSave
+ - OnBlendSeed
+ - OnBlendLoadRelatedData
 
 ---
 
