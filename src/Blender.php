@@ -160,15 +160,6 @@ class Blender
     }
 
     /**
-     * @deprecated v0.9.7, use getSeedsDir
-     * @return string
-     */
-    public function getTimestamp()
-    {
-        return $this->seeds_dir;
-    }
-
-    /**
      * @param string $seeds_dir ~ local folder
      *
      * @return Blender
@@ -177,17 +168,6 @@ class Blender
     {
         $this->seeds_dir = $seeds_dir;
         return $this;
-    }
-
-    /**
-     * @deprecated v0.9.7, use setSeedsDir
-     * @param string $timestamp ~ will be the directory name
-     *
-     * @return $this
-     */
-    public function setSeedTimeDir($timestamp)
-    {
-        return $this->setSeedDir($timestamp);
     }
 
     /**

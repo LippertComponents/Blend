@@ -102,7 +102,7 @@ Same as above, but with short options
 /** @var \LCI\Blend\Blendable\Chunk $myChunk */
 $myChunk = $this->blender->getBlendableChunk('myChunk');
 $myChunk
-    ->setSeedsDir($this->getTimestamp())// This is needed to set the down() data
+    ->setSeedsDir($this->getSeedsDir())// This is needed to set the down() data
     ->setFieldDescription('This is my test chunk, note this is limited to 255 or something')
     ->setFieldCategory('My Site=>Chunks')
     ->setFieldCode('[[+testPlaceholder]]')// could do file_get_contents()
@@ -131,7 +131,7 @@ $blendChunk = $this->blender->getBlendableChunk('myChunk');
 $blendChunk->setSeedsDir($this->getSeedsDir());// This is needed to retrieve the down data
 
 if ( $blendChunk->revertBlend() ) {
-    $this->blender->out($blendChunk->getFieldName().' setting has been reverted to '.$this->getTimestamp());
+    $this->blender->out($blendChunk->getFieldName().' setting has been reverted to '.$this->getSeedsDir());
 
 } else {
     $this->blender->out($blendChunk->getFieldName().' setting was not reverted', true);
@@ -206,7 +206,7 @@ should show up there.
   - Install MODX (3.x for git is complete)
   - Update
   - Add TV convenience methods for building custom migrations 
-  - Media Sources, seed and migrate
+  - DONE: Media Sources, seed and migrate
   - Convert all System Setting to have values that are name key vs int key, templates, resources, ect.
 - v1.1
   - Extras

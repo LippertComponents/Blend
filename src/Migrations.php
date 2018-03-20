@@ -123,15 +123,6 @@ abstract class Migrations
     }
 
     /**
-     * @deprecated v0.9.7, use getSeedsDir
-     * @return string
-     */
-    public function getTimestamp()
-    {
-        return $this->getSeedsDir();
-    }
-
-    /**
      * Method is called on construct, Child class needs to override and implement this
      */
     protected function assignDescription()
@@ -161,11 +152,6 @@ abstract class Migrations
     protected function assignSeedsDir()
     {
         $this->seeds_dir = '';
-        // for @deprecated method: assignTimestamp
-        if (method_exists($this, 'assignTimestamp')) {
-            $this->assignTimestamp();
-            $this->seeds_dir = $this->timestamp;
-        }
     }
 
 }
