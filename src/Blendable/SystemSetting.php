@@ -6,122 +6,56 @@
  * Time: 2:21 PM
  */
 
-namespace LCI\Blend;
+namespace LCI\Blend\Blendable;
 
+use LCI\Blend\Blender;
 
-class SystemSetting
+class SystemSetting extends Blendable
 {
-    /** @var  \modx */
-    protected $modx;
+    //use BlendableProperties;
 
-    /** @var  Blender */
-    protected $blender;
+    /** @var string  */
+    protected $opt_cache_key = 'settings';
 
-    /** @var string */
-    protected $seeds_dir = '';
+    /** @var string ex: modResource */
+    protected $xpdo_simple_object_class = 'modSystemSetting';
 
-    /** @var array  */
-    protected $cacheOptions = [];
+    /** @var string  */
+    protected $unique_key_column = 'key';
 
-    /** @var int $cache_life in seconds, 0 is forever */
-    protected $cache_life = 0;
+    /** @var array ~ this should match data to be inserted via xPDO, ex [column_name => value, ...] */
+    protected $blendable_xpdo_simple_object_data = [
+        'area' => '',
+        //'editedon' => date('Y-m-d H:i:s'),
+        'key' => '',
+        'namespace' => 'core',
+        'value' => '',
+        'xtype' => 'textfield',
+    ];
 
-    /** @var string */
-    protected $namespace = 'core';
-
-    /** @var string ~ xtype */
-    protected $type = 'textfield';
-
-    /** @var string ~ the system setting name(key) */
-    protected $name = '';
-
-    /** @var  string */
-    protected $area = '';
+    /** @var array ~ ['setMethodName' => 'setMethodActualName', 'setDoNotUseMethod' => false] overwrite in child classes */
+    protected $load_from_array_aliases = [
+        'setProperties' => 'mergePropertiesFromArray'
+    ];
 
     /** @var mixed|bool|string */
     protected $current_value;
 
-    /** @var mixed|bool|string */
-    protected $value;
-
     /** @var string */
     protected $edited_on;
-
-    /** @var bool|\modSystemSetting */
-    protected $systemSetting = false;
-
-    /** @var bool  */
-    protected $exists = false;
 
     /** @var bool  */
     protected $changed = false;
 
     /**
-     * Element constructor.
-     *
-     * @param \modx $modx
-     * @param Blender $blender
+     * @return Blendable
      */
-    public function __construct(\modx $modx, Blender $blender)
+    public function getCurrentVersion()
     {
-        $this->modx = $modx;
-        $this->blender = $blender;
-        $this->properties = new Properties();
-        $this->cacheOptions = [
-            \xPDO::OPT_CACHE_KEY => 'settings',
-            \xPDO::OPT_CACHE_PATH => $this->blender->getSeedsPath()
-        ];
-    }
-
-    /**
-     * @return string
-     */
-    public function getSeedsDir()
-    {
-        return $this->seeds_dir;
-    }
-
-    /**
-     * @deprecated v0.9.7, use getSeedsDir
-     * @return string
-     */
-    public function getTimestamp()
-    {
-        return $this->seeds_dir;
-    }
-
-    /**
-     * @param string $dir ~ will be the directory name
-     *
-     * @return $this
-     */
-    public function setSeedsDir($dir)
-    {
-        $this->seeds_dir = (string) $dir;
-        if (!empty($this->seeds_dir)) {
-            $this->cacheOptions[\xPDO::OPT_CACHE_PATH] = $this->blender->getSeedsPath() . $dir . '/';
-        }
-        return $this;
-    }
-
-    /**
-     * @deprecated v0.9.7, use setSeedsDir
-     * @param string $timestamp ~ will be the directory name
-     *
-     * @return $this
-     */
-    public function setSeedTimeDir($timestamp)
-    {
-        return $this->setSeedsDir($timestamp);
-    }
-
-    /**
-     * @return bool
-     */
-    public function isExists()
-    {
-        $this->loadObject();
-        return $this->exists;
+        /** @var \LCI\Blend\Blendable\Resource $resource */
+        $resource = new self($this->modx, $this->blender, $this->getFieldName());
+        return $resource
+            ->setSeedsDir($this->getSeedsDir());
     }
 
     /**
@@ -129,12 +63,13 @@ class SystemSetting
      */
     public function isChanged()
     {
-        $this->loadObject();
-        if ( $this->systemSetting->get('namespace') != $this->getNamespace() ||
-            $this->systemSetting->get('area') != $this->getArea() ||
-            $this->systemSetting->get('key') != $this->getName() ||
-            $this->systemSetting->get('value') != $this->getValue() ||
-            $this->systemSetting->get('xtype') != $this->getType()
+        if (is_object($this->xPDOSimpleObject) && (
+                $this->xPDOSimpleObject->get('namespace') != $this->getFieldNamespace() ||
+                $this->xPDOSimpleObject->get('area') != $this->getFieldArea() ||
+                $this->xPDOSimpleObject->get('key') != $this->getFieldName() ||
+                $this->xPDOSimpleObject->get('value') != $this->getFieldValue() ||
+                $this->xPDOSimpleObject->get('xtype') != $this->getFieldType()
+            )
         ) {
             $this->changed = true;
         }
@@ -142,115 +77,7 @@ class SystemSetting
         return $this->changed;
     }
 
-    /**
-     * @return string
-     */
-    public function getNamespace()
-    {
-        return $this->namespace;
-    }
-
-    /**
-     * @param string $namespace
-     *
-     * @return SystemSetting
-     */
-    public function setNamespace($namespace)
-    {
-        $this->namespace = $namespace;
-        return $this;
-    }
-
-    /**
-     * @return string
-     */
-    public function getType()
-    {
-        return $this->type;
-    }
-
-    /**
-     * @see https://docs.modx.com/revolution/2.x/administering-your-site/settings/system-settings/#SystemSettings-TypesofSystemSettings
-     * @param string $type
-     *
-     * @return SystemSetting
-     */
-    public function setType($type)
-    {
-        $this->type = $type;
-        return $this;
-    }
-
-    /**
-     * @return string
-     */
-    public function getName()
-    {
-        return $this->name;
-    }
-
-    // @TODO changeName()
-
-    /**
-     * @param string $name
-     *
-     * @return SystemSetting
-     */
-    public function setName($name)
-    {
-        $this->name = $name;
-        return $this;
-    }
-
-    /**
-     * @deprecated
-     * @param string $key
-     *
-     * @return SystemSetting
-     */
-    public function setKey($key)
-    {
-        return $this->setName($key);
-    }
-
-    /**
-     * @return string
-     */
-    public function getArea()
-    {
-        return $this->area;
-    }
-
-    /**
-     * @param string $area
-     *
-     * @return SystemSetting
-     */
-    public function setArea($area)
-    {
-        $this->area = $area;
-        return $this;
-    }
-
-    /**
-     * @return bool|mixed|string
-     */
-    public function getValue()
-    {
-        return $this->value;
-    }
-
-    /**
-     * @param bool|mixed|string $value
-     *
-     * @return SystemSetting
-     */
-    public function setValue($value)
-    {
-        $this->value = $value;
-        return $this;
-    }
-
+    // Getters:
     /**
      * @return bool|mixed|string ~ the current value of the system setting before blend/save
      */
@@ -262,176 +89,196 @@ class SystemSetting
     /**
      * @return string
      */
-    public function getEditedOn()
+    public function getFieldArea()
     {
-        return $this->edited_on;
+        return $this->blendable_xpdo_simple_object_data['area'];
     }
 
     /**
-     * @param string $edited_on
+     * @return string
+     */
+    public function getEditedOn()
+    {
+        return $this->blendable_xpdo_simple_object_data['editedon'];
+    }
+
+    /**
+     * @return string
+     */
+    public function getFieldKey()
+    {
+        return $this->blendable_xpdo_simple_object_data['key'];
+    }
+
+    /**
+     * @return string ~ alias for getFieldKey()
+     */
+    public function getFieldName()
+    {
+        return $this->getFieldKey();
+    }
+
+    /**
+     * @return string
+     */
+    public function getFieldNamespace()
+    {
+        return $this->blendable_xpdo_simple_object_data['namespace'];
+    }
+
+    /**
+     * @return string ~ alias to getFieldXType
+     */
+    public function getFieldType()
+    {
+        return $this->getFieldXType();
+    }
+
+    /**
+     * @return string
+     */
+    public function getFieldXType()
+    {
+        return $this->blendable_xpdo_simple_object_data['xtype'];
+    }
+
+    /**
+     * @return bool|mixed|string
+     */
+    public function getFieldValue()
+    {
+        return $this->blendable_xpdo_simple_object_data['value'];
+    }
+    /**
+     * @param string $type ~ seed or revert
+     * @return string
+     */
+    public function getSeedKey($type='seed')
+    {
+        $key = $this->blender->getSeedKeyFromName($this->getFieldNamespace().'-'.$this->getFieldName());
+
+        switch ($type) {
+            case 'revert':
+                $seed_key = 'revert-' . $key;
+                break;
+
+            case 'seed':
+                // no break
+            default:
+                $seed_key = $key;
+        }
+
+        return $seed_key;
+    }
+    // Setters:
+
+
+    /**
+     * @param string $area
+     *
+     * @return SystemSetting
+     */
+    public function setFieldArea($area)
+    {
+        $this->blendable_xpdo_simple_object_data['area'] = $area;
+        return $this;
+    }
+
+    /**
+     * @param string $edited_on ~ date('Y-m-d H:i:s')
      *
      * @return SystemSetting
      */
     public function setEditedOn($edited_on)
     {
-        $this->edited_on = $edited_on;
+        $this->blendable_xpdo_simple_object_data['editedon'] = $edited_on;
         return $this;
     }
 
-
     /**
-     * @return bool
+     * @param string $key
+     *
+     * @return SystemSetting
      */
-    public function blend()
+    public function setFieldKey($key)
     {
-        $down = false;
-        $this->loadObject();
-        if ($this->isExists()) {
-            $down = $this->systemSetting->toArray();
-        }
-
-        $saved = false;
-
-        if ($this->save()) {
-            // write old verison to disk:
-            $seed_key = $this->blender->getSeedKeyFromAlias('down-'.$this->getNamespace().'-'.$this->getName());
-
-            // now cache it:
-            $this->modx->cacheManager->set(
-                $seed_key,
-                $down,
-                $this->cache_life,
-                $this->cacheOptions
-            );
-            $saved = true;
-        }
-
-        return $saved;
+        $this->blendable_xpdo_simple_object_data['key'] = $key;
+        return $this;
     }
 
     /**
-     * @return bool
+     * @param string $name ~ alias method for setFieldKey()
+     *
+     * @return SystemSetting
      */
-    public function revertBlend()
+    public function setFieldName($name)
     {
-        $this->loadObject(true);
-        $seed_key = $this->blender->getSeedKeyFromAlias('down-'.$this->getNamespace().'-'.$this->getName());
-        // 1. get from cache:
-        $data = $this->modx->cacheManager->get($seed_key, $this->cacheOptions);
-
-        if (!$data) {
-            return $this->systemSetting->remove();
-
-        } elseif (is_array($data)) {
-            // load old data:
-            $this->systemSetting->fromArray($data);
-            return $this->systemSetting->save();
-        }
-
-        return false;
+        return $this->setFieldKey($name);
     }
 
     /**
-     * @return bool
+     * @param string $namespace
+     *
+     * @return SystemSetting
      */
-    public function save()
+    public function setFieldNamespace($namespace)
     {
-        $this->loadObject();
-        if ($this->isChanged() || $this->isExists() ) {
-            $this->systemSetting->set('editedon', date('Y-m-d H:i:s'));
-        } elseif (!empty($this->getEditedOn())) {
-            $this->systemSetting->set('editedon', $this->getEditedOn());
-        }
-        $this->systemSetting->set('namespace', $this->getNamespace());
-        $this->systemSetting->set('area', $this->getArea());
-        $this->systemSetting->set('key', $this->getName());
-        $this->systemSetting->set('value', $this->getValue());
-        $this->systemSetting->set('xtype', $this->getType());
-
-        return $this->systemSetting->save();
+        $this->blendable_xpdo_simple_object_data['namespace'] = $namespace;
+        return $this;
     }
+
+    /**
+     * @see $this->setFieldXType
+     * @param string $type ~ alias for setFieldXType
+     *
+     * @return SystemSetting
+     */
+    public function setFieldType($type)
+    {
+        return $this->setFieldXType($type);
+    }
+
+    /**
+     * @see https://docs.modx.com/revolution/2.x/administering-your-site/settings/system-settings/#SystemSettings-TypesofSystemSettings
+     * @param string $xtype
+     *
+     * @return SystemSetting
+     */
+    public function setFieldXType($xtype)
+    {
+        $this->blendable_xpdo_simple_object_data['xtype'] = $xtype;
+        return $this;
+    }
+
+    /**
+     * @param bool|mixed|string $value
+     *
+     * @return SystemSetting
+     */
+    public function setFieldValue($value)
+    {
+        $this->blendable_xpdo_simple_object_data['value'] = $value;
+        return $this;
+    }
+
+    // @TODO changeName()
 
     /**
      * @param bool $load_defaults
      */
     protected function loadObject($load_defaults=false)
     {
-        if (!$this->systemSetting) {
-            $this->systemSetting = $this->modx->getObject('modSystemSetting', $this->name);
-            if ($this->systemSetting instanceof \modSystemSetting) {
-                $this->current_value = $this->systemSetting->get('value');
-                $this->exists = true;
-                if ($load_defaults) {
-                    $this->setNamespace($this->systemSetting->get('namespace'));
-                    $this->setArea($this->systemSetting->get('area'));
-                    $this->setName($this->systemSetting->get('key'));
-                    $this->setValue($this->systemSetting->get('value'));
-                    $this->setType($this->systemSetting->get('xtype'));
-                }
-            }
-        }
-        if (!$this->systemSetting) {
-            $this->systemSetting = $this->modx->newObject('modSystemSetting');
+        parent::loadObject();
+
+        if (is_object($this->xPDOSimpleObject)) {
+            $this->current_value = $this->xPDOSimpleObject->get('value');
+
         }
     }
 
     /***********************
      * Core settings
      ***********************/
-
-
-    /**
-     * Comments~~~
-     * @param bool|string|int $value
-     *
-     * @return $this
-     */
-    public function setBoolSetting($value)
-    {
-        $this->setName('**');
-        $this->loadObject(true);
-        $this->setValue($value);
-
-        return $this;
-    }
-
-    /**
-     * Comments~~~
-     * @param int $value
-     *
-     * @return $this
-     */
-    public function coreIntSetting($value)
-    {
-        $this->setName('**');
-        $this->loadObject(true);
-        $this->setValue($value);
-
-        return $this;
-    }
-
-    /**
-     * Comments~~~
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function coreStringSetting($value)
-    {
-        $this->setName('**');
-        $this->loadObject(true);
-        $this->setValue($value);
-
-        return $this;
-    }
-
-
-
-
-
-
-
-
 
     /**
      * Check Category Access ~
@@ -443,9 +290,9 @@ class SystemSetting
      */
     public function setCoreAccessCategoryEnabled($value)
     {
-        $this->setName('access_category_enabled');
+        $this->setFieldName('access_category_enabled');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -460,9 +307,9 @@ class SystemSetting
      */
     public function setCoreAccessContextEnabled($value)
     {
-        $this->setName('access_context_enabled');
+        $this->setFieldName('access_context_enabled');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -477,9 +324,9 @@ class SystemSetting
      */
     public function setCoreAccessPoliciesVersion($value)
     {
-        $this->setName('access_policies_version');
+        $this->setFieldName('access_policies_version');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -495,9 +342,9 @@ class SystemSetting
      */
     public function setCoreAccessResourceGroupEnabled($value)
     {
-        $this->setName('access_resource_group_enabled');
+        $this->setFieldName('access_resource_group_enabled');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -512,9 +359,9 @@ class SystemSetting
      */
     public function setCoreAllowForwardAcrossContexts($value)
     {
-        $this->setName('allow_forward_across_contexts');
+        $this->setFieldName('allow_forward_across_contexts');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -529,9 +376,9 @@ class SystemSetting
      */
     public function setCoreAllowManagerLoginForgotPassword($value)
     {
-        $this->setName('allow_manager_login_forgot_password');
+        $this->setFieldName('allow_manager_login_forgot_password');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -546,9 +393,9 @@ class SystemSetting
      */
     public function setCoreAllowMultipleEmails($value)
     {
-        $this->setName('allow_multiple_emails');
+        $this->setFieldName('allow_multiple_emails');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -563,9 +410,9 @@ class SystemSetting
      */
     public function setCoreAllowTagsInPost($value)
     {
-        $this->setName('allow_tags_in_post');
+        $this->setFieldName('allow_tags_in_post');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -580,9 +427,9 @@ class SystemSetting
      */
     public function setCoreAllowTvEval($value)
     {
-        $this->setName('allow_tv_eval');
+        $this->setFieldName('allow_tv_eval');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -597,9 +444,9 @@ class SystemSetting
      */
     public function setCoreAnonymousSessions($value)
     {
-        $this->setName('anonymous_sessions');
+        $this->setFieldName('anonymous_sessions');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -614,9 +461,9 @@ class SystemSetting
      */
     public function setCoreArchiveWith($value)
     {
-        $this->setName('archive_with');
+        $this->setFieldName('archive_with');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -631,9 +478,9 @@ class SystemSetting
      */
     public function setCoreAutoCheckPkgUpdates($value)
     {
-        $this->setName('auto_check_pkg_updates');
+        $this->setFieldName('auto_check_pkg_updates');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -648,9 +495,9 @@ class SystemSetting
      */
     public function setCoreAutoCheckPkgUpdatesCacheExpire($value)
     {
-        $this->setName('auto_check_pkg_updates_cache_expire');
+        $this->setFieldName('auto_check_pkg_updates_cache_expire');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -666,9 +513,9 @@ class SystemSetting
      */
     public function setCoreAutoIsfolder($value)
     {
-        $this->setName('auto_isfolder');
+        $this->setFieldName('auto_isfolder');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -683,9 +530,9 @@ class SystemSetting
      */
     public function setCoreAutoMenuindex($value)
     {
-        $this->setName('auto_menuindex');
+        $this->setFieldName('auto_menuindex');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -700,9 +547,9 @@ class SystemSetting
      */
     public function setCoreAutomaticAlias($value)
     {
-        $this->setName('automatic_alias');
+        $this->setFieldName('automatic_alias');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -717,9 +564,9 @@ class SystemSetting
      */
     public function setCoreBaseHelpUrl($value)
     {
-        $this->setName('base_help_url');
+        $this->setFieldName('base_help_url');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -735,9 +582,9 @@ class SystemSetting
      */
     public function setCoreBlockedMinutes($value)
     {
-        $this->setName('blocked_minutes');
+        $this->setFieldName('blocked_minutes');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -753,9 +600,9 @@ class SystemSetting
      */
     public function setCoreCacheActionMap($value)
     {
-        $this->setName('cache_action_map');
+        $this->setFieldName('cache_action_map');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -770,9 +617,9 @@ class SystemSetting
      */
     public function setCoreCacheAliasMap($value)
     {
-        $this->setName('cache_alias_map');
+        $this->setFieldName('cache_alias_map');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -787,9 +634,9 @@ class SystemSetting
      */
     public function setCoreCacheContextSettings($value)
     {
-        $this->setName('cache_context_settings');
+        $this->setFieldName('cache_context_settings');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -804,9 +651,9 @@ class SystemSetting
      */
     public function setCoreCacheDb($value)
     {
-        $this->setName('cache_db');
+        $this->setFieldName('cache_db');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -821,9 +668,9 @@ class SystemSetting
      */
     public function setCoreCacheDbExpires($value)
     {
-        $this->setName('cache_db_expires');
+        $this->setFieldName('cache_db_expires');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -839,9 +686,9 @@ class SystemSetting
      */
     public function setCoreCacheDbSession($value)
     {
-        $this->setName('cache_db_session');
+        $this->setFieldName('cache_db_session');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -856,9 +703,9 @@ class SystemSetting
      */
     public function setCoreCacheDbSessionLifetime($value)
     {
-        $this->setName('cache_db_session_lifetime');
+        $this->setFieldName('cache_db_session_lifetime');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -874,9 +721,9 @@ class SystemSetting
      */
     public function setCoreCacheDefault($value)
     {
-        $this->setName('cache_default');
+        $this->setFieldName('cache_default');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -891,9 +738,9 @@ class SystemSetting
      */
     public function setCoreCacheDisabled($value)
     {
-        $this->setName('cache_disabled');
+        $this->setFieldName('cache_disabled');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -908,9 +755,9 @@ class SystemSetting
      */
     public function setCoreCacheExpires($value)
     {
-        $this->setName('cache_expires');
+        $this->setFieldName('cache_expires');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -926,9 +773,9 @@ class SystemSetting
      */
     public function setCoreCacheFormat($value)
     {
-        $this->setName('cache_format');
+        $this->setFieldName('cache_format');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -944,9 +791,9 @@ class SystemSetting
      */
     public function setCoreCacheHandler($value)
     {
-        $this->setName('cache_handler');
+        $this->setFieldName('cache_handler');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -962,9 +809,9 @@ class SystemSetting
      */
     public function setCoreCacheLangJs($value)
     {
-        $this->setName('cache_lang_js');
+        $this->setFieldName('cache_lang_js');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -979,9 +826,9 @@ class SystemSetting
      */
     public function setCoreCacheLexiconTopics($value)
     {
-        $this->setName('cache_lexicon_topics');
+        $this->setFieldName('cache_lexicon_topics');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -996,9 +843,9 @@ class SystemSetting
      */
     public function setCoreCacheNoncoreLexiconTopics($value)
     {
-        $this->setName('cache_noncore_lexicon_topics');
+        $this->setFieldName('cache_noncore_lexicon_topics');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -1013,9 +860,9 @@ class SystemSetting
      */
     public function setCoreCacheResource($value)
     {
-        $this->setName('cache_resource');
+        $this->setFieldName('cache_resource');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -1030,9 +877,9 @@ class SystemSetting
      */
     public function setCoreCacheResourceExpires($value)
     {
-        $this->setName('cache_resource_expires');
+        $this->setFieldName('cache_resource_expires');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -1048,9 +895,9 @@ class SystemSetting
      */
     public function setCoreCacheScripts($value)
     {
-        $this->setName('cache_scripts');
+        $this->setFieldName('cache_scripts');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -1065,9 +912,9 @@ class SystemSetting
      */
     public function setCoreCacheSystemSettings($value)
     {
-        $this->setName('cache_system_settings');
+        $this->setFieldName('cache_system_settings');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -1082,9 +929,9 @@ class SystemSetting
      */
     public function setCoreClearCacheRefreshTrees($value)
     {
-        $this->setName('clear_cache_refresh_trees');
+        $this->setFieldName('clear_cache_refresh_trees');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -1099,9 +946,9 @@ class SystemSetting
      */
     public function setCoreCompressCss($value)
     {
-        $this->setName('compress_css');
+        $this->setFieldName('compress_css');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -1116,9 +963,9 @@ class SystemSetting
      */
     public function setCoreCompressJs($value)
     {
-        $this->setName('compress_js');
+        $this->setFieldName('compress_js');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -1133,9 +980,9 @@ class SystemSetting
      */
     public function setCoreCompressJsMaxFiles($value)
     {
-        $this->setName('compress_js_max_files');
+        $this->setFieldName('compress_js_max_files');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -1151,9 +998,9 @@ class SystemSetting
      */
     public function setCoreConfirmNavigation($value)
     {
-        $this->setName('confirm_navigation');
+        $this->setFieldName('confirm_navigation');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -1168,9 +1015,9 @@ class SystemSetting
      */
     public function setCoreContainerSuffix($value)
     {
-        $this->setName('container_suffix');
+        $this->setFieldName('container_suffix');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -1186,9 +1033,9 @@ class SystemSetting
      */
     public function setCoreContextTreeSort($value)
     {
-        $this->setName('context_tree_sort');
+        $this->setFieldName('context_tree_sort');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -1203,9 +1050,9 @@ class SystemSetting
      */
     public function setCoreContextTreeSortby($value)
     {
-        $this->setName('context_tree_sortby');
+        $this->setFieldName('context_tree_sortby');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -1221,9 +1068,9 @@ class SystemSetting
      */
     public function setCoreContextTreeSortdir($value)
     {
-        $this->setName('context_tree_sortdir');
+        $this->setFieldName('context_tree_sortdir');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -1239,9 +1086,9 @@ class SystemSetting
      */
     public function setCoreCultureKey($value)
     {
-        $this->setName('cultureKey');
+        $this->setFieldName('cultureKey');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -1257,9 +1104,9 @@ class SystemSetting
      */
     public function setCoreDateTimezone($value)
     {
-        $this->setName('date_timezone');
+        $this->setFieldName('date_timezone');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -1275,9 +1122,9 @@ class SystemSetting
      */
     public function setCoreDebug($value)
     {
-        $this->setName('debug');
+        $this->setFieldName('debug');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -1293,9 +1140,9 @@ class SystemSetting
      */
     public function setCoreDefaultContentType($value)
     {
-        $this->setName('default_content_type');
+        $this->setFieldName('default_content_type');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -1311,9 +1158,9 @@ class SystemSetting
      */
     public function setCoreDefaultContext($value)
     {
-        $this->setName('default_context');
+        $this->setFieldName('default_context');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -1329,9 +1176,9 @@ class SystemSetting
      */
     public function setCoreDefaultDuplicatePublishOption($value)
     {
-        $this->setName('default_duplicate_publish_option');
+        $this->setFieldName('default_duplicate_publish_option');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -1347,9 +1194,9 @@ class SystemSetting
      */
     public function setCoreDefaultMediaSource($value)
     {
-        $this->setName('default_media_source');
+        $this->setFieldName('default_media_source');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -1365,9 +1212,9 @@ class SystemSetting
      */
     public function setCoreDefaultPerPage($value)
     {
-        $this->setName('default_per_page');
+        $this->setFieldName('default_per_page');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -1383,9 +1230,9 @@ class SystemSetting
      */
     public function setCoreDefaultTemplate($value)
     {
-        $this->setName('default_template');
+        $this->setFieldName('default_template');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -1401,9 +1248,9 @@ class SystemSetting
      */
     public function setCoreDefaultUsername($value)
     {
-        $this->setName('default_username');
+        $this->setFieldName('default_username');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -1419,9 +1266,9 @@ class SystemSetting
      */
     public function setCoreEditorCssPath($value)
     {
-        $this->setName('editor_css_path');
+        $this->setFieldName('editor_css_path');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -1437,9 +1284,9 @@ class SystemSetting
      */
     public function setCoreEditorCssSelectors($value)
     {
-        $this->setName('editor_css_selectors');
+        $this->setFieldName('editor_css_selectors');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -1455,9 +1302,9 @@ class SystemSetting
      */
     public function setCoreEmailsender($value)
     {
-        $this->setName('emailsender');
+        $this->setFieldName('emailsender');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -1473,9 +1320,9 @@ class SystemSetting
      */
     public function setCoreEmailsubject($value)
     {
-        $this->setName('emailsubject');
+        $this->setFieldName('emailsubject');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -1491,9 +1338,9 @@ class SystemSetting
      */
     public function setCoreEnableDragdrop($value)
     {
-        $this->setName('enable_dragdrop');
+        $this->setFieldName('enable_dragdrop');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -1508,9 +1355,9 @@ class SystemSetting
      */
     public function setCoreEnableGravatar($value)
     {
-        $this->setName('enable_gravatar');
+        $this->setFieldName('enable_gravatar');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -1525,9 +1372,9 @@ class SystemSetting
      */
     public function setCoreErrorPage($value)
     {
-        $this->setName('error_page');
+        $this->setFieldName('error_page');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -1543,9 +1390,9 @@ class SystemSetting
      */
     public function setCoreExtensionPackages($value)
     {
-        $this->setName('extension_packages');
+        $this->setFieldName('extension_packages');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -1561,9 +1408,9 @@ class SystemSetting
      */
     public function setCoreFailedLoginAttempts($value)
     {
-        $this->setName('failed_login_attempts');
+        $this->setFieldName('failed_login_attempts');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -1579,9 +1426,9 @@ class SystemSetting
      */
     public function setCoreFeEditorLang($value)
     {
-        $this->setName('fe_editor_lang');
+        $this->setFieldName('fe_editor_lang');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -1597,9 +1444,9 @@ class SystemSetting
      */
     public function setCoreFeedModxNews($value)
     {
-        $this->setName('feed_modx_news');
+        $this->setFieldName('feed_modx_news');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -1615,9 +1462,9 @@ class SystemSetting
      */
     public function setCoreFeedModxNewsEnabled($value)
     {
-        $this->setName('feed_modx_news_enabled');
+        $this->setFieldName('feed_modx_news_enabled');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -1632,9 +1479,9 @@ class SystemSetting
      */
     public function setCoreFeedModxSecurity($value)
     {
-        $this->setName('feed_modx_security');
+        $this->setFieldName('feed_modx_security');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -1650,9 +1497,9 @@ class SystemSetting
      */
     public function setCoreFeedModxSecurityEnabled($value)
     {
-        $this->setName('feed_modx_security_enabled');
+        $this->setFieldName('feed_modx_security_enabled');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -1667,9 +1514,9 @@ class SystemSetting
      */
     public function setCoreFilemanagerPath($value)
     {
-        $this->setName('filemanager_path');
+        $this->setFieldName('filemanager_path');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -1685,9 +1532,9 @@ class SystemSetting
      */
     public function setCoreFilemanagerPathRelative($value)
     {
-        $this->setName('filemanager_path_relative');
+        $this->setFieldName('filemanager_path_relative');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -1702,9 +1549,9 @@ class SystemSetting
      */
     public function setCoreFilemanagerUrl($value)
     {
-        $this->setName('filemanager_url');
+        $this->setFieldName('filemanager_url');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -1720,9 +1567,9 @@ class SystemSetting
      */
     public function setCoreFilemanagerUrlRelative($value)
     {
-        $this->setName('filemanager_url_relative');
+        $this->setFieldName('filemanager_url_relative');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -1737,9 +1584,9 @@ class SystemSetting
      */
     public function setCoreForgotLoginEmail($value)
     {
-        $this->setName('forgot_login_email');
+        $this->setFieldName('forgot_login_email');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -1755,9 +1602,9 @@ class SystemSetting
      */
     public function setCoreFormCustomizationUseAllGroups($value)
     {
-        $this->setName('form_customization_use_all_groups');
+        $this->setFieldName('form_customization_use_all_groups');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -1772,9 +1619,9 @@ class SystemSetting
      */
     public function setCoreForwardMergeExcludes($value)
     {
-        $this->setName('forward_merge_excludes');
+        $this->setFieldName('forward_merge_excludes');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -1790,9 +1637,9 @@ class SystemSetting
      */
     public function setCoreFriendlyAliasLowercaseOnly($value)
     {
-        $this->setName('friendly_alias_lowercase_only');
+        $this->setFieldName('friendly_alias_lowercase_only');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -1807,9 +1654,9 @@ class SystemSetting
      */
     public function setCoreFriendlyAliasMaxLength($value)
     {
-        $this->setName('friendly_alias_max_length');
+        $this->setFieldName('friendly_alias_max_length');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -1825,9 +1672,9 @@ class SystemSetting
      */
     public function setCoreFriendlyAliasRealtime($value)
     {
-        $this->setName('friendly_alias_realtime');
+        $this->setFieldName('friendly_alias_realtime');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -1842,9 +1689,9 @@ class SystemSetting
      */
     public function setCoreFriendlyAliasRestrictChars($value)
     {
-        $this->setName('friendly_alias_restrict_chars');
+        $this->setFieldName('friendly_alias_restrict_chars');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -1860,9 +1707,9 @@ class SystemSetting
      */
     public function setCoreFriendlyAliasRestrictCharsPattern($value)
     {
-        $this->setName('friendly_alias_restrict_chars_pattern');
+        $this->setFieldName('friendly_alias_restrict_chars_pattern');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -1878,9 +1725,9 @@ class SystemSetting
      */
     public function setCoreFriendlyAliasStripElementTags($value)
     {
-        $this->setName('friendly_alias_strip_element_tags');
+        $this->setFieldName('friendly_alias_strip_element_tags');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -1895,9 +1742,9 @@ class SystemSetting
      */
     public function setCoreFriendlyAliasTranslit($value)
     {
-        $this->setName('friendly_alias_translit');
+        $this->setFieldName('friendly_alias_translit');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -1913,9 +1760,9 @@ class SystemSetting
      */
     public function setCoreFriendlyAliasTranslitClass($value)
     {
-        $this->setName('friendly_alias_translit_class');
+        $this->setFieldName('friendly_alias_translit_class');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -1931,9 +1778,9 @@ class SystemSetting
      */
     public function setCoreFriendlyAliasTranslitClassPath($value)
     {
-        $this->setName('friendly_alias_translit_class_path');
+        $this->setFieldName('friendly_alias_translit_class_path');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -1949,9 +1796,9 @@ class SystemSetting
      */
     public function setCoreFriendlyAliasTrimChars($value)
     {
-        $this->setName('friendly_alias_trim_chars');
+        $this->setFieldName('friendly_alias_trim_chars');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -1967,9 +1814,9 @@ class SystemSetting
      */
     public function setCoreFriendlyAliasWordDelimiter($value)
     {
-        $this->setName('friendly_alias_word_delimiter');
+        $this->setFieldName('friendly_alias_word_delimiter');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -1985,9 +1832,9 @@ class SystemSetting
      */
     public function setCoreFriendlyAliasWordDelimiters($value)
     {
-        $this->setName('friendly_alias_word_delimiters');
+        $this->setFieldName('friendly_alias_word_delimiters');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -2003,9 +1850,9 @@ class SystemSetting
      */
     public function setCoreFriendlyUrls($value)
     {
-        $this->setName('friendly_urls');
+        $this->setFieldName('friendly_urls');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -2020,9 +1867,9 @@ class SystemSetting
      */
     public function setCoreFriendlyUrlsStrict($value)
     {
-        $this->setName('friendly_urls_strict');
+        $this->setFieldName('friendly_urls_strict');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -2037,9 +1884,9 @@ class SystemSetting
      */
     public function setCoreGlobalDuplicateUriCheck($value)
     {
-        $this->setName('global_duplicate_uri_check');
+        $this->setFieldName('global_duplicate_uri_check');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -2054,9 +1901,9 @@ class SystemSetting
      */
     public function setCoreHidemenuDefault($value)
     {
-        $this->setName('hidemenu_default');
+        $this->setFieldName('hidemenu_default');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -2071,9 +1918,9 @@ class SystemSetting
      */
     public function setCoreInlineHelp($value)
     {
-        $this->setName('inline_help');
+        $this->setFieldName('inline_help');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -2088,9 +1935,9 @@ class SystemSetting
      */
     public function setCoreLinkTagScheme($value)
     {
-        $this->setName('link_tag_scheme');
+        $this->setFieldName('link_tag_scheme');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -2106,9 +1953,9 @@ class SystemSetting
      */
     public function setCoreLocale($value)
     {
-        $this->setName('locale');
+        $this->setFieldName('locale');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -2124,9 +1971,9 @@ class SystemSetting
      */
     public function setCoreLockTtl($value)
     {
-        $this->setName('lock_ttl');
+        $this->setFieldName('lock_ttl');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -2142,9 +1989,9 @@ class SystemSetting
      */
     public function setCoreLogLevel($value)
     {
-        $this->setName('log_level');
+        $this->setFieldName('log_level');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -2160,9 +2007,9 @@ class SystemSetting
      */
     public function setCoreLogSnippetNotFound($value)
     {
-        $this->setName('log_snippet_not_found');
+        $this->setFieldName('log_snippet_not_found');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -2177,9 +2024,9 @@ class SystemSetting
      */
     public function setCoreLogTarget($value)
     {
-        $this->setName('log_target');
+        $this->setFieldName('log_target');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -2195,9 +2042,9 @@ class SystemSetting
      */
     public function setCoreMailCharset($value)
     {
-        $this->setName('mail_charset');
+        $this->setFieldName('mail_charset');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -2213,9 +2060,9 @@ class SystemSetting
      */
     public function setCoreMailEncoding($value)
     {
-        $this->setName('mail_encoding');
+        $this->setFieldName('mail_encoding');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -2231,9 +2078,9 @@ class SystemSetting
      */
     public function setCoreMailSmtpAuth($value)
     {
-        $this->setName('mail_smtp_auth');
+        $this->setFieldName('mail_smtp_auth');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -2248,9 +2095,9 @@ class SystemSetting
      */
     public function setCoreMailSmtpHelo($value)
     {
-        $this->setName('mail_smtp_helo');
+        $this->setFieldName('mail_smtp_helo');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -2266,9 +2113,9 @@ class SystemSetting
      */
     public function setCoreMailSmtpHosts($value)
     {
-        $this->setName('mail_smtp_hosts');
+        $this->setFieldName('mail_smtp_hosts');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -2284,9 +2131,9 @@ class SystemSetting
      */
     public function setCoreMailSmtpKeepalive($value)
     {
-        $this->setName('mail_smtp_keepalive');
+        $this->setFieldName('mail_smtp_keepalive');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -2301,9 +2148,9 @@ class SystemSetting
      */
     public function setCoreMailSmtpPass($value)
     {
-        $this->setName('mail_smtp_pass');
+        $this->setFieldName('mail_smtp_pass');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -2319,9 +2166,9 @@ class SystemSetting
      */
     public function setCoreMailSmtpPort($value)
     {
-        $this->setName('mail_smtp_port');
+        $this->setFieldName('mail_smtp_port');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -2337,9 +2184,9 @@ class SystemSetting
      */
     public function setCoreMailSmtpPrefix($value)
     {
-        $this->setName('mail_smtp_prefix');
+        $this->setFieldName('mail_smtp_prefix');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -2355,9 +2202,9 @@ class SystemSetting
      */
     public function setCoreMailSmtpSingleTo($value)
     {
-        $this->setName('mail_smtp_single_to');
+        $this->setFieldName('mail_smtp_single_to');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -2372,9 +2219,9 @@ class SystemSetting
      */
     public function setCoreMailSmtpTimeout($value)
     {
-        $this->setName('mail_smtp_timeout');
+        $this->setFieldName('mail_smtp_timeout');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -2390,9 +2237,9 @@ class SystemSetting
      */
     public function setCoreMailSmtpUser($value)
     {
-        $this->setName('mail_smtp_user');
+        $this->setFieldName('mail_smtp_user');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -2408,9 +2255,9 @@ class SystemSetting
      */
     public function setCoreMailUseSmtp($value)
     {
-        $this->setName('mail_use_smtp');
+        $this->setFieldName('mail_use_smtp');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -2425,9 +2272,9 @@ class SystemSetting
      */
     public function setCoreMainNavParent($value)
     {
-        $this->setName('main_nav_parent');
+        $this->setFieldName('main_nav_parent');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -2443,9 +2290,9 @@ class SystemSetting
      */
     public function setCoreManagerDateFormat($value)
     {
-        $this->setName('manager_date_format');
+        $this->setFieldName('manager_date_format');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -2461,9 +2308,9 @@ class SystemSetting
      */
     public function setCoreManagerDirection($value)
     {
-        $this->setName('manager_direction');
+        $this->setFieldName('manager_direction');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -2479,9 +2326,9 @@ class SystemSetting
      */
     public function setCoreManagerFaviconUrl($value)
     {
-        $this->setName('manager_favicon_url');
+        $this->setFieldName('manager_favicon_url');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -2497,9 +2344,9 @@ class SystemSetting
      */
     public function setCoreManagerJsCacheFileLocking($value)
     {
-        $this->setName('manager_js_cache_file_locking');
+        $this->setFieldName('manager_js_cache_file_locking');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -2514,9 +2361,9 @@ class SystemSetting
      */
     public function setCoreManagerJsCacheMaxAge($value)
     {
-        $this->setName('manager_js_cache_max_age');
+        $this->setFieldName('manager_js_cache_max_age');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -2532,9 +2379,9 @@ class SystemSetting
      */
     public function setCoreManagerJsDocumentRoot($value)
     {
-        $this->setName('manager_js_document_root');
+        $this->setFieldName('manager_js_document_root');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -2550,9 +2397,9 @@ class SystemSetting
      */
     public function setCoreManagerJsZlibOutputCompression($value)
     {
-        $this->setName('manager_js_zlib_output_compression');
+        $this->setFieldName('manager_js_zlib_output_compression');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -2567,9 +2414,9 @@ class SystemSetting
      */
     public function setCoreManagerLangAttribute($value)
     {
-        $this->setName('manager_lang_attribute');
+        $this->setFieldName('manager_lang_attribute');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -2585,9 +2432,9 @@ class SystemSetting
      */
     public function setCoreManagerLanguage($value)
     {
-        $this->setName('manager_language');
+        $this->setFieldName('manager_language');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -2603,9 +2450,9 @@ class SystemSetting
      */
     public function setCoreManagerLoginUrlAlternate($value)
     {
-        $this->setName('manager_login_url_alternate');
+        $this->setFieldName('manager_login_url_alternate');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -2621,9 +2468,9 @@ class SystemSetting
      */
     public function setCoreManagerTheme($value)
     {
-        $this->setName('manager_theme');
+        $this->setFieldName('manager_theme');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -2639,9 +2486,9 @@ class SystemSetting
      */
     public function setCoreManagerTimeFormat($value)
     {
-        $this->setName('manager_time_format');
+        $this->setFieldName('manager_time_format');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -2657,9 +2504,9 @@ class SystemSetting
      */
     public function setCoreManagerUseFullname($value)
     {
-        $this->setName('manager_use_fullname');
+        $this->setFieldName('manager_use_fullname');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -2674,9 +2521,9 @@ class SystemSetting
      */
     public function setCoreManagerWeekStart($value)
     {
-        $this->setName('manager_week_start');
+        $this->setFieldName('manager_week_start');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -2692,9 +2539,9 @@ class SystemSetting
      */
     public function setCoreMgrSourceIcon($value)
     {
-        $this->setName('mgr_source_icon');
+        $this->setFieldName('mgr_source_icon');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -2710,9 +2557,9 @@ class SystemSetting
      */
     public function setCoreMgrTreeIconContext($value)
     {
-        $this->setName('mgr_tree_icon_context');
+        $this->setFieldName('mgr_tree_icon_context');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -2728,9 +2575,9 @@ class SystemSetting
      */
     public function setCoreModxBrowserDefaultSort($value)
     {
-        $this->setName('modx_browser_default_sort');
+        $this->setFieldName('modx_browser_default_sort');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -2746,9 +2593,9 @@ class SystemSetting
      */
     public function setCoreModxBrowserDefaultViewmode($value)
     {
-        $this->setName('modx_browser_default_viewmode');
+        $this->setFieldName('modx_browser_default_viewmode');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -2764,9 +2611,9 @@ class SystemSetting
      */
     public function setCoreModxBrowserTreeHideFiles($value)
     {
-        $this->setName('modx_browser_tree_hide_files');
+        $this->setFieldName('modx_browser_tree_hide_files');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -2781,9 +2628,9 @@ class SystemSetting
      */
     public function setCoreModxBrowserTreeHideTooltips($value)
     {
-        $this->setName('modx_browser_tree_hide_tooltips');
+        $this->setFieldName('modx_browser_tree_hide_tooltips');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -2798,9 +2645,9 @@ class SystemSetting
      */
     public function setCoreModxCharset($value)
     {
-        $this->setName('modx_charset');
+        $this->setFieldName('modx_charset');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -2816,9 +2663,9 @@ class SystemSetting
      */
     public function setCoreParserRecurseUncacheable($value)
     {
-        $this->setName('parser_recurse_uncacheable');
+        $this->setFieldName('parser_recurse_uncacheable');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -2833,9 +2680,9 @@ class SystemSetting
      */
     public function setCorePasswordGeneratedLength($value)
     {
-        $this->setName('password_generated_length');
+        $this->setFieldName('password_generated_length');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -2851,9 +2698,9 @@ class SystemSetting
      */
     public function setCorePasswordMinLength($value)
     {
-        $this->setName('password_min_length');
+        $this->setFieldName('password_min_length');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -2869,9 +2716,9 @@ class SystemSetting
      */
     public function setCorePhpthumbAllowSrcAboveDocroot($value)
     {
-        $this->setName('phpthumb_allow_src_above_docroot');
+        $this->setFieldName('phpthumb_allow_src_above_docroot');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -2886,9 +2733,9 @@ class SystemSetting
      */
     public function setCorePhpthumbCacheMaxage($value)
     {
-        $this->setName('phpthumb_cache_maxage');
+        $this->setFieldName('phpthumb_cache_maxage');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -2904,9 +2751,9 @@ class SystemSetting
      */
     public function setCorePhpthumbCacheMaxfiles($value)
     {
-        $this->setName('phpthumb_cache_maxfiles');
+        $this->setFieldName('phpthumb_cache_maxfiles');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -2922,9 +2769,9 @@ class SystemSetting
      */
     public function setCorePhpthumbCacheMaxsize($value)
     {
-        $this->setName('phpthumb_cache_maxsize');
+        $this->setFieldName('phpthumb_cache_maxsize');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -2940,9 +2787,9 @@ class SystemSetting
      */
     public function setCorePhpthumbCacheSourceEnabled($value)
     {
-        $this->setName('phpthumb_cache_source_enabled');
+        $this->setFieldName('phpthumb_cache_source_enabled');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -2957,9 +2804,9 @@ class SystemSetting
      */
     public function setCorePhpthumbDocumentRoot($value)
     {
-        $this->setName('phpthumb_document_root');
+        $this->setFieldName('phpthumb_document_root');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -2975,9 +2822,9 @@ class SystemSetting
      */
     public function setCorePhpthumbErrorBgcolor($value)
     {
-        $this->setName('phpthumb_error_bgcolor');
+        $this->setFieldName('phpthumb_error_bgcolor');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -2993,9 +2840,9 @@ class SystemSetting
      */
     public function setCorePhpthumbErrorFontsize($value)
     {
-        $this->setName('phpthumb_error_fontsize');
+        $this->setFieldName('phpthumb_error_fontsize');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -3011,9 +2858,9 @@ class SystemSetting
      */
     public function setCorePhpthumbErrorTextcolor($value)
     {
-        $this->setName('phpthumb_error_textcolor');
+        $this->setFieldName('phpthumb_error_textcolor');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -3029,9 +2876,9 @@ class SystemSetting
      */
     public function setCorePhpthumbFar($value)
     {
-        $this->setName('phpthumb_far');
+        $this->setFieldName('phpthumb_far');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -3047,9 +2894,9 @@ class SystemSetting
      */
     public function setCorePhpthumbImagemagickPath($value)
     {
-        $this->setName('phpthumb_imagemagick_path');
+        $this->setFieldName('phpthumb_imagemagick_path');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -3065,9 +2912,9 @@ class SystemSetting
      */
     public function setCorePhpthumbNohotlinkEnabled($value)
     {
-        $this->setName('phpthumb_nohotlink_enabled');
+        $this->setFieldName('phpthumb_nohotlink_enabled');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -3082,9 +2929,9 @@ class SystemSetting
      */
     public function setCorePhpthumbNohotlinkEraseImage($value)
     {
-        $this->setName('phpthumb_nohotlink_erase_image');
+        $this->setFieldName('phpthumb_nohotlink_erase_image');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -3099,9 +2946,9 @@ class SystemSetting
      */
     public function setCorePhpthumbNohotlinkTextMessage($value)
     {
-        $this->setName('phpthumb_nohotlink_text_message');
+        $this->setFieldName('phpthumb_nohotlink_text_message');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -3117,9 +2964,9 @@ class SystemSetting
      */
     public function setCorePhpthumbNohotlinkValidDomains($value)
     {
-        $this->setName('phpthumb_nohotlink_valid_domains');
+        $this->setFieldName('phpthumb_nohotlink_valid_domains');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -3135,9 +2982,9 @@ class SystemSetting
      */
     public function setCorePhpthumbNooffsitelinkEnabled($value)
     {
-        $this->setName('phpthumb_nooffsitelink_enabled');
+        $this->setFieldName('phpthumb_nooffsitelink_enabled');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -3152,9 +2999,9 @@ class SystemSetting
      */
     public function setCorePhpthumbNooffsitelinkEraseImage($value)
     {
-        $this->setName('phpthumb_nooffsitelink_erase_image');
+        $this->setFieldName('phpthumb_nooffsitelink_erase_image');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -3169,9 +3016,9 @@ class SystemSetting
      */
     public function setCorePhpthumbNooffsitelinkRequireRefer($value)
     {
-        $this->setName('phpthumb_nooffsitelink_require_refer');
+        $this->setFieldName('phpthumb_nooffsitelink_require_refer');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -3186,9 +3033,9 @@ class SystemSetting
      */
     public function setCorePhpthumbNooffsitelinkTextMessage($value)
     {
-        $this->setName('phpthumb_nooffsitelink_text_message');
+        $this->setFieldName('phpthumb_nooffsitelink_text_message');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -3204,9 +3051,9 @@ class SystemSetting
      */
     public function setCorePhpthumbNooffsitelinkValidDomains($value)
     {
-        $this->setName('phpthumb_nooffsitelink_valid_domains');
+        $this->setFieldName('phpthumb_nooffsitelink_valid_domains');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -3222,9 +3069,9 @@ class SystemSetting
      */
     public function setCorePhpthumbNooffsitelinkWatermarkSrc($value)
     {
-        $this->setName('phpthumb_nooffsitelink_watermark_src');
+        $this->setFieldName('phpthumb_nooffsitelink_watermark_src');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -3240,9 +3087,9 @@ class SystemSetting
      */
     public function setCorePhpthumbZoomcrop($value)
     {
-        $this->setName('phpthumb_zoomcrop');
+        $this->setFieldName('phpthumb_zoomcrop');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -3258,9 +3105,9 @@ class SystemSetting
      */
     public function setCorePreserveMenuindex($value)
     {
-        $this->setName('preserve_menuindex');
+        $this->setFieldName('preserve_menuindex');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -3275,9 +3122,9 @@ class SystemSetting
      */
     public function setCorePrincipalTargets($value)
     {
-        $this->setName('principal_targets');
+        $this->setFieldName('principal_targets');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -3293,9 +3140,9 @@ class SystemSetting
      */
     public function setCoreProxyAuthType($value)
     {
-        $this->setName('proxy_auth_type');
+        $this->setFieldName('proxy_auth_type');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -3311,9 +3158,9 @@ class SystemSetting
      */
     public function setCoreProxyHost($value)
     {
-        $this->setName('proxy_host');
+        $this->setFieldName('proxy_host');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -3329,9 +3176,9 @@ class SystemSetting
      */
     public function setCoreProxyPassword($value)
     {
-        $this->setName('proxy_password');
+        $this->setFieldName('proxy_password');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -3347,9 +3194,9 @@ class SystemSetting
      */
     public function setCoreProxyPort($value)
     {
-        $this->setName('proxy_port');
+        $this->setFieldName('proxy_port');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -3365,9 +3212,9 @@ class SystemSetting
      */
     public function setCoreProxyUsername($value)
     {
-        $this->setName('proxy_username');
+        $this->setFieldName('proxy_username');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -3383,9 +3230,9 @@ class SystemSetting
      */
     public function setCorePublishDefault($value)
     {
-        $this->setName('publish_default');
+        $this->setFieldName('publish_default');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -3400,9 +3247,9 @@ class SystemSetting
      */
     public function setCoreRbBaseDir($value)
     {
-        $this->setName('rb_base_dir');
+        $this->setFieldName('rb_base_dir');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -3418,9 +3265,9 @@ class SystemSetting
      */
     public function setCoreRbBaseUrl($value)
     {
-        $this->setName('rb_base_url');
+        $this->setFieldName('rb_base_url');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -3436,9 +3283,9 @@ class SystemSetting
      */
     public function setCoreRequestController($value)
     {
-        $this->setName('request_controller');
+        $this->setFieldName('request_controller');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -3454,9 +3301,9 @@ class SystemSetting
      */
     public function setCoreRequestMethodStrict($value)
     {
-        $this->setName('request_method_strict');
+        $this->setFieldName('request_method_strict');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -3471,9 +3318,9 @@ class SystemSetting
      */
     public function setCoreRequestParamAlias($value)
     {
-        $this->setName('request_param_alias');
+        $this->setFieldName('request_param_alias');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -3489,9 +3336,9 @@ class SystemSetting
      */
     public function setCoreRequestParamId($value)
     {
-        $this->setName('request_param_id');
+        $this->setFieldName('request_param_id');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -3507,9 +3354,9 @@ class SystemSetting
      */
     public function setCoreResolveHostnames($value)
     {
-        $this->setName('resolve_hostnames');
+        $this->setFieldName('resolve_hostnames');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -3524,9 +3371,9 @@ class SystemSetting
      */
     public function setCoreResourceTreeNodeName($value)
     {
-        $this->setName('resource_tree_node_name');
+        $this->setFieldName('resource_tree_node_name');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -3542,9 +3389,9 @@ class SystemSetting
      */
     public function setCoreResourceTreeNodeNameFallback($value)
     {
-        $this->setName('resource_tree_node_name_fallback');
+        $this->setFieldName('resource_tree_node_name_fallback');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -3560,9 +3407,9 @@ class SystemSetting
      */
     public function setCoreResourceTreeNodeTooltip($value)
     {
-        $this->setName('resource_tree_node_tooltip');
+        $this->setFieldName('resource_tree_node_tooltip');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -3578,9 +3425,9 @@ class SystemSetting
      */
     public function setCoreRichtextDefault($value)
     {
-        $this->setName('richtext_default');
+        $this->setFieldName('richtext_default');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -3595,9 +3442,9 @@ class SystemSetting
      */
     public function setCoreSearchDefault($value)
     {
-        $this->setName('search_default');
+        $this->setFieldName('search_default');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -3612,9 +3459,9 @@ class SystemSetting
      */
     public function setCoreSendPoweredbyHeader($value)
     {
-        $this->setName('send_poweredby_header');
+        $this->setFieldName('send_poweredby_header');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -3629,9 +3476,9 @@ class SystemSetting
      */
     public function setCoreServerOffsetTime($value)
     {
-        $this->setName('server_offset_time');
+        $this->setFieldName('server_offset_time');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -3647,9 +3494,9 @@ class SystemSetting
      */
     public function setCoreServerProtocol($value)
     {
-        $this->setName('server_protocol');
+        $this->setFieldName('server_protocol');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -3665,9 +3512,9 @@ class SystemSetting
      */
     public function setCoreSessionCookieDomain($value)
     {
-        $this->setName('session_cookie_domain');
+        $this->setFieldName('session_cookie_domain');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -3683,9 +3530,9 @@ class SystemSetting
      */
     public function setCoreSessionCookieHttponly($value)
     {
-        $this->setName('session_cookie_httponly');
+        $this->setFieldName('session_cookie_httponly');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -3700,9 +3547,9 @@ class SystemSetting
      */
     public function setCoreSessionCookieLifetime($value)
     {
-        $this->setName('session_cookie_lifetime');
+        $this->setFieldName('session_cookie_lifetime');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -3718,9 +3565,9 @@ class SystemSetting
      */
     public function setCoreSessionCookiePath($value)
     {
-        $this->setName('session_cookie_path');
+        $this->setFieldName('session_cookie_path');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -3736,9 +3583,9 @@ class SystemSetting
      */
     public function setCoreSessionCookieSecure($value)
     {
-        $this->setName('session_cookie_secure');
+        $this->setFieldName('session_cookie_secure');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -3753,9 +3600,9 @@ class SystemSetting
      */
     public function setCoreSessionGcMaxlifetime($value)
     {
-        $this->setName('session_gc_maxlifetime');
+        $this->setFieldName('session_gc_maxlifetime');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -3771,9 +3618,9 @@ class SystemSetting
      */
     public function setCoreSessionHandlerClass($value)
     {
-        $this->setName('session_handler_class');
+        $this->setFieldName('session_handler_class');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -3789,9 +3636,9 @@ class SystemSetting
      */
     public function setCoreSessionName($value)
     {
-        $this->setName('session_name');
+        $this->setFieldName('session_name');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -3807,9 +3654,9 @@ class SystemSetting
      */
     public function setCoreSetHeader($value)
     {
-        $this->setName('set_header');
+        $this->setFieldName('set_header');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -3824,9 +3671,9 @@ class SystemSetting
      */
     public function setCoreSettingsDistro($value)
     {
-        $this->setName('settings_distro');
+        $this->setFieldName('settings_distro');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -3842,9 +3689,9 @@ class SystemSetting
      */
     public function setCoreSettingsVersion($value)
     {
-        $this->setName('settings_version');
+        $this->setFieldName('settings_version');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -3860,9 +3707,9 @@ class SystemSetting
      */
     public function setCoreShowTvCategoriesHeader($value)
     {
-        $this->setName('show_tv_categories_header');
+        $this->setFieldName('show_tv_categories_header');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -3877,9 +3724,9 @@ class SystemSetting
      */
     public function setCoreSignupemailMessage($value)
     {
-        $this->setName('signupemail_message');
+        $this->setFieldName('signupemail_message');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -3895,9 +3742,9 @@ class SystemSetting
      */
     public function setCoreSiteName($value)
     {
-        $this->setName('site_name');
+        $this->setFieldName('site_name');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -3913,9 +3760,9 @@ class SystemSetting
      */
     public function setCoreSiteStart($value)
     {
-        $this->setName('site_start');
+        $this->setFieldName('site_start');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -3931,9 +3778,9 @@ class SystemSetting
      */
     public function setCoreSiteStatus($value)
     {
-        $this->setName('site_status');
+        $this->setFieldName('site_status');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -3948,9 +3795,9 @@ class SystemSetting
      */
     public function setCoreSiteUnavailableMessage($value)
     {
-        $this->setName('site_unavailable_message');
+        $this->setFieldName('site_unavailable_message');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -3966,9 +3813,9 @@ class SystemSetting
      */
     public function setCoreSiteUnavailablePage($value)
     {
-        $this->setName('site_unavailable_page');
+        $this->setFieldName('site_unavailable_page');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -3984,9 +3831,9 @@ class SystemSetting
      */
     public function setCoreStripImagePaths($value)
     {
-        $this->setName('strip_image_paths');
+        $this->setFieldName('strip_image_paths');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -4001,9 +3848,9 @@ class SystemSetting
      */
     public function setCoreSymlinkMergeFields($value)
     {
-        $this->setName('symlink_merge_fields');
+        $this->setFieldName('symlink_merge_fields');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -4018,9 +3865,9 @@ class SystemSetting
      */
     public function setCoreSyncsiteDefault($value)
     {
-        $this->setName('syncsite_default');
+        $this->setFieldName('syncsite_default');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -4035,9 +3882,9 @@ class SystemSetting
      */
     public function setCoreTopmenuShowDescriptions($value)
     {
-        $this->setName('topmenu_show_descriptions');
+        $this->setFieldName('topmenu_show_descriptions');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -4052,9 +3899,9 @@ class SystemSetting
      */
     public function setCoreTreeDefaultSort($value)
     {
-        $this->setName('tree_default_sort');
+        $this->setFieldName('tree_default_sort');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -4070,9 +3917,9 @@ class SystemSetting
      */
     public function setCoreTreeRootId($value)
     {
-        $this->setName('tree_root_id');
+        $this->setFieldName('tree_root_id');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -4087,9 +3934,9 @@ class SystemSetting
      */
     public function setCoreTvsBelowContent($value)
     {
-        $this->setName('tvs_below_content');
+        $this->setFieldName('tvs_below_content');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -4104,9 +3951,9 @@ class SystemSetting
      */
     public function setCoreUdpermsAllowroot($value)
     {
-        $this->setName('udperms_allowroot');
+        $this->setFieldName('udperms_allowroot');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -4121,9 +3968,9 @@ class SystemSetting
      */
     public function setCoreUnauthorizedPage($value)
     {
-        $this->setName('unauthorized_page');
+        $this->setFieldName('unauthorized_page');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -4139,9 +3986,9 @@ class SystemSetting
      */
     public function setCoreUploadFiles($value)
     {
-        $this->setName('upload_files');
+        $this->setFieldName('upload_files');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -4157,9 +4004,9 @@ class SystemSetting
      */
     public function setCoreUploadFlash($value)
     {
-        $this->setName('upload_flash');
+        $this->setFieldName('upload_flash');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -4175,9 +4022,9 @@ class SystemSetting
      */
     public function setCoreUploadImages($value)
     {
-        $this->setName('upload_images');
+        $this->setFieldName('upload_images');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -4193,9 +4040,9 @@ class SystemSetting
      */
     public function setCoreUploadMaxsize($value)
     {
-        $this->setName('upload_maxsize');
+        $this->setFieldName('upload_maxsize');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -4211,9 +4058,9 @@ class SystemSetting
      */
     public function setCoreUploadMedia($value)
     {
-        $this->setName('upload_media');
+        $this->setFieldName('upload_media');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -4229,9 +4076,9 @@ class SystemSetting
      */
     public function setCoreUseAliasPath($value)
     {
-        $this->setName('use_alias_path');
+        $this->setFieldName('use_alias_path');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -4246,9 +4093,9 @@ class SystemSetting
      */
     public function setCoreUseBrowser($value)
     {
-        $this->setName('use_browser');
+        $this->setFieldName('use_browser');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -4263,9 +4110,9 @@ class SystemSetting
      */
     public function setCoreUseContextResourceTable($value)
     {
-        $this->setName('use_context_resource_table');
+        $this->setFieldName('use_context_resource_table');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -4280,9 +4127,9 @@ class SystemSetting
      */
     public function setCoreUseEditor($value)
     {
-        $this->setName('use_editor');
+        $this->setFieldName('use_editor');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -4297,9 +4144,9 @@ class SystemSetting
      */
     public function setCoreUseFrozenParentUris($value)
     {
-        $this->setName('use_frozen_parent_uris');
+        $this->setFieldName('use_frozen_parent_uris');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -4314,9 +4161,9 @@ class SystemSetting
      */
     public function setCoreUseMultibyte($value)
     {
-        $this->setName('use_multibyte');
+        $this->setFieldName('use_multibyte');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -4331,9 +4178,9 @@ class SystemSetting
      */
     public function setCoreUseWeblinkTarget($value)
     {
-        $this->setName('use_weblink_target');
+        $this->setFieldName('use_weblink_target');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -4348,9 +4195,9 @@ class SystemSetting
      */
     public function setCoreUserNavParent($value)
     {
-        $this->setName('user_nav_parent');
+        $this->setFieldName('user_nav_parent');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -4366,9 +4213,9 @@ class SystemSetting
      */
     public function setCoreWebpwdreminderMessage($value)
     {
-        $this->setName('webpwdreminder_message');
+        $this->setFieldName('webpwdreminder_message');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -4384,9 +4231,9 @@ class SystemSetting
      */
     public function setCoreWebsignupemailMessage($value)
     {
-        $this->setName('websignupemail_message');
+        $this->setFieldName('websignupemail_message');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -4402,9 +4249,9 @@ class SystemSetting
      */
     public function setCoreWelcomeAction($value)
     {
-        $this->setName('welcome_action');
+        $this->setFieldName('welcome_action');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -4420,9 +4267,9 @@ class SystemSetting
      */
     public function setCoreWelcomeNamespace($value)
     {
-        $this->setName('welcome_namespace');
+        $this->setFieldName('welcome_namespace');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -4438,9 +4285,9 @@ class SystemSetting
      */
     public function setCoreWelcomeScreen($value)
     {
-        $this->setName('welcome_screen');
+        $this->setFieldName('welcome_screen');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -4455,9 +4302,9 @@ class SystemSetting
      */
     public function setCoreWelcomeScreenUrl($value)
     {
-        $this->setName('welcome_screen_url');
+        $this->setFieldName('welcome_screen_url');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -4473,9 +4320,9 @@ class SystemSetting
      */
     public function setCoreWhichEditor($value)
     {
-        $this->setName('which_editor');
+        $this->setFieldName('which_editor');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -4491,9 +4338,9 @@ class SystemSetting
      */
     public function setCoreWhichElementEditor($value)
     {
-        $this->setName('which_element_editor');
+        $this->setFieldName('which_element_editor');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }
@@ -4509,9 +4356,9 @@ class SystemSetting
      */
     public function setCoreXhtmlUrls($value)
     {
-        $this->setName('xhtml_urls');
+        $this->setFieldName('xhtml_urls');
         $this->loadObject(true);
-        $this->setValue($value);
+        $this->setFieldValue($value);
 
         return $this;
     }

@@ -95,7 +95,9 @@ abstract class Blendable implements BlendableInterface
         ];
 
         $this->setUniqueCriteria($unique_value);
-        $this->loadObject();
+        if (!empty($unique_value)) {
+            $this->loadObject();
+        }
     }
 
     /**
@@ -170,8 +172,8 @@ abstract class Blendable implements BlendableInterface
     public function getSeedKey($type='seed')
     {
         $name = $this->blendable_xpdo_simple_object_data[$this->unique_key_column];
-        if (method_exists($this, 'getName')) {
-            $name = $this->getName();
+        if (method_exists($this, 'getFieldName')) {
+            $name = $this->getFieldName();
         }
         $key = $this->blender->getSeedKeyFromName($name);
 
@@ -242,9 +244,8 @@ abstract class Blendable implements BlendableInterface
                     'xPDOSimleObject' => &$this->xPDOSimpleObject
                 ]
             );
-        } else {
-            $this->blender->out('Error did not save ', true);
         }
+
         return $save;
     }
 

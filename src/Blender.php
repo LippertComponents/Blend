@@ -14,6 +14,7 @@ use LCI\Blend\Blendable\MediaSource;
 use LCI\Blend\Blendable\Plugin;
 use LCI\Blend\Blendable\Resource;
 use LCI\Blend\Blendable\Snippet;
+use LCI\Blend\Blendable\SystemSetting;
 use LCI\Blend\Blendable\Template;
 use LCI\Blend\Blendable\TemplateVariable;
 use LCI\Blend\Helpers\UserInteractionHandler;
@@ -342,7 +343,7 @@ class Blender
     {
         // will update if system setting does exist or create new
         foreach ($chunks as $seed_key) {
-            /** @var \LCI\Blend\Blendable\Chunk $systemSetting */
+            /** @var \LCI\Blend\Blendable\Chunk $blendChunk */
             $blendChunk = new Chunk($this->modx, $this, $this->getNameFromSeedKey($seed_key));
             if (!empty($seeds_dir)) {
                 $blendChunk->setSeedsDir($seeds_dir);
@@ -473,7 +474,7 @@ class Blender
     {
         // will update if system setting does exist or create new
         foreach ($plugins as $seed_key) {
-            /** @var \LCI\Blend\Blendable\Plugin $systemSetting */
+            /** @var \LCI\Blend\Blendable\Plugin $blendPlugin */
             $blendPlugin = new Plugin($this->modx, $this);
             if (!empty($seeds_dir)) {
                 $blendPlugin->setSeedsDir($seeds_dir);
@@ -537,7 +538,7 @@ class Blender
     {
         // will update if system setting does exist or create new
         foreach ($snippets as $seed_key) {
-            /** @var Snippet $systemSetting */
+            /** @var Snippet $blendSnippet */
             $blendSnippet = new Snippet($this->modx, $this, $this->getNameFromSeedKey($seed_key));
             if (!empty($seeds_dir)) {
                 $blendSnippet->setSeedsDir($seeds_dir);
@@ -717,6 +718,17 @@ class Blender
     }
 
     /**
+     * @param string $key
+     * @return \LCI\Blend\Blendable\SystemSetting
+     */
+    public function getBlendableSystemSetting($key='')
+    {
+        /** @var \LCI\Blend\Blendable\SystemSetting $systemSetting */
+        $systemSetting =  new SystemSetting($this->modx, $this, $key);
+        return $systemSetting->setSeedsDir($this->getSeedsDir());
+    }
+
+    /**
      * @param array $settings ~ [ ['name' => 'mySystemSetting', 'value' => 'myValue'], ..]
      * @param string $seeds_dir
      *
@@ -727,15 +739,11 @@ class Blender
         $success = true;
         // will update if system setting does exist or create new
         foreach ($settings as $setting) {
-            $systemSetting = new SystemSetting($this->modx, $this);
-            if (!empty($seeds_dir)) {
-                $systemSetting->setSeedsDir($seeds_dir);
-            }
             if (isset($setting['key'])) {
-                $systemSetting->setName($setting['key']);
+                $key = $setting['key'];
 
             } elseif (isset($setting['name'])) {
-                $systemSetting->setName($setting['key']);
+                $key = $setting['name'];
 
             } else {
                 // Error: no name/key
@@ -743,25 +751,30 @@ class Blender
                 continue;
             }
 
+            $systemSetting = $this->getBlendableSystemSetting($key);
+            if (!empty($seeds_dir)) {
+                $systemSetting->setSeedsDir($seeds_dir);
+            }
+
             if (isset($setting['namespace'])) {
-                $systemSetting->setNamespace($setting['namespace']);
+                $systemSetting->setFieldNamespace($setting['namespace']);
             }
             if (isset($setting['area'])) {
-                $systemSetting->setArea($setting['area']);
+                $systemSetting->setFieldArea($setting['area']);
             }
             if (isset($setting['value'])) {
-                $systemSetting->setValue($setting['value']);
+                $systemSetting->setFieldValue($setting['value']);
             }
 
             if (isset($setting['xtype'])) {
-                $systemSetting->setType($setting['xtype']);
+                $systemSetting->setFieldType($setting['xtype']);
 
             } elseif (isset($setting['type'])) {
-                $systemSetting->setType($setting['type']);
+                $systemSetting->setFieldType($setting['type']);
             }
 
-            if ( $systemSetting->blend() ) {
-                $this->out($systemSetting->getName().' setting has been blended');
+            if ( $systemSetting->blend(true) ) {
+                $this->out($systemSetting->getFieldName().' setting has been blended');
             } else {
                 $success = false;
             }
@@ -781,15 +794,12 @@ class Blender
         $success = true;
         // will update if system setting does exist or create new
         foreach ($settings as $setting) {
-            $systemSetting = new SystemSetting($this->modx, $this);
-            if (!empty($seeds_dir)) {
-                $systemSetting->setSeedsDir($seeds_dir);
-            }
+
             if (isset($setting['key'])) {
-                $systemSetting->setName($setting['key']);
+                $key = $setting['key'];
 
             } elseif (isset($setting['name'])) {
-                $systemSetting->setName($setting['key']);
+                $key = $setting['name'];
 
             } else {
                 // Error: no name/key
@@ -797,11 +807,17 @@ class Blender
                 continue;
             }
 
+            $systemSetting = $this->getBlendableSystemSetting($key);
+
+            if (!empty($seeds_dir)) {
+                $systemSetting->setSeedsDir($seeds_dir);
+            }
+
             if ( $systemSetting->revertBlend() ) {
-                $this->out($systemSetting->getName().' setting has been reverted to '.$seeds_dir);
+                $this->out($systemSetting->getFieldName().' setting has been reverted to '.$seeds_dir);
 
             } else {
-                $this->out($systemSetting->getName().' setting was not reverted', true);
+                $this->out($systemSetting->getFieldName().' setting was not reverted', true);
                 $success = false;
             }
         }

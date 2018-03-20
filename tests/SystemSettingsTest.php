@@ -34,7 +34,7 @@ final class SystemSettingsTest extends BaseBlend
     {
         $this->assertEquals(
             true,
-            $this->blender->blendManySystemSettings($this->test_system_settings),
+            $this->blender->blendManySystemSettings($this->test_system_settings, BLEND_TEST_SEEDS_DIR),
             'blendManySystemSettings attempted '
         );
 
@@ -56,12 +56,15 @@ final class SystemSettingsTest extends BaseBlend
         }
     }
 
+    /**
+     * @depends testBlendManySystemSettings
+     */
     public function testRevertBlendManySystemSettings()
     {
         // @TODO validate the reverted data
         $this->assertEquals(
             true,
-            $this->blender->revertBlendManySystemSettings($this->test_system_settings),
+            $this->blender->revertBlendManySystemSettings($this->test_system_settings, BLEND_TEST_SEEDS_DIR),
             'Revert system settings attempted '
         );
     }
@@ -113,6 +116,9 @@ final class SystemSettingsTest extends BaseBlend
         $this->blender->setSeedsDir($actual_timestamp);
     }
 
+    /**
+     * @depends testMakeSystemSettingsSeeds
+     */
     public function testCleanUpMakeSystemSettingsSeeds()
     {
         $actual_timestamp = $this->blender->getSeedsDir();
@@ -179,6 +185,9 @@ final class SystemSettingsTest extends BaseBlend
         }
     }
 
+    /**
+     * @depends testSystemSettingMigration
+     */
     public function testSystemSettingRevertMigration()
     {
         $migration = 'SystemSettingMigrationExample';

@@ -16,6 +16,10 @@ class install_blender extends Migrations
 
     /** @var array  */
     protected $blender_events = [
+        'OnBlendBeforeSave',
+        'OnBlendAfterSave',
+        'OnBlendSeed',
+        // @TODO replace:
         'OnBlendResourceBeforeSave',
         'OnBlendResourceAfterSave',
         'OnBlendSeedResource',
@@ -51,13 +55,12 @@ class install_blender extends Migrations
             $this->createSystemEvents($event_name);
         }
 
-        /** @var \LCI\Blend\SystemSetting $systemSetting */
-        $systemSetting = new \LCI\Blend\SystemSetting($this->modx, $this->blender);
+        /** @var \LCI\Blend\Blendable\SystemSetting $systemSetting */
+        $systemSetting = $this->blender->getBlendableSystemSetting('blend.version');
         $systemSetting
-            ->setName('blend.version')
             ->setSeedsDir($this->getSeedsDir())
-            ->setValue($this->blender->getVersion())
-            ->setArea('Blend')
+            ->setFieldValue($this->blender->getVersion())
+            ->setFieldArea('Blend')
             ->blend();
 
         $this->modx->cacheManager->refresh();
@@ -89,10 +92,9 @@ class install_blender extends Migrations
             $this->removeSystemEvents($event_name);
         }
 
-        /** @var \LCI\Blend\SystemSetting $systemSetting */
-        $systemSetting = new \LCI\Blend\SystemSetting($this->modx, $this->blender);
+        /** @var \LCI\Blend\Blendable\SystemSetting $systemSetting */
+        $systemSetting = $this->blender->getBlendableSystemSetting('blend.version');
         $systemSetting
-            ->setName('blend.version')
             ->setSeedsDir($this->getSeedsDir())
             ->revertBlend();
 
