@@ -929,8 +929,8 @@ class Resource extends Blendable
             'resource_groups' => $resource_groups
         ];
 
-        // @TODO need event to allow others to add in extras here:
-
+        // Calls on the event: OnBlendLoadRelatedData
+        parent::loadRelatedData();
     }
 
     protected function uniqueCriteria()

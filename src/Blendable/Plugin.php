@@ -79,6 +79,9 @@ class Plugin extends Element
             // will be loaded via setOnEvents from blend()
             $this->related_data = $events;
         }
+
+        // Calls on the event: OnBlendLoadRelatedData
+        parent::loadRelatedData();
     }
 
     protected function attachRelatedPiecesAfterSave()

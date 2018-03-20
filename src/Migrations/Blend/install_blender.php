@@ -19,13 +19,8 @@ class install_blender extends Migrations
         'OnBlendBeforeSave',
         'OnBlendAfterSave',
         'OnBlendSeed',
+        'OnBlendLoadRelatedData',
         // @TODO replace:
-        'OnBlendResourceBeforeSave',
-        'OnBlendResourceAfterSave',
-        'OnBlendSeedResource',
-        'OnBlendSeedElement',
-        'OnBlendElementBeforeSave',
-        'OnBlendElementAfterSave',
         'OnBlendSeedSystemSettings'
     ];
 

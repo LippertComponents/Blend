@@ -226,7 +226,7 @@ abstract class Blendable implements BlendableInterface
                 'data' => &$this->blendable_xpdo_simple_object_data,
                 'type' => $this->type,
                 'xPDOClass' => $this->xpdo_simple_object_class,
-                'xPDOSimleObject' => &$this->xPDOSimpleObject
+                'xPDOSimpleObject' => &$this->xPDOSimpleObject
             ]
         );
 
@@ -241,7 +241,7 @@ abstract class Blendable implements BlendableInterface
                     'data' => &$this->blendable_xpdo_simple_object_data,
                     'type' => $this->type,
                     'xPDOClass' => $this->xpdo_simple_object_class,
-                    'xPDOSimleObject' => &$this->xPDOSimpleObject
+                    'xPDOSimpleObject' => &$this->xPDOSimpleObject
                 ]
             );
         }
@@ -502,7 +502,17 @@ abstract class Blendable implements BlendableInterface
      */
     protected function loadRelatedData()
     {
-
+        $this->modx->invokeEvent(
+            'OnBlendLoadRelatedData',
+            [
+                'blender' => $this->blender,
+                'blendable' => $this,
+                'data' => &$this->blendable_xpdo_simple_object_data,
+                'type' => $this->type,
+                'xPDOClass' => $this->xpdo_simple_object_class,
+                'xPDOSimpleObject' => &$this->xPDOSimpleObject
+            ]
+        );
     }
 
     /**
