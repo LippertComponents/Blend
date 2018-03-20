@@ -91,7 +91,7 @@ abstract class Blendable implements BlendableInterface
 
         $this->cacheOptions = [
             \xPDO::OPT_CACHE_KEY => $this->opt_cache_key,
-            \xPDO::OPT_CACHE_PATH => $this->blender->getSeedsDirectory()
+            \xPDO::OPT_CACHE_PATH => $this->blender->getSeedsPath()
         ];
 
         $this->setUniqueCriteria($unique_value);
@@ -134,7 +134,7 @@ abstract class Blendable implements BlendableInterface
     {
         $this->seeds_dir = (string) $dir;
         if (!empty($this->seeds_dir)) {
-            $this->cacheOptions[\xPDO::OPT_CACHE_PATH] = $this->blender->getSeedsDirectory() . $dir . '/';
+            $this->cacheOptions[\xPDO::OPT_CACHE_PATH] = $this->blender->getSeedsPath() . $dir . '/';
         }
         return $this;
     }

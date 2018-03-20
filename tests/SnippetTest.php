@@ -99,13 +99,13 @@ final class SnippetTest extends BaseBlend
 
         $this->assertEquals(
             $this->removeStringLineEndings($this->getStringAfterFirstComment(file_get_contents(BLEND_COMPARE_DIRECTORY.$snippet_name.'.migration.php'))),
-            $this->removeStringLineEndings($this->getStringAfterFirstComment(file_get_contents($this->blender->getMigrationDirectory().'m2018_01_10_093000_Snippet.php'))),
+            $this->removeStringLineEndings($this->getStringAfterFirstComment(file_get_contents($this->blender->getMigrationPath().'m2018_01_10_093000_Snippet.php'))),
             'Comparing existing testSnippet2 migration file with generated file'
         );
 
         $fixed_data = require_once BLEND_COMPARE_DIRECTORY.'testSnippet2.seed.php';
         $generated_data = false;
-        $seed_file = $this->blender->getSeedsDirectory($seeds_directory) . 'elements' . DIRECTORY_SEPARATOR . 'snippets'. DIRECTORY_SEPARATOR .$snippet_name.'.cache.php';
+        $seed_file = $this->blender->getSeedsPath($seeds_directory) . 'elements' . DIRECTORY_SEPARATOR . 'snippets'. DIRECTORY_SEPARATOR .$snippet_name.'.cache.php';
         if (file_exists($seed_file)) {
             $generated_data = require_once $seed_file;
         }

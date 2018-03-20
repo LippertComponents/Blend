@@ -211,7 +211,7 @@ final class ResourceTest extends BaseBlend
 
         $this->assertEquals(
             $this->removeStringLineEndings($this->getStringAfterFirstComment(file_get_contents(BLEND_COMPARE_DIRECTORY.'testResource2.migration.php'))),
-            $this->removeStringLineEndings($this->getStringAfterFirstComment(file_get_contents($this->blender->getMigrationDirectory().'m2018_01_10_093000_Resource.php'))),
+            $this->removeStringLineEndings($this->getStringAfterFirstComment(file_get_contents($this->blender->getMigrationPath().'m2018_01_10_093000_Resource.php'))),
             'Comparing existing testResource2 migration file with generated file'
         );
 
@@ -219,7 +219,7 @@ final class ResourceTest extends BaseBlend
         foreach ($test_resources as $alias => $test_resource) {
             $fixed_data = require_once BLEND_COMPARE_DIRECTORY . 'testResource'.$count.'.seed.php';
             $generated_data = false;
-            $seed_file = $this->blender->getSeedsDirectory($seeds_directory) . 'resources' . DIRECTORY_SEPARATOR . 'web'. DIRECTORY_SEPARATOR . $alias.'.cache.php';
+            $seed_file = $this->blender->getSeedsPath($seeds_directory) . 'resources' . DIRECTORY_SEPARATOR . 'web'. DIRECTORY_SEPARATOR . $alias.'.cache.php';
             if (file_exists($seed_file)) {
                 $generated_data = require_once $seed_file;
             }

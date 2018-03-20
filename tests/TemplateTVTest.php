@@ -99,7 +99,7 @@ final class TemplateTVTest extends BaseBlend
 
         $cacheOptions = [
             \xPDO::OPT_CACHE_KEY => 'elements/template-variables',
-            \xPDO::OPT_CACHE_PATH  => $this->blender->getSeedsDirectory(BLEND_TEST_SEEDS_DIR)
+            \xPDO::OPT_CACHE_PATH  => $this->blender->getSeedsPath(BLEND_TEST_SEEDS_DIR)
         ];
 
         // get all related TVs:

@@ -69,7 +69,7 @@ class SystemSetting
         $this->properties = new Properties();
         $this->cacheOptions = [
             \xPDO::OPT_CACHE_KEY => 'settings',
-            \xPDO::OPT_CACHE_PATH => $this->blender->getSeedsDirectory()
+            \xPDO::OPT_CACHE_PATH => $this->blender->getSeedsPath()
         ];
     }
 
@@ -99,7 +99,7 @@ class SystemSetting
     {
         $this->seeds_dir = (string) $dir;
         if (!empty($this->seeds_dir)) {
-            $this->cacheOptions[\xPDO::OPT_CACHE_PATH] = $this->blender->getSeedsDirectory() . $dir . '/';
+            $this->cacheOptions[\xPDO::OPT_CACHE_PATH] = $this->blender->getSeedsPath() . $dir . '/';
         }
         return $this;
     }

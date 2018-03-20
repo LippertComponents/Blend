@@ -82,7 +82,7 @@ class v3_0_0_dev_install extends MODXSetup
             // resolvers/resolve.actionfields.php
         ];
 
-        $path = $this->blender->getSeedsDirectory('transport');
+        $path = $this->blender->getSeedsPath('transport');
         $xpdo = $this->modx;
         foreach ($legacy_transport as $file) {
             echo $path.$file.PHP_EOL;
@@ -669,7 +669,7 @@ class v3_0_0_dev_install extends MODXSetup
     protected function upInitSiteContent()
     {
         /* add base template and home resource */
-        $templateContent = file_get_contents($this->blender->getSeedsDirectory($this->getSeedsDir()) . 'base_template.tpl');
+        $templateContent = file_get_contents($this->blender->getSeedsPath($this->getSeedsDir()) . 'base_template.tpl');
 
         $template_name = ($this->modx->lexicon('base_template') ? $this->modx->lexicon('base_template') : 'Base Template');
         /** @var \LCI\Blend\Template $baseTemplate */

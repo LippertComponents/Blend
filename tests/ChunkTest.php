@@ -109,13 +109,13 @@ final class ChunkTest extends BaseBlend
         $this->blender->out('DIR: '.BLEND_COMPARE_DIRECTORY.$chunk_name.'.php', true);
         $this->assertEquals(
             $this->removeStringLineEndings($this->getStringAfterFirstComment(file_get_contents(BLEND_COMPARE_DIRECTORY.$chunk_name.'.php'))),
-            $this->removeStringLineEndings($this->getStringAfterFirstComment(file_get_contents($this->blender->getMigrationDirectory().'m2018_01_10_093000_Chunk.php'))),
+            $this->removeStringLineEndings($this->getStringAfterFirstComment(file_get_contents($this->blender->getMigrationPath().'m2018_01_10_093000_Chunk.php'))),
             'Comparing existing testChunk2 migration file with generated file'
         );
 
         $fixed_data = require_once BLEND_COMPARE_DIRECTORY.'testChunk2.seed.php';
         $generated_data = false;
-        $seed_file = $this->blender->getSeedsDirectory($seeds_directory) . 'elements' . DIRECTORY_SEPARATOR . 'chunks'. DIRECTORY_SEPARATOR .$chunk_name.'.cache.php';
+        $seed_file = $this->blender->getSeedsPath($seeds_directory) . 'elements' . DIRECTORY_SEPARATOR . 'chunks'. DIRECTORY_SEPARATOR .$chunk_name.'.cache.php';
         if (file_exists($seed_file)) {
             $generated_data = require_once $seed_file;
         }

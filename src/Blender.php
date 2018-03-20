@@ -98,9 +98,9 @@ class Blender
         }
 
         $this->config = [
-            'migration_templates_dir' => __DIR__. '/Migrations/templates/',
-            'migrations_dir' => $blend_modx_migration_dir.'database/migrations/',
-            'seeds_dir' => $blend_modx_migration_dir.'database/seeds/',
+            'migration_templates_path' => __DIR__. '/Migrations/templates/',
+            'migrations_path' => $blend_modx_migration_dir.'database/migrations/',
+            'seeds_path' => $blend_modx_migration_dir.'database/seeds/',
             'model_dir' => __DIR__ . ($this->xpdo_version >= 3 ? '/' : '/xpdo2/'),
             'extras' => [
                 'tagger' => false
@@ -192,9 +192,9 @@ class Blender
      * @param null $directory_key
      * @return string
      */
-    public function getSeedsDirectory($directory_key=null)
+    public function getSeedsPath($directory_key=null)
     {
-        $seed_path = $this->config['seeds_dir'];
+        $seed_path = $this->config['seeds_path'];
         if (!empty($directory_key)) {
             $seed_path .= trim($directory_key, '/') . DIRECTORY_SEPARATOR;
         }
@@ -204,9 +204,9 @@ class Blender
     /**
      * @return string
      */
-    public function getMigrationDirectory()
+    public function getMigrationPath()
     {
-        return $this->config['migrations_dir'];
+        return $this->config['migrations_path'];
     }
 
     /**
@@ -1140,10 +1140,10 @@ class Blender
         $config = $this->config;
 
         if (!empty($custom_migration_path)) {
-            $config['migrations_dir'] = $custom_migration_path;
+            $config['migrations_path'] = $custom_migration_path;
         }
         if (!empty($seed_root_path)) {
-            $config['seeds_dir'] = $seed_root_path;
+            $config['seeds_path'] = $seed_root_path;
         }
 
         $blender = new Blender($this->modx, $this->getUserInteractionHandler(), $config);
@@ -1176,18 +1176,18 @@ class Blender
                 }
 
                 // does the migration directory exist?
-                if (!file_exists($this->getMigrationDirectory())) {
+                if (!file_exists($this->getMigrationPath())) {
                     $create = true;
                     if ($prompt) {
                         $response = $this->prompt('Create the following directory for migration files? (y/n) '.PHP_EOL
-                            .$this->getMigrationDirectory(), 'y');
+                            .$this->getMigrationPath(), 'y');
                         if (strtolower(trim($response)) != 'y') {
                             $create = false;
                         }
                     }
                     if ($create) {
-                        mkdir($this->getMigrationDirectory(), 0700, true);
-                        $this->outSuccess('Created migration directory: '. $this->getMigrationDirectory());
+                        mkdir($this->getMigrationPath(), 0700, true);
+                        $this->outSuccess('Created migration directory: '. $this->getMigrationPath());
                     }
                 }
 
@@ -1271,7 +1271,7 @@ class Blender
 
         // new blender for each instance
         $config = $this->config;
-        $config['migrations_dir'] = __DIR__.'/migration/';
+        $config['migrations_path'] = __DIR__.'/migration/';
 
         $blender = new Blender($this->modx, $this->getUserInteractionHandler(), $config);
 
@@ -1469,12 +1469,12 @@ class Blender
             $blendMigrations[$migration->get('name')] = $migration;
         }
 
-        $migration_dir = $this->getMigrationDirectory();
+        $migration_dir = $this->getMigrationPath();
         $this->out('Searching '.$migration_dir);
 
         $reload = false;
         /** @var \DirectoryIterator $file */
-        foreach (new \DirectoryIterator($this->getMigrationDirectory()) as $file) {
+        foreach (new \DirectoryIterator($this->getMigrationPath()) as $file) {
             if ($file->isFile() && $file->getExtension() == 'php') {
 
                 $name = $file->getBasename('.php');
@@ -1514,7 +1514,7 @@ class Blender
     {
         $migrationProcessClass = false;
 
-        $file = $blender->getMigrationDirectory().$name.'.php';
+        $file = $blender->getMigrationPath().$name.'.php';
         if (file_exists($file)) {
             require_once $file;
 
@@ -1631,7 +1631,7 @@ class Blender
 
         $file_contents = '';
 
-        $migration_template = $this->config['migration_templates_dir'].$migration_template;
+        $migration_template = $this->config['migration_templates_path'].$migration_template;
         if (file_exists($migration_template)) {
             $file_contents = file_get_contents($migration_template);
         }
@@ -1640,18 +1640,18 @@ class Blender
             $file_contents = str_replace('[[+'.$name.']]', $value, $file_contents);
         }
 
-        $this->out($this->getMigrationDirectory().$class_name.'.php');
+        $this->out($this->getMigrationPath().$class_name.'.php');
 
         $write = false;
-        if (file_exists($this->getMigrationDirectory().$class_name.'.php')) {
-            $this->out($this->getMigrationDirectory() . $class_name . '.php migration file already exists', true);
+        if (file_exists($this->getMigrationPath().$class_name.'.php')) {
+            $this->out($this->getMigrationPath() . $class_name . '.php migration file already exists', true);
 
         } elseif (is_object($this->modx->getObject($this->blend_class_object, ['name' => $class_name]))) {
             $this->out($class_name . ' migration already has been created in the blend_migrations table', true);
 
         } else {
             try {
-                $write = file_put_contents($this->getMigrationDirectory() . $class_name . '.php', $file_contents);
+                $write = file_put_contents($this->getMigrationPath() . $class_name . '.php', $file_contents);
                 $migration = $this->modx->newObject($this->blend_class_object);
                 if ($migration && $log) {
                     $migration->set('name', $class_name);
@@ -1666,7 +1666,7 @@ class Blender
                 $this->out($exception->getMessage(), true);
             }
             if (!$write) {
-                $this->out($this->getMigrationDirectory() . $class_name . '.php Did not write to file', true);
+                $this->out($this->getMigrationPath() . $class_name . '.php Did not write to file', true);
                 $this->out('Verify that the folders exists and are writable by PHP', true);
             }
         }
@@ -1686,7 +1686,7 @@ class Blender
         $class_name = $this->getMigrationName($type, $name);
 
         $removed = false;
-        $migration_file = $this->getMigrationDirectory() . $class_name . '.php';
+        $migration_file = $this->getMigrationPath() . $class_name . '.php';
         if (file_exists($migration_file)) {
             if (unlink($migration_file)) {
                 $removed = true;
@@ -1700,7 +1700,7 @@ class Blender
             }
 
         } else {
-            $this->out($this->getMigrationDirectory() . $class_name . '.php migration could not be found to remove', true);
+            $this->out($this->getMigrationPath() . $class_name . '.php migration could not be found to remove', true);
         }
 
         return $removed;

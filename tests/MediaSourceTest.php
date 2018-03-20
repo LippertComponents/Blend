@@ -79,13 +79,13 @@ final class MediaSourceTest extends BaseBlend
         $this->blender->out('DIR: '.BLEND_COMPARE_DIRECTORY.$media_source_name.'.php', true);
         $this->assertEquals(
             $this->removeStringLineEndings($this->getStringAfterFirstComment(file_get_contents(BLEND_COMPARE_DIRECTORY.$media_source_name.'.php'))),
-            $this->removeStringLineEndings($this->getStringAfterFirstComment(file_get_contents($this->blender->getMigrationDirectory().'m2018_01_10_093000_MediaSource.php'))),
+            $this->removeStringLineEndings($this->getStringAfterFirstComment(file_get_contents($this->blender->getMigrationPath().'m2018_01_10_093000_MediaSource.php'))),
             'Comparing existing testMediaSource migration file with generated file'
         );
 
         $fixed_data = require_once BLEND_COMPARE_DIRECTORY.'testMediaSource1.seed.php';
         $generated_data = false;
-        $seed_file = $this->blender->getSeedsDirectory($seeds_directory).DIRECTORY_SEPARATOR.'media-sources'.DIRECTORY_SEPARATOR.$media_source_name.'.cache.php';
+        $seed_file = $this->blender->getSeedsPath($seeds_directory).DIRECTORY_SEPARATOR.'media-sources'.DIRECTORY_SEPARATOR.$media_source_name.'.cache.php';
         if (file_exists($seed_file)) {
             $generated_data = require_once $seed_file;
         }
