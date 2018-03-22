@@ -195,16 +195,15 @@ class v3_0_0_dev_install extends MODXSetup
     {
         // Load MODX System Settings:
 
-        /** @var \LCI\Blend\SystemSetting $systemSetting */
-        $systemSetting = new \LCI\Blend\SystemSetting($this->modx, $this->blender);
+        /** @var \LCI\Blend\Blendable\SystemSetting $systemSetting */
+        $systemSetting = $this->blender->getBlendableSystemSetting();
         $systemSetting
             ->setSeedsDir($this->getSeedsDir())
             ->setCoreSettingsVersion($this->current_version['full_version'])
             ->blend();
 
-
-        /** @var \LCI\Blend\SystemSetting $systemSetting */
-        $systemSetting = new \LCI\Blend\SystemSetting($this->modx, $this->blender);
+        /** @var \LCI\Blend\Blendable\SystemSetting $systemSetting */
+        $systemSetting = $this->blender->getBlendableSystemSetting();
         $systemSetting
             ->setSeedsDir($this->getSeedsDir())
             ->setCoreSettingsDistro(trim($this->current_version['distro'], '@'))
@@ -212,31 +211,29 @@ class v3_0_0_dev_install extends MODXSetup
 
         /* set new_folder_permissions/new_file_permissions if specified */
         if ($this->getUserInstallConfigValue('new_folder_permissions')) {
-            /** @var \LCI\Blend\SystemSetting $systemSetting */
-            $systemSetting = new \LCI\Blend\SystemSetting($this->modx, $this->blender);
+            /** @var \LCI\Blend\Blendable\SystemSetting $systemSetting */
+            $systemSetting = $this->blender->getBlendableSystemSetting('new_folder_permissions');
             $systemSetting
-                ->setName('new_folder_permissions')
                 ->setSeedsDir($this->getSeedsDir())
-                ->setValue($this->getUserInstallConfigValue('new_folder_permissions'))
-                ->setArea('Files')
+                ->setFieldValue($this->getUserInstallConfigValue('new_folder_permissions'))
+                ->setFieldArea('Files')
                 ->blend();
         }
         if ($this->getUserInstallConfigValue('new_file_permissions')) {
-            /** @var \LCI\Blend\SystemSetting $systemSetting */
-            $systemSetting = new \LCI\Blend\SystemSetting($this->modx, $this->blender);
+            /** @var \LCI\Blend\Blendable\SystemSetting $systemSetting */
+            $systemSetting = $this->blender->getBlendableSystemSetting('new_file_permissions');
             $systemSetting
-                ->setName('new_file_permissions')
                 ->setSeedsDir($this->getSeedsDir())
-                ->setValue($this->getUserInstallConfigValue('new_file_permissions'))
-                ->setArea('Files')
+                ->setFieldValue($this->getUserInstallConfigValue('new_file_permissions'))
+                ->setFieldArea('Files')
                 ->blend();
         }
 
         /* check for mb extension, set setting accordingly */
         $usemb = function_exists('mb_strlen');
         if ($usemb) {
-            /** @var \LCI\Blend\SystemSetting $systemSetting */
-            $systemSetting = new \LCI\Blend\SystemSetting($this->modx, $this->blender);
+            /** @var \LCI\Blend\Blendable\SystemSetting $systemSetting */
+            $systemSetting = $this->blender->getBlendableSystemSetting();
             $systemSetting
                 ->setSeedsDir($this->getSeedsDir())
                 ->setCoreUseMultibyte(1)
@@ -246,22 +243,22 @@ class v3_0_0_dev_install extends MODXSetup
         /* if language != en, set cultureKey, manager_language, manager_lang_attribute to it */
         $language = $this->getUserInstallConfigValue('language','en');
         if ($language != 'en') {
-            /** @var \LCI\Blend\SystemSetting $systemSetting */
-            $systemSetting = new \LCI\Blend\SystemSetting($this->modx, $this->blender);
+            /** @var \LCI\Blend\Blendable\SystemSetting $systemSetting */
+            $systemSetting = $this->blender->getBlendableSystemSetting();
             $systemSetting
                 ->setSeedsDir($this->getSeedsDir())
                 ->setCoreCultureKey($language)
                 ->blend();
 
-            /** @var \LCI\Blend\SystemSetting $systemSetting */
-            $systemSetting = new \LCI\Blend\SystemSetting($this->modx, $this->blender);
+            /** @var \LCI\Blend\Blendable\SystemSetting $systemSetting */
+            $systemSetting = $this->blender->getBlendableSystemSetting();
             $systemSetting
                 ->setSeedsDir($this->getSeedsDir())
                 ->setCoreManagerLanguage($language)
                 ->blend();
 
-            /** @var \LCI\Blend\SystemSetting $systemSetting */
-            $systemSetting = new \LCI\Blend\SystemSetting($this->modx, $this->blender);
+            /** @var \LCI\Blend\Blendable\SystemSetting $systemSetting */
+            $systemSetting = $this->blender->getBlendableSystemSetting();
             $systemSetting
                 ->setSeedsDir($this->getSeedsDir())
                 ->setCoreManagerLangAttribute($language)
@@ -270,15 +267,14 @@ class v3_0_0_dev_install extends MODXSetup
 
         /* add ext_debug setting for sdk distro */
         if ('sdk' === trim($this->current_version['distro'], '@')) {
-            /** @var \LCI\Blend\SystemSetting $systemSetting */
-            $systemSetting = new \LCI\Blend\SystemSetting($this->modx, $this->blender);
+            /** @var \LCI\Blend\Blendable\SystemSetting $systemSetting */
+            $systemSetting = $this->blender->getBlendableSystemSetting('ext_debug');
             $systemSetting
                 ->setSeedsDir($this->getSeedsDir())
-                ->setArea('system')
-                ->setName('ext_debug')
-                ->setNamespace('core')
-                ->setType('combo-boolean')
-                ->setValue(false)
+                ->setFieldArea('system')
+                ->setFieldNamespace('core')
+                ->setFieldXType('combo-boolean')
+                ->setFieldValue(false)
                 ->blend();
         }
 
@@ -297,8 +293,8 @@ class v3_0_0_dev_install extends MODXSetup
                 $maxFileSize *= 1024;
         }
 
-        /** @var \LCI\Blend\SystemSetting $systemSetting */
-        $systemSetting = new \LCI\Blend\SystemSetting($this->modx, $this->blender);
+        /** @var \LCI\Blend\Blendable\SystemSetting $systemSetting */
+        $systemSetting = $this->blender->getBlendableSystemSetting();
         $systemSetting
             ->setSeedsDir($this->getSeedsDir())
             ->setCoreUploadMaxsize($maxFileSize)
@@ -431,8 +427,8 @@ class v3_0_0_dev_install extends MODXSetup
                 $user->save();
             }
             if ($saved) {
-                /** @var \LCI\Blend\SystemSetting $systemSetting */
-                $systemSetting = new \LCI\Blend\SystemSetting($this->modx, $this->blender);
+                /** @var \LCI\Blend\Blendable\SystemSetting $systemSetting */
+                $systemSetting = $this->blender->getBlendableSystemSetting();
                 $systemSetting
                     ->setSeedsDir($this->getSeedsDir())
                     ->setCoreEmailsender($this->getUserInstallConfigValue('admin_email', 'need-email@email.com'))
@@ -672,28 +668,26 @@ class v3_0_0_dev_install extends MODXSetup
         $templateContent = file_get_contents($this->blender->getSeedsPath($this->getSeedsDir()) . 'base_template.tpl');
 
         $template_name = ($this->modx->lexicon('base_template') ? $this->modx->lexicon('base_template') : 'Base Template');
-        /** @var \LCI\Blend\Template $baseTemplate */
-        $baseTemplate = $this->blender->blendOneRawTemplate($template_name);
+        /** @var \LCI\Blend\Blendable\Template $baseTemplate */
+        $baseTemplate = $this->blender->getBlendableTemplate($template_name);
         $baseTemplate
             ->setSeedsDir($this->getSeedsDir())
-            ->setCode($templateContent);
+            ->setFieldCode($templateContent);
 
         if ($baseTemplate->blend()) {
 
-            $template = $baseTemplate->getElementFromName($template_name);
+            $template = $baseTemplate->getXPDOSimpleObject();
 
-            /** @var \LCI\Blend\SystemSetting $systemSetting */
-            $systemSetting = new \LCI\Blend\SystemSetting($this->modx, $this->blender);
+            /** @var \LCI\Blend\Blendable\SystemSetting $systemSetting */
+            $systemSetting = $this->blender->getBlendableSystemSetting();
             $systemSetting
                 ->setSeedsDir($this->getSeedsDir())
                 ->setCoreDefaultTemplate($template->get('id'))
                 ->blend();
 
-            /** @var \LCI\Blend\Resource $blendResource */
-            $blendResource = new \LCI\Blend\Resource($this->modx, $this->blender);
-            $blendResource
-                ->setContextKey('web')
-                ->setSeedsDir($this->getSeedsDir());
+            /** @var \LCI\Blend\Blendable\Resource $blendResource */
+            $blendResource = $this->blender->getBlendableResource('index', 'web');
+            $blendResource->setSeedsDir($this->getSeedsDir());
 
             if ($blendResource->blendFromSeed('index')) {
                 /** @var modResource $resource */
@@ -704,8 +698,8 @@ class v3_0_0_dev_install extends MODXSetup
 
                 if ($resource->save()) {
                     /* site_start */
-                    /** @var \LCI\Blend\SystemSetting $systemSetting */
-                    $systemSetting = new \LCI\Blend\SystemSetting($this->modx, $this->blender);
+                    /** @var \LCI\Blend\Blendable\SystemSetting $systemSetting */
+                    $systemSetting = $this->blender->getBlendableSystemSetting();
                     $systemSetting
                         ->setSeedsDir($this->getSeedsDir())
                         ->setCoreSiteStart($resource->get('id'))

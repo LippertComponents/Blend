@@ -192,6 +192,14 @@ abstract class Blendable implements BlendableInterface
     }
 
     /**
+     * @return null|\xPDOSimpleObject
+     */
+    public function getXPDOSimpleObject()
+    {
+        return $this->xPDOSimpleObject;
+    }
+
+    /**
      * @param string $seed_key
      * @param bool $overwrite
      *
