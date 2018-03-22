@@ -58,6 +58,27 @@ class install_blender extends Migrations
             ->setFieldArea('Blend')
             ->blend();
 
+        /** @var \LCI\Blend\Blendable\SystemSetting $systemSetting */
+        $systemSetting = $this->blender->getBlendableSystemSetting('blend.portable.systemSettings.mediaSources');
+        $systemSetting
+            ->setSeedsDir($this->getSeedsDir())
+            ->setFieldArea('Blend')
+            ->blend();
+
+        /** @var \LCI\Blend\Blendable\SystemSetting $systemSetting */
+        $systemSetting = $this->blender->getBlendableSystemSetting('blend.portable.systemSettings.resources');
+        $systemSetting
+            ->setSeedsDir($this->getSeedsDir())
+            ->setFieldArea('Blend')
+            ->blend();
+
+        /** @var \LCI\Blend\Blendable\SystemSetting $systemSetting */
+        $systemSetting = $this->blender->getBlendableSystemSetting('blend.portable.systemSettings.templates');
+        $systemSetting
+            ->setSeedsDir($this->getSeedsDir())
+            ->setFieldArea('Blend')
+            ->blend();
+
         $this->modx->cacheManager->refresh();
     }
 
@@ -89,6 +110,24 @@ class install_blender extends Migrations
 
         /** @var \LCI\Blend\Blendable\SystemSetting $systemSetting */
         $systemSetting = $this->blender->getBlendableSystemSetting('blend.version');
+        $systemSetting
+            ->setSeedsDir($this->getSeedsDir())
+            ->revertBlend();
+
+        /** @var \LCI\Blend\Blendable\SystemSetting $systemSetting */
+        $systemSetting = $this->blender->getBlendableSystemSetting('blend.portable.systemSettings.mediaSources');
+        $systemSetting
+            ->setSeedsDir($this->getSeedsDir())
+            ->revertBlend();
+
+        /** @var \LCI\Blend\Blendable\SystemSetting $systemSetting */
+        $systemSetting = $this->blender->getBlendableSystemSetting('blend.portable.systemSettings.resources');
+        $systemSetting
+            ->setSeedsDir($this->getSeedsDir())
+            ->revertBlend();
+
+        /** @var \LCI\Blend\Blendable\SystemSetting $systemSetting */
+        $systemSetting = $this->blender->getBlendableSystemSetting('blend.portable.systemSettings.templates');
         $systemSetting
             ->setSeedsDir($this->getSeedsDir())
             ->revertBlend();

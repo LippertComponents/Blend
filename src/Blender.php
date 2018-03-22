@@ -719,7 +719,14 @@ class Blender
     {
         $success = true;
         // will update if system setting does exist or create new
-        foreach ($settings as $setting) {
+        foreach ($settings as $data) {
+            if (isset($data['columns'])) {
+                $setting = $data['columns'];
+            } else {
+                $setting = $data;
+                $data['columns'] = $data;
+            }
+
             if (isset($setting['key'])) {
                 $key = $setting['key'];
 
@@ -737,24 +744,7 @@ class Blender
                 $systemSetting->setSeedsDir($seeds_dir);
             }
 
-            if (isset($setting['namespace'])) {
-                $systemSetting->setFieldNamespace($setting['namespace']);
-            }
-            if (isset($setting['area'])) {
-                $systemSetting->setFieldArea($setting['area']);
-            }
-            if (isset($setting['value'])) {
-                $systemSetting->setFieldValue($setting['value']);
-            }
-
-            if (isset($setting['xtype'])) {
-                $systemSetting->setFieldType($setting['xtype']);
-
-            } elseif (isset($setting['type'])) {
-                $systemSetting->setFieldType($setting['type']);
-            }
-
-            if ( $systemSetting->blend(true) ) {
+            if ($systemSetting->blendFromArray($data, true)) {
                 $this->out($systemSetting->getFieldName().' setting has been blended');
             } else {
                 $success = false;
@@ -774,7 +764,13 @@ class Blender
     {
         $success = true;
         // will update if system setting does exist or create new
-        foreach ($settings as $setting) {
+        foreach ($settings as $data) {
+            if (isset($data['columns'])) {
+                $setting = $data['columns'];
+            } else {
+                $setting = $data;
+                $data['columns'] = $data;
+            }
 
             if (isset($setting['key'])) {
                 $key = $setting['key'];
@@ -1047,8 +1043,9 @@ class Blender
 
         $setting_data = [];
         foreach ($collection as $setting) {
-            // @TODO transform all values that are IDs, templates, resources, ect.
-            $setting_data[] = $setting->toArray();
+            /** @var \LCI\Blend\Blendable\SystemSetting $blendableSetting */
+            $blendableSetting = $this->getBlendableSystemSetting($setting->get('key'));
+            $setting_data[] = $blendableSetting->seedToArray();
         }
 
         // https://docs.modx.com/revolution/2.x/developing-in-modx/other-development-resources/class-reference/modx/modx.invokeevent

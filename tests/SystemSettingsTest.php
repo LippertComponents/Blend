@@ -8,25 +8,37 @@ final class SystemSettingsTest extends BaseBlend
 
     protected $test_system_settings = [
         0 => [
-            'key' => 'site_name',
-            'value' => 'Blend Site',
-            'xtype' => 'textfield',
-            'namespace' => 'core',
-            'area' => 'site',
+            'columns' => [
+                'key' => 'site_name',
+                'value' => 'Blend Site',
+                'xtype' => 'textfield',
+                'namespace' => 'core',
+                'area' => 'site',
+            ],
+            'primaryKeyHistory' => [],
+            'related' => [],
         ],
         1 => [
-            'key' => 'blend_system_setting_test',
-            'value' => 'This is only a test, I am safe to delete',
-            'xtype' => 'textfield',
-            'namespace' => 'core',
-            'area' => 'site',
+            'columns' => [
+                'key' => 'blend_system_setting_test',
+                'value' => 'This is only a test, I am safe to delete',
+                'xtype' => 'textfield',
+                'namespace' => 'core',
+                'area' => 'site',
+            ],
+            'primaryKeyHistory' => [],
+            'related' => [],
         ],
         2 => [
-            'key' => 'site_status',
-            'value' => '0',
-            'xtype' => 'combo-boolean',
-            'namespace' => 'core',
-            'area' => 'site',
+            'columns' => [
+                'key' => 'site_status',
+                'value' => '0',
+                'xtype' => 'combo-boolean',
+                'namespace' => 'core',
+                'area' => 'site',
+            ],
+            'primaryKeyHistory' => [],
+            'related' => [],
         ]
     ];
 
@@ -38,7 +50,8 @@ final class SystemSettingsTest extends BaseBlend
             'blendManySystemSettings attempted '
         );
 
-        foreach ($this->test_system_settings as $count => $setting) {
+        foreach ($this->test_system_settings as $count => $data) {
+            $setting = $data['columns'];
             $systemSetting = $this->modx->getObject('modSystemSetting', $setting['key']);
 
             $this->assertInstanceOf(

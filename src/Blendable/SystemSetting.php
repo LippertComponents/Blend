@@ -48,6 +48,60 @@ class SystemSetting extends Blendable
     protected $changed = false;
 
     /**
+     * @var array
+     * Extend by adding comma separted setting keys to: blend.portable.systemSettings.mediaSources,
+     * blend.portable.systemSettings.resources or blend.portable.systemSettings.templates'
+     */
+    protected $portable_settings = [
+        'media_sources' => [
+            'default_media_source'
+        ],
+        'resources' => [
+            'error_page',
+            'site_start',
+            'site_unavailable_page',
+            'tree_root_id',
+            'unauthorized_page'
+        ],
+        'templates' => [
+            'default_template'
+            ]
+    ];
+
+    /**
+     * Blendable constructor.
+     *
+     * @param \modx $modx
+     * @param Blender $blender
+     * @param string|array $unique_value
+     */
+    public function __construct(\modx $modx, Blender $blender, $unique_value = '')
+    {
+        parent::__construct($modx, $blender, $unique_value);
+        $additional = explode(',', $this->modx->getOption('blend.portable.systemSettings.mediaSources'));
+        if (count($additional) > 0) {
+            $this->portable_settings['media_sources'] = array_merge($this->portable_settings['media_sources'], $additional);
+        }
+
+        $additional = explode(',', $this->modx->getOption('blend.portable.systemSettings.resources'));
+        if (count($additional) > 0) {
+            $this->portable_settings['resources'] = array_merge($this->portable_settings['resources'], $additional);
+        }
+
+        $additional = explode(',', $this->modx->getOption('blend.portable.systemSettings.templates'));
+        if (count($additional) > 0) {
+            $this->portable_settings['templates'] = array_merge($this->portable_settings['templates'], $additional);
+        }
+    }
+
+    /**
+     * @TODO add methods:
+     * setPortableAsResource, setPortableAsMediaSource, setPortableAsTemplate
+     * On blend these methods would add the current key to the related system setting
+     * On revertBlend it would remove the current key from the related system setting
+     */
+
+    /**
      * @return Blendable
      */
     public function getCurrentVersion()
@@ -75,6 +129,33 @@ class SystemSetting extends Blendable
         }
 
         return $this->changed;
+    }
+
+    /**
+     * Don't call this until the key is set or setting is loaded
+     * @return bool|string
+     */
+    public function getPortableType()
+    {
+        $type = false;
+        switch ($this->getFieldXType()) {
+            case 'modx-combo-template':
+                $type = 'template';
+                break;
+
+            case 'modx-combo-source':
+                $type = 'media-source';
+                break;
+
+            default:
+                foreach ($this->portable_settings as $xtype => $settings) {
+                    if (in_array($this->getFieldKey(), $settings)) {
+                        $type = $xtype;
+                        break;
+                    }
+                }
+        }
+        return $type;
     }
 
     // Getters:
@@ -274,6 +355,71 @@ class SystemSetting extends Blendable
             $this->current_value = $this->xPDOSimpleObject->get('value');
 
         }
+    }
+
+    protected function convertValue($value)
+    {
+        if (is_array($value) && isset($value['type']) && isset($value['portable_value'])) {
+            switch ($value['type']) {
+                case 'media_source':
+                    $mediaSource = $this->modx->getObject('modMediaSource', ['name' => $value['portable_value']]);
+                    if (is_object($mediaSource)) {
+                        $value = $mediaSource->get('id');
+                    }
+                    break;
+
+                case 'resource':
+                    $value = $this->blender->getResourceIDFromSeedKey($value['portable_value']['seed_key'], $value['portable_value']['context']);
+                    break;
+
+                case 'template':
+                    $template = $this->modx->getObject('modTemplate', ['templatename' => $value['portable_value']]);
+                    if (is_object($template)) {
+                        $value = $template->get('id');
+                    }
+                    break;
+            }
+        }
+
+        return $value;
+    }
+
+    protected function seedValue($value)
+    {
+        $type = $this->getPortableType();
+        switch ($type) {
+            case 'media_sources':
+                $mediaSource = $this->modx->getObject('modMediaSource', $value);
+                if (is_object($mediaSource)) {
+                    $value = [
+                        'type' => 'media_sources',
+                        'portable_value' => $mediaSource->get('name'),
+                        'value' => $value
+                    ];
+                }
+                break;
+
+            case 'resources':
+                $value = [
+                    'type' => 'resource',
+                    'portable_value' => $this->blender->getResourceSeedKeyFromID($value),
+                    'value' => $value
+                ];
+                break;
+
+            case 'templates':
+                $template = $this->modx->getObject('modTemplate', $value);
+                if (is_object($template)) {
+                    $value = [
+                        'type' => 'template',
+                        'portable_value' => $template->get('templatename'),
+                        'value' => $value
+                    ];
+                }
+                break;
+        }
+
+        return $value;
     }
 
     /***********************

@@ -13,11 +13,13 @@ class SystemSettingMigrationExample extends Migrations
     /** @var array ~ custom settings: */
     protected $settings = [
         [
-            'key' => 'testSystemSettingMigration',
-            'value' => 'Blend Site',
-            'xtype' => 'textfield',
-            'namespace' => 'core',
-            'area' => 'site',
+            'columns' => [
+                'key' => 'testSystemSettingMigration',
+                'value' => 'Blend Site',
+                'xtype' => 'textfield',
+                'namespace' => 'core',
+                'area' => 'site',
+            ],
         ],
     ];
 

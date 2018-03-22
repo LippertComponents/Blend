@@ -200,6 +200,30 @@ abstract class Blendable implements BlendableInterface
     }
 
     /**
+     * @param array $data ~ must be in the format: array('columns' => [], 'primaryKeyHistory' => [], 'related' => [])
+     * @param bool $overwrite
+     * @return bool
+     */
+    public function blendFromArray($data, $overwrite=false)
+    {
+        if (isset($data['columns'])) {
+            $this->blendable_xpdo_simple_object_data = $data['columns'];
+        }
+        if (isset($data['primaryKeyHistory']) && $data['primaryKeyHistory']) {
+            $this->unique_key_history = $data['primaryKeyHistory'];
+        } else {
+            $this->unique_key_history = [];
+        }
+
+        if (isset($data['related']) && $data['related']) {
+            $this->related_data = $data['related'];
+        } else {
+            $this->related_data = [];
+        }
+
+        return $this->blend($overwrite);
+    }
+    /**
      * @param string $seed_key
      * @param bool $overwrite
      *
@@ -308,6 +332,26 @@ abstract class Blendable implements BlendableInterface
         // No IDs! must get the alias and get a seed key,
         $seed_key = $this->getSeedKey($type);
 
+        $data = $this->seedToArray($type, $seed_key);
+
+        // now cache it:
+        $this->modx->cacheManager->set(
+            $seed_key,
+            $data,
+            $this->cache_life,
+            $this->cacheOptions
+        );
+
+        return $seed_key;
+    }
+
+    /**
+     * @param string $type ~ seed or revert
+     * @param string $seed_key
+     * @return array
+     */
+    public function seedToArray($type='seed', $seed_key='')
+    {
         if (is_object($this->xPDOSimpleObject)) {
             $this->current_xpdo_simple_object_data = $this->xPDOSimpleObject->toArray();
 
@@ -365,15 +409,7 @@ abstract class Blendable implements BlendableInterface
             ]
         );
 
-        // now cache it:
-        $this->modx->cacheManager->set(
-            $seed_key,
-            $data,
-            $this->cache_life,
-            $this->cacheOptions
-        );
-
-        return $seed_key;
+        return $data;
     }
 
     /**
@@ -417,13 +453,13 @@ abstract class Blendable implements BlendableInterface
         if ($this->xPDOSimpleObject->save()) {
             $this->attachRelatedPiecesAfterSave();
             if ($this->isDebug()) {
-                $this->blender->out($this->getName() . ' has been installed/saved');
+                $this->blender->out($this->blendable_xpdo_simple_object_data[$this->unique_key_column] . ' has been installed/saved');
             }
             $saved = true;
 
         } else {
             if ($this->isDebug()) {
-                $this->blender->out($this->getName() . ' did not install/update', true);
+                $this->blender->out($this->blendable_xpdo_simple_object_data[$this->unique_key_column] . ' did not install/update', true);
             }
 
         }

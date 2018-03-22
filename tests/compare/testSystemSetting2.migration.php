@@ -2,7 +2,7 @@
 
 /**
  * Auto Generated from Blender
- * Date: 2018/01/18 at 7:48:01 EST -05:00
+ * Date: 2018/03/22 at 18:30:25 UTC +00:00
  */
 
 use \LCI\Blend\Migrations;
@@ -13,12 +13,21 @@ class m2018_01_10_093000_Systemsettings extends Migrations
     protected $settings = array (
       0 => 
       array (
-        'key' => 'testSystemSetting2',
-        'value' => 'Blend Site',
-        'xtype' => 'textfield',
-        'namespace' => 'core',
-        'area' => 'site',
-        'editedon' => '0000-00-00 00:00:00',
+        'columns' => 
+        array (
+          'area' => 'site',
+          'key' => 'testSystemSetting2',
+          'namespace' => 'core',
+          'value' => 'Blend Site',
+          'xtype' => 'textfield',
+          'editedon' => '0000-00-00 00:00:00',
+        ),
+        'primaryKeyHistory' => 
+        array (
+        ),
+        'related' => 
+        array (
+        ),
       ),
     );
 
