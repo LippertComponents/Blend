@@ -24,6 +24,16 @@ class install_blender extends Migrations
         'OnBlendSeedSystemSettings'
     ];
 
+    protected $empty_settings = [
+        'blend.portable.systemSettings.templates',
+        'blend.portable.systemSettings.mediaSources',
+        'blend.portable.systemSettings.resources',
+
+        'blend.portable.templateVariables.templates',
+        'blend.portable.templateVariables.mediaSources',
+        'blend.portable.templateVariables.resources',
+    ];
+
     /**
      * Run the migrations.
      *
@@ -58,26 +68,15 @@ class install_blender extends Migrations
             ->setFieldArea('Blend')
             ->blend();
 
-        /** @var \LCI\Blend\Blendable\SystemSetting $systemSetting */
-        $systemSetting = $this->blender->getBlendableSystemSetting('blend.portable.systemSettings.mediaSources');
-        $systemSetting
-            ->setSeedsDir($this->getSeedsDir())
-            ->setFieldArea('Blend')
-            ->blend();
+        foreach ($this->empty_settings as $key) {
 
-        /** @var \LCI\Blend\Blendable\SystemSetting $systemSetting */
-        $systemSetting = $this->blender->getBlendableSystemSetting('blend.portable.systemSettings.resources');
-        $systemSetting
-            ->setSeedsDir($this->getSeedsDir())
-            ->setFieldArea('Blend')
-            ->blend();
-
-        /** @var \LCI\Blend\Blendable\SystemSetting $systemSetting */
-        $systemSetting = $this->blender->getBlendableSystemSetting('blend.portable.systemSettings.templates');
-        $systemSetting
-            ->setSeedsDir($this->getSeedsDir())
-            ->setFieldArea('Blend')
-            ->blend();
+            /** @var \LCI\Blend\Blendable\SystemSetting $systemSetting */
+            $systemSetting = $this->blender->getBlendableSystemSetting($key);
+            $systemSetting
+                ->setSeedsDir($this->getSeedsDir())
+                ->setFieldArea('Blend')
+                ->blend();
+        }
 
         $this->modx->cacheManager->refresh();
     }
@@ -114,23 +113,13 @@ class install_blender extends Migrations
             ->setSeedsDir($this->getSeedsDir())
             ->revertBlend();
 
-        /** @var \LCI\Blend\Blendable\SystemSetting $systemSetting */
-        $systemSetting = $this->blender->getBlendableSystemSetting('blend.portable.systemSettings.mediaSources');
-        $systemSetting
-            ->setSeedsDir($this->getSeedsDir())
-            ->revertBlend();
-
-        /** @var \LCI\Blend\Blendable\SystemSetting $systemSetting */
-        $systemSetting = $this->blender->getBlendableSystemSetting('blend.portable.systemSettings.resources');
-        $systemSetting
-            ->setSeedsDir($this->getSeedsDir())
-            ->revertBlend();
-
-        /** @var \LCI\Blend\Blendable\SystemSetting $systemSetting */
-        $systemSetting = $this->blender->getBlendableSystemSetting('blend.portable.systemSettings.templates');
-        $systemSetting
-            ->setSeedsDir($this->getSeedsDir())
-            ->revertBlend();
+        foreach ($this->empty_settings as $key) {
+            /** @var \LCI\Blend\Blendable\SystemSetting $systemSetting */
+            $systemSetting = $this->blender->getBlendableSystemSetting($key);
+            $systemSetting
+                ->setSeedsDir($this->getSeedsDir())
+                ->revertBlend();
+        }
 
         $this->modx->cacheManager->refresh();
     }

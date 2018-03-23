@@ -9,6 +9,17 @@ use \LCI\Blend\Migrations;
 
 class v0_9_11_update extends Migrations
 {
+
+    protected $empty_settings = [
+        'blend.portable.systemSettings.templates',
+        'blend.portable.systemSettings.mediaSources',
+        'blend.portable.systemSettings.resources',
+
+        'blend.portable.templateVariables.templates',
+        'blend.portable.templateVariables.mediaSources',
+        'blend.portable.templateVariables.resources',
+    ];
+
     /**
      * Run the migrations.
      *
@@ -26,6 +37,16 @@ class v0_9_11_update extends Migrations
             ->setFieldArea('Blend')
             ->blend();
 
+        foreach ($this->empty_settings as $key) {
+
+            /** @var \LCI\Blend\Blendable\SystemSetting $systemSetting */
+            $systemSetting = $this->blender->getBlendableSystemSetting($key);
+            $systemSetting
+                ->setSeedsDir($this->getSeedsDir())
+                ->setFieldArea('Blend')
+                ->blend();
+        }
+
         $this->modx->cacheManager->refresh();
     }
 
@@ -41,6 +62,15 @@ class v0_9_11_update extends Migrations
         $systemSetting
             ->setSeedsDir($this->getSeedsDir())
             ->revertBlend();
+
+        foreach ($this->empty_settings as $key) {
+
+            /** @var \LCI\Blend\Blendable\SystemSetting $systemSetting */
+            $systemSetting = $this->blender->getBlendableSystemSetting($key);
+            $systemSetting
+                ->setSeedsDir($this->getSeedsDir())
+                ->revertBlend();
+        }
 
         $this->modx->cacheManager->refresh();
     }
