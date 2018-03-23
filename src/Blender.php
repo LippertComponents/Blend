@@ -10,6 +10,7 @@ namespace LCI\Blend;
 
 use modX;
 use LCI\Blend\Blendable\Chunk;
+use LCI\Blend\Blendable\Context;
 use LCI\Blend\Blendable\MediaSource;
 use LCI\Blend\Blendable\Plugin;
 use LCI\Blend\Blendable\Resource;
@@ -337,6 +338,18 @@ class Blender
                 $this->out($blendChunk->getName().' chunk was not reverted', true);
             }
         }
+    }
+
+    /**
+     * Use this method with your IDE to help manually build a Chunk with PHP
+     * @param string $key
+     * @return Context
+     */
+    public function getBlendableContext($key)
+    {
+        /** @var \LCI\Blend\Blendable\Context $chunk */
+        $context =  new Context($this->modx, $this, $key);
+        return $context->setSeedsDir($this->getSeedsDir());
     }
 
     /**
