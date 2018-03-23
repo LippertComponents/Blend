@@ -53,19 +53,19 @@ class SystemSetting extends Blendable
      * blend.portable.systemSettings.resources or blend.portable.systemSettings.templates'
      */
     protected $portable_settings = [
-        'media_sources' => [
-            'default_media_source'
-        ],
-        'resources' => [
-            'error_page',
-            'site_start',
-            'site_unavailable_page',
-            'tree_root_id',
-            'unauthorized_page'
-        ],
-        'templates' => [
-            'default_template'
-            ]
+        // setting key => portable type
+        // Media sources
+        'default_media_source' => 'media_source',
+
+        // Resources
+        'error_page' => 'resource',
+        'site_start' => 'resource',
+        'site_unavailable_page' => 'resource',
+        'tree_root_id' => 'resource',
+        'unauthorized_page' => 'resource',
+
+        // Templates
+        'default_template' => 'template'
     ];
 
     /**
@@ -80,17 +80,23 @@ class SystemSetting extends Blendable
         parent::__construct($modx, $blender, $unique_value);
         $additional = explode(',', $this->modx->getOption('blend.portable.systemSettings.mediaSources'));
         if (count($additional) > 0) {
-            $this->portable_settings['media_sources'] = array_merge($this->portable_settings['media_sources'], $additional);
+            foreach ($additional as $setting) {
+                $this->portable_settings[$setting] = 'media_source';
+            }
         }
 
         $additional = explode(',', $this->modx->getOption('blend.portable.systemSettings.resources'));
         if (count($additional) > 0) {
-            $this->portable_settings['resources'] = array_merge($this->portable_settings['resources'], $additional);
+            foreach ($additional as $setting) {
+                $this->portable_settings[$setting] = 'resource';
+            }
         }
 
         $additional = explode(',', $this->modx->getOption('blend.portable.systemSettings.templates'));
         if (count($additional) > 0) {
-            $this->portable_settings['templates'] = array_merge($this->portable_settings['templates'], $additional);
+            foreach ($additional as $setting) {
+                $this->portable_settings[$setting] = 'template';
+            }
         }
     }
 
@@ -148,11 +154,8 @@ class SystemSetting extends Blendable
                 break;
 
             default:
-                foreach ($this->portable_settings as $xtype => $settings) {
-                    if (in_array($this->getFieldKey(), $settings)) {
-                        $type = $xtype;
-                        break;
-                    }
+                if (isset($this->portable_settings[$this->getFieldKey()])) {
+                    $type = $this->portable_settings[$this->getFieldKey()];
                 }
         }
         return $type;
@@ -388,18 +391,18 @@ class SystemSetting extends Blendable
     {
         $type = $this->getPortableType();
         switch ($type) {
-            case 'media_sources':
+            case 'media_source':
                 $mediaSource = $this->modx->getObject('modMediaSource', $value);
                 if (is_object($mediaSource)) {
                     $value = [
-                        'type' => 'media_sources',
+                        'type' => 'media_source',
                         'portable_value' => $mediaSource->get('name'),
                         'value' => $value
                     ];
                 }
                 break;
 
-            case 'resources':
+            case 'resource':
                 $value = [
                     'type' => 'resource',
                     'portable_value' => $this->blender->getResourceSeedKeyFromID($value),
@@ -407,7 +410,7 @@ class SystemSetting extends Blendable
                 ];
                 break;
 
-            case 'templates':
+            case 'template':
                 $template = $this->modx->getObject('modTemplate', $value);
                 if (is_object($template)) {
                     $value = [
