@@ -72,6 +72,9 @@ class Resource extends Blendable
         'setProperties' => 'mergePropertiesFromArray'
     ];
 
+    /** @var array  */
+    protected $portable_template_variables = [];
+
     /**
      * Resource constructor.
      *
@@ -85,6 +88,27 @@ class Resource extends Blendable
         $this->setFieldAlias($alias);
         $this->setFieldContextKey($context);
         parent::__construct($modx, $blender, ['alias' => $alias, 'context_key' => $context]);
+
+        $additional = explode(',', $this->modx->getOption('blend.portable.templateVariables.mediaSources'));
+        if (count($additional) > 0) {
+            foreach ($additional as $tv_name) {
+                $this->portable_template_variables[$tv_name] = 'media_source';
+            }
+        }
+
+        $additional = explode(',', $this->modx->getOption('blend.portable.templateVariables.resources'));
+        if (count($additional) > 0) {
+            foreach ($additional as $tv_name) {
+                $this->portable_template_variables[$tv_name] = 'resource';
+            }
+        }
+
+        $additional = explode(',', $this->modx->getOption('blend.portable.templateVariables.templates'));
+        if (count($additional) > 0) {
+            foreach ($additional as $tv_name) {
+                $this->portable_template_variables[$tv_name] = 'template';
+            }
+        }
     }
 
 
@@ -901,18 +925,7 @@ class Resource extends Blendable
                 $tv = $tvTemplate->getOne('TemplateVar');
                 $tv_name = $tv->get('name');
 
-                $tvs[$tv_name] = [
-                    'type' => $tv->get('type'),
-                    'value' => $this->xPDOSimpleObject->getTVValue($tv_name)
-                ];
-
-                switch ($tv->get('type')) {
-                    case 'resourcelist':
-                        if ($tvs[$tv_name]['value'] > 0) {
-                            $tvs[$tv_name]['portable_value'] = $this->blender->getResourceSeedKeyFromID($tvs[$tv_name]);
-                        }
-                        break;
-                }
+                $tvs[$tv_name] = $this->makePortableTVData($tv_name, $tv->get('type'), $this->xPDOSimpleObject->getTVValue($tv_name));
             }
         }
 
@@ -931,6 +944,69 @@ class Resource extends Blendable
 
         // Calls on the event: OnBlendLoadRelatedData
         parent::loadRelatedData();
+    }
+
+    /**
+     * @param string $tv_name
+     * @return bool|string
+     */
+    protected function getPortableTVType($tv_name, $tv_type)
+    {
+        $type = false;
+
+        // These are set via system settings:
+        if (isset($this->portable_template_variables[$tv_name]) ) {
+            return $this->portable_template_variables[$tv_name];
+        }
+
+        switch ($tv_type) {
+            case 'resourcelist':
+                $type = 'resource';
+                break;
+        }
+
+        return $type;
+    }
+
+    /**
+     * @param string $tv_name
+     * @param string $tv_type
+     * @param mixed $value
+     * @return array
+     */
+    protected function makePortableTVData($tv_name, $tv_type, $value)
+    {
+        $portable = [
+            'type' => $tv_type,
+            'value' => $value
+        ];
+
+        $type = $this->getPortableTVType($tv_name, $tv_type);
+
+        switch ($type) {
+            case 'media_source':
+                $mediaSource = $this->modx->getObject('modMediaSource', $value);
+                if (is_object($mediaSource)) {
+                    $portable['portable_type'] = 'media_source';
+                    $portable['portable_value'] = $mediaSource->get('name');
+                }
+                break;
+
+            case 'resource':
+                $portable['portable_type'] = 'resource';
+                $portable['portable_value'] = $this->blender->getResourceSeedKeyFromID($value);
+                break;
+
+            case 'template':
+                $template = $this->modx->getObject('modTemplate', $value);
+                if (is_object($template)) {
+                    $portable['portable_type'] = 'media_source';
+                    $portable['portable_value'] = $template->get('templatename');
+                }
+                break;
+        }
+
+        return $portable;
     }
 
     protected function uniqueCriteria()
@@ -979,6 +1055,38 @@ class Resource extends Blendable
     }
 
     /**
+     * @param array $tv_data
+     * @return string|int|mixed $value
+     */
+    protected function convertToLocalTVData($tv_data)
+    {
+        $value = $tv_data['value'];
+        if (is_array($tv_data) && isset($tv_data['portable_type']) && isset($tv_data['portable_value'])) {
+            switch ($tv_data['portable_type']) {
+                case 'media_source':
+                    $mediaSource = $this->modx->getObject('modMediaSource', ['name' => $tv_data['portable_value']]);
+                    if (is_object($mediaSource)) {
+                        $value = $mediaSource->get('id');
+                    }
+                    break;
+
+                case 'resource':
+                    $value = $this->blender->getResourceIDFromSeedKey($tv_data['portable_value']['seed_key'], $tv_data['portable_value']['context']);
+                    break;
+
+                case 'template':
+                    $template = $this->modx->getObject('modTemplate', ['templatename' => $tv_data['portable_value']]);
+                    if (is_object($template)) {
+                        $value = $template->get('id');
+                    }
+                    break;
+            }
+        }
+
+        return $value;
+    }
+
+    /**
      * Create seed methods for any column that needs be portable, from an int to string|array
      */
     /**
@@ -1022,18 +1130,7 @@ class Resource extends Blendable
             $tvs = $this->related_data['tvs'];
             if (is_array($tvs) && count($tvs) > 0) {
                 foreach ($tvs as $tv_name => $tv_data) {
-                    //$this->blender->out('  set TV: '.$tv_name.' '.$value);
-                    $value = $tv_data['value'];
-
-                    switch ($tv_data['type']) {
-                        case 'resourcelist':
-                            if (isset($tv_data['portable_value']) && isset($tv_data['portable_value']['context']) && isset($tv_data['portable_value']['seed_key'])) {
-                                $value = $this->blender->getResourceIDFromSeedKey($tv_data['portable_value']['seed_key'], $tv_data['portable_value']['context']);
-                            }
-                            break;
-                    }
-
-                    // Event here?
+                    $value = $this->convertToLocalTVData($tv_data);
 
                     $this->xPDOSimpleObject->setTVValue($tv_name, $value);
                 }
