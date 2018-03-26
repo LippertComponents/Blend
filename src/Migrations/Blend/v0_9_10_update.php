@@ -18,14 +18,13 @@ class v0_9_10_update extends Migrations
     {
         // only thing to change is the version number
 
-        /** @var \LCI\Blend\SystemSetting $systemSetting */
-        $systemSetting = new \LCI\Blend\SystemSetting($this->modx, $this->blender);
+        /** @var \LCI\Blend\Blendable\SystemSetting $systemSetting */
+        $systemSetting = $this->blender->getBlendableSystemSetting('blend.version');
         $systemSetting
-            ->setName('blend.version')
             ->setSeedsDir($this->getSeedsDir())
-            ->setValue('0.9.10')
-            ->setArea('Blend')
-            ->blend();
+            ->setFieldValue('0.9.10')
+            ->setFieldArea('Blend')
+            ->blend(true);
 
         $this->modx->cacheManager->refresh();
     }
@@ -37,10 +36,9 @@ class v0_9_10_update extends Migrations
      */
     public function down()
     {
-        /** @var \LCI\Blend\SystemSetting $systemSetting */
-        $systemSetting = new \LCI\Blend\SystemSetting($this->modx, $this->blender);
+        /** @var \LCI\Blend\Blendable\SystemSetting $systemSetting */
+        $systemSetting = $this->blender->getBlendableSystemSetting('blend.version');
         $systemSetting
-            ->setName('blend.version')
             ->setSeedsDir($this->getSeedsDir())
             ->revertBlend();
 
