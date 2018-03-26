@@ -16,7 +16,7 @@ class ContextMigrationExample extends Migrations
      */
     public function up()
     {
-        /** @var \LCI\Blend\Blendable\Context $chunk */
+        /** @var \LCI\Blend\Blendable\Context $testContext3 */
         $testContext3 = $this->blender->getBlendableContext('it');
         $testContext3
             ->setSeedsDir($this->getSeedsDir())
@@ -46,14 +46,14 @@ class ContextMigrationExample extends Migrations
     {
         $context_key = 'it';
 
-        $blendChunk = $this->blender->getBlendableContext($context_key);
-        $blendChunk->setSeedsDir($this->getSeedsDir());
+        $blendContext = $this->blender->getBlendableContext($context_key);
+        $blendContext->setSeedsDir($this->getSeedsDir());
 
-        if ( $blendChunk->revertBlend() ) {
-            $this->blender->out($blendChunk->getFieldKey().' setting has been reverted to '.$this->getSeedsDir());
+        if ( $blendContext->revertBlend() ) {
+            $this->blender->out($blendContext->getFieldKey().' setting has been reverted to '.$this->getSeedsDir());
 
         } else {
-            $this->blender->out($blendChunk->getFieldKey().' setting was not reverted', true);
+            $this->blender->out($blendContext->getFieldKey().' setting was not reverted', true);
         }
     }
 
