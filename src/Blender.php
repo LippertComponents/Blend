@@ -1363,12 +1363,12 @@ class Blender
 
         // new blender for each instance
         $config = $this->config;
-        $config['migrations_path'] = __DIR__.'/migration/';
+        $config['migrations_path'] = __DIR__.'/Migrations/Blend/';
 
         $blender = new Blender($this->modx, $this->getUserInteractionHandler(), $config);
 
         foreach ($this->update_migrations as $v => $migration_name) {
-            if (version_compare($this->getVersion(), $current_vesion) === 1 ) {
+            if (version_compare($v, $current_vesion) === 1 ) {
                 // can not use as xPDO get queries fill the SELECT with the DB fields and since we are adding one this is a SQL error
                 //$blender->runMigration($method, 'master', 0, 0, $migration_name);
 
@@ -1433,7 +1433,7 @@ class Blender
 
         $current_vesion = $this->modx->getOption('blend.version');
         //                                      FILE version,        DB Version
-        if ( $this->isBlendInstalledInModx() && ( !$current_vesion || version_compare($this->getVersion(), $current_vesion, '>')) ) {
+        if ( $this->isBlendInstalledInModx() && ( !$current_vesion || version_compare($this->getVersion(), $current_vesion)) ) {
             $upgrade = true;
         }
 

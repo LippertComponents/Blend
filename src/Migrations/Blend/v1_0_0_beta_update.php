@@ -7,7 +7,7 @@
 
 use \LCI\Blend\Migrations;
 
-class v0_9_11_update extends Migrations
+class v1_0_0_beta_update extends Migrations
 {
 
     protected $empty_settings = [
@@ -35,7 +35,7 @@ class v0_9_11_update extends Migrations
             ->setSeedsDir($this->getSeedsDir())
             ->setFieldValue('1.0.0 beta')
             ->setFieldArea('Blend')
-            ->blend();
+            ->blend(true);
 
         foreach ($this->empty_settings as $key) {
 
@@ -44,7 +44,7 @@ class v0_9_11_update extends Migrations
             $systemSetting
                 ->setSeedsDir($this->getSeedsDir())
                 ->setFieldArea('Blend')
-                ->blend();
+                ->blend(true);
         }
 
         $this->modx->cacheManager->refresh();

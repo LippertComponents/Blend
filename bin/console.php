@@ -103,7 +103,7 @@ if (version_compare(phpversion(),'5.3.0') >= 0) {
 }
 
 /** @var \LCI\Blend\BlendConsole $application */
-$application = new BlendConsole('Bend', '1.0.0dev');
+$application = new BlendConsole('Bend', '1.0.0 beta');
 // need a check if MODX is installed:
 if (BlendConsole::isModxInstalled()) {
     $application->add(new Blend);
