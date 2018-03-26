@@ -67,6 +67,28 @@ class Context extends Blendable
         }
     }
 
+    /**
+     * @param string $type ~ seed or revert
+     * @return string
+     */
+    public function getSeedKey($type='seed')
+    {
+        $name = $this->getFieldKey();
+        $key = $this->blender->getSeedKeyFromName($name);
+
+        switch ($type) {
+            case 'revert':
+                $seed_key = 'revert-' . $key;
+                break;
+
+            case 'seed':
+                // no break
+            default:
+                $seed_key = $key;
+        }
+
+        return $seed_key;
+    }
 
     // Column Getters:
     /**
@@ -184,7 +206,7 @@ class Context extends Blendable
             $settings[] = $this->makePortableData($setting->toArray());
         }
 
-        // @TODO add in context_resources
+        // @TODO modContextResource or should this be on Resource
         $this->related_data = [
             'settings' => $settings
         ];
@@ -315,5 +337,7 @@ class Context extends Blendable
                 $contextSetting->remove();
             }
         }
+
+        // @TODO modContextResource or should this be on Resource
     }
 }

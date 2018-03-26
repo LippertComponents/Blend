@@ -353,6 +353,60 @@ class Blender
     }
 
     /**
+     * @param array $contexts
+     * @param string $seeds_dir
+     */
+    public function blendManyContexts($contexts=[], $seeds_dir='')
+    {
+        // will update if element does exist or create new
+        foreach ($contexts as $seed_key) {
+            /** @var \LCI\Blend\Blendable\Context $blendContext */
+            $blendContext = new Context($this->modx, $this, $this->getNameFromSeedKey($seed_key));
+            if (!empty($seeds_dir)) {
+                $blendContext->setSeedsDir($seeds_dir);
+            }
+            if ($blendContext->blendFromSeed($seed_key)) {
+                $this->out($seed_key.' has been blended ');
+
+            } elseif($blendContext->isExists()) {
+                // @TODO prompt Do you want to blend Y/N/Compare
+                $this->out($seed_key.' chunk already exists', true);
+                if ($this->prompt('Would you like to update?', 'Y') === 'Y') {
+                    if ($blendContext->blendFromSeed($seed_key, true)) {
+                        $this->out($seed_key.' has been blended');
+                    }
+                }
+            } else {
+                $this->out('There was an error saving '.$seed_key, true);
+            }
+        }
+    }
+
+    /**
+     * @param array $contexts
+     * @param string $seeds_dir
+     */
+    public function revertBlendManyContexts($contexts=[], $seeds_dir='')
+    {
+        // will update if system setting does exist or create new
+        foreach ($contexts as $seed_key) {
+            /** @var \LCI\Blend\Blendable\Context $blendContext */
+            $blendContext = new Context($this->modx, $this, $this->getNameFromSeedKey($seed_key));
+            if (!empty($seeds_dir)) {
+                $blendContext->setSeedsDir($seeds_dir);
+            }
+
+            if ( $blendContext->revertBlend() ) {
+                $this->out($blendContext->getFieldKey().' context has been reverted to '.$seeds_dir);
+
+            } else {
+                $this->out($blendContext->getFieldKey().' context was not reverted', true);
+            }
+        }
+    }
+
+
+    /**
      * @param string $name
      * @return \LCI\Blend\Blendable\MediaSource
      */
@@ -404,16 +458,16 @@ class Blender
         // will update if system setting does exist or create new
         foreach ($media_sources as $seed_key) {
             /** @var \LCI\Blend\Blendable\MediaSource $blendMediaSource */
-            $blendMediaSource = new MediaSource($this->modx, $this);
+            $blendMediaSource = new MediaSource($this->modx, $this, $this->getNameFromSeedKey($seed_key));
             if (!empty($seeds_dir)) {
                 $blendMediaSource->setSeedsDir($seeds_dir);
             }
 
-            if ( $blendMediaSource->revertBlendFromSeed($seed_key) ) {
-                $this->out($blendMediaSource->getName().' media source has been reverted to '.$seeds_dir);
+            if ( $blendMediaSource->revertBlend() ) {
+                $this->out($blendMediaSource->getFieldName().' media source has been reverted to '.$seeds_dir);
 
             } else {
-                $this->out($blendMediaSource->getName().' media source was not reverted', true);
+                $this->out($blendMediaSource->getFieldName().' media source was not reverted', true);
             }
         }
     }
@@ -928,6 +982,35 @@ class Blender
      *
      * @return array
      */
+    public function makeContextSeeds($criteria, $server_type='master', $name=null, $create_migration_file=true)
+    {
+        $keys = [];
+        $collection = $this->modx->getCollection('modContext', $criteria);
+
+        foreach ($collection as $context) {
+            /** @var Context $blendContext */
+            $blendContext = new Context($this->modx, $this, $context->get('key'));
+            $seed_key = $blendContext
+                ->setSeedsDir($this->getMigrationName('context', $name))
+                ->seed();
+            $this->out("Context: ".$context->get('name').' Key: '.$seed_key);
+            $keys[] = $seed_key;
+        }
+
+        if ($create_migration_file) {
+            $this->writeMigrationClassFile('context', $keys, $server_type, $name);
+        }
+        return $keys;
+    }
+
+    /**
+     * @param \xPDOQuery|array|null $criteria
+     * @param string $server_type
+     * @param string $name
+     * @param bool $create_migration_file
+     *
+     * @return array
+     */
     public function makeMediaSourceSeeds($criteria, $server_type='master', $name=null, $create_migration_file=true)
     {
         $keys = [];
@@ -1111,6 +1194,8 @@ class Blender
     public function makeSiteSeed($server_type='master', $name=null)
     {
         $site_data = [
+            'mediaSources' => $this->makeMediaSourceSeeds(null, $server_type, $name, false),
+            'contexts' => $this->makeContextSeeds(null, $server_type, $name, false),
             'chunks' => $this->makeChunkSeeds(null, $server_type, $name, false),
             'plugins' => $this->makePluginSeeds(null, $server_type, $name, false),
             'resources' => $this->makeResourceSeeds(null, $server_type, $name, false),
@@ -1585,6 +1670,13 @@ class Blender
                 $placeholders['chunkData'] = $this->prettyVarExport($class_data);
                 $placeholders['classUpInners'] = '$this->blender->blendManyChunks($this->chunks, $this->getSeedsDir());';
                 $placeholders['classDownInners'] = '$this->blender->revertBlendManyChunks($this->chunks, $this->getSeedsDir());';
+                break;
+
+            case 'context':
+                $migration_template = 'context.txt';
+                $placeholders['contextData'] = $this->prettyVarExport($class_data);
+                $placeholders['classUpInners'] = '$this->blender->blendManyContexts($this->contexts, $this->getSeedsDir());';
+                $placeholders['classDownInners'] = '$this->blender->revertBlendManyContexts($this->contexts, $this->getSeedsDir());';
                 break;
 
             case 'mediaSource':
