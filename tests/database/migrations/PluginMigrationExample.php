@@ -48,15 +48,15 @@ class PluginMigrationExample extends Migrations
         // set back to previous version of the plugin
         $name = 'testPlugin3';
 
-        /** @var \LCI\Blend\Blendable\Plugin $testPlugin3 */
+        /** @var \LCI\Blend\Blendable\Plugin $blendPlugin */
         $blendPlugin = $this->blender->getBlendablePlugin($name);
         $blendPlugin->setSeedsDir($this->getSeedsDir());
 
         if ( $blendPlugin->revertBlend() ) {
-            $this->blender->out($blendPlugin->getFieldName().' setting has been reverted to '.$this->getSeedsDir());
+            $this->blender->out($blendPlugin->getFieldName().' plugin has been reverted to '.$this->getSeedsDir());
 
         } else {
-            $this->blender->out($blendPlugin->getFieldName().' setting was not reverted', true);
+            $this->blender->out($blendPlugin->getFieldName().' plugin was not reverted', true);
         }
     }
 

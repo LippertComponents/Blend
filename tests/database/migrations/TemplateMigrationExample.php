@@ -30,7 +30,7 @@ class TemplateMigrationExample extends Migrations
 
         } else {
             //error
-            $this->blender->out($testTemplate3->getFieldCode().' did not save correctly ', true);
+            $this->blender->out($testTemplate3->getFieldName().' did not save correctly ', true);
             $this->blender->out(print_r($testTemplate3->getErrorMessages(), true), true);
         }
     }

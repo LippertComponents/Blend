@@ -50,10 +50,10 @@ class SnippetMigrationExample extends Migrations
         $blendSnippet->setSeedsDir($this->getSeedsDir());
 
         if ( $blendSnippet->revertBlend() ) {
-            $this->blender->out($blendSnippet->getFieldName().' setting has been reverted to '.$this->getSeedsDir());
+            $this->blender->out($blendSnippet->getFieldName().' snippet has been reverted to '.$this->getSeedsDir());
 
         } else {
-            $this->blender->out($blendSnippet->getFieldName().' setting was not reverted', true);
+            $this->blender->out($blendSnippet->getFieldName().' snippet was not reverted', true);
         }
     }
 

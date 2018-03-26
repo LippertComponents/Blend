@@ -37,7 +37,7 @@ class SystemSettingMigrationExample extends Migrations
         $blendExistingSetting
             ->setSeedsDir($this->getSeedsDir())
             ->setCoreSiteName('Blend SystemSettingMigrationExample')
-            ->blend();
+            ->blend(true);
 
         // From array:
         $this->blender->blendManySystemSettings($this->settings, $this->getSeedsDir());
