@@ -11,6 +11,7 @@
             <file>tests/SystemSettingsTest.php</file>
             <file>tests/TemplateTest.php</file>
             <file>tests/TemplateTVTest.php</file>
+            <file>tests/SiteTest.php</file>
         </testsuite>
     </testsuites>
 </phpunit>
