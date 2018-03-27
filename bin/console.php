@@ -61,7 +61,7 @@ if (file_exists($local_config)) {
     foreach ($modx_possible_paths as $modx_path) {
         if (file_exists($modx_path)) {
             if (!defined('MODX_PATH')) {
-                define('MODX_PATH', dirname($modx_path));
+                define('MODX_PATH', rtrim(dirname($modx_path), DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR);
             }
             break;
         }
@@ -71,8 +71,8 @@ if (file_exists($local_config)) {
         define('MODX_CONFIG_PATH', MODX_PATH.'config.core.php');
     }
 
-    if (!defined('MODX_CORE_PATH')) {
-        define('MODX_CORE_PATH', MODX_PATH.'core/');
+    if (!defined('M_CORE_PATH')) {
+        define('M_CORE_PATH', MODX_PATH.'core/');
     }
 
     // Where you will write your migration project/site
@@ -103,7 +103,7 @@ if (version_compare(phpversion(),'5.3.0') >= 0) {
 }
 
 /** @var \LCI\Blend\BlendConsole $application */
-$application = new BlendConsole('Bend', '1.0.0 beta');
+$application = new BlendConsole('Bend', '1.0.0 beta2');
 // need a check if MODX is installed:
 if (BlendConsole::isModxInstalled()) {
     $application->add(new Blend);
