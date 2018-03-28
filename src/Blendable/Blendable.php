@@ -291,8 +291,11 @@ abstract class Blendable implements BlendableInterface
             $this->seed('revert');
         }
         $removed = false;
-        if ($this->xPDOSimpleObject->remove()) {
+        if (!is_object($this->xPDOSimpleObject)) {
+            $this->blender->out($this->blendable_xpdo_simple_object_data[$this->unique_key_column] . ' of xPDO class '.
+                $this->xpdo_simple_object_class.' was not found, could not be removed/deleted', true);
 
+        } elseif ($this->xPDOSimpleObject->remove()) {
             $this->onDeleteRevertRelatedPieces();
             if ($this->isDebug()) {
                 $this->blender->out($this->blendable_xpdo_simple_object_data[$this->unique_key_column] . ' has been removed/deleted');
