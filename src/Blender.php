@@ -332,10 +332,10 @@ class Blender
             }
 
             if ( $blendChunk->revertBlend() ) {
-                $this->out($blendChunk->getName().' chunk has been reverted to '.$seeds_dir);
+                $this->out($blendChunk->getFieldName().' chunk has been reverted to '.$seeds_dir);
 
             } else {
-                $this->out($blendChunk->getName().' chunk was not reverted', true);
+                $this->out($blendChunk->getFieldName().' chunk was not reverted', true);
             }
         }
     }
