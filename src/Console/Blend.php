@@ -8,14 +8,10 @@
 
 namespace LCI\Blend\Console;
 
-use LCI\Blend\Blender;
-use LCI\Blend\BlendConsole;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 use Symfony\Component\Console\Input\InputArgument;
-use Symfony\Component\Console\Input\InputDefinition;
-use Symfony\Component\Console\Input\InputOption;
 
 class Blend extends BaseCommand
 {
@@ -27,8 +23,9 @@ class Blend extends BaseCommand
      */
     protected function configure()
     {
-        if (BlendConsole::isBlendInstalled()) {
-            if (BlendConsole::isBlendRequireUpdate()) {
+        $activePackageCommands = new ActivePackageCommands($this->console);
+        if ($activePackageCommands->isBlendInstalled()) {
+            if ($activePackageCommands->isBlendRequireUpdate()) {
                 $this->exe_type = 'update';
                 $this
                     ->setName('blend:update')

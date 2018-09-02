@@ -18,8 +18,8 @@ use LCI\Blend\Blendable\Snippet;
 use LCI\Blend\Blendable\SystemSetting;
 use LCI\Blend\Blendable\Template;
 use LCI\Blend\Blendable\TemplateVariable;
-use LCI\Blend\Helpers\UserInteractionHandler;
 use LCI\Blend\Helpers\SimpleCache;
+use LCI\MODX\Console\Helpers\UserInteractionHandler;
 use PHPUnit\Runner\Exception;
 
 class Blender
@@ -43,7 +43,7 @@ class Blender
     /** @var array  */
     protected $modx_version_info = [];
 
-    /** @var \LCI\Blend\Helpers\UserInteractionHandler */
+    /** @var \LCI\MODX\Console\Helpers\UserInteractionHandler */
     protected $userInteractionHandler;
 
     /** @var array  */

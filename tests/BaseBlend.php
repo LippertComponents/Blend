@@ -3,18 +3,18 @@
 
 use PHPUnit\Framework\TestCase;
 use LCI\Blend\Blender;
-use LCI\Blend\Helpers\EmptyUserInteractionHandler;
 use LCI\Blend\Helpers\SimpleCache;
+use LCI\MODX\Console\Helpers\VoidUserInteractionHandler;
 
 class BaseBlend extends TestCase
 {
-    /** @var \MODx  An xPDO instance for this TestCase. */
+    /** @var \modX  An xPDO instance for this TestCase. */
     protected $modx;
 
     /** @var Blender */
     protected $blender;
 
-    /** @var \LCI\Blend\Helpers\UserInteractionHandler */
+    /** @var \LCI\MODX\Console\Helpers\UserInteractionHandler */
     protected $consoleUserInteractionHandler;
 
     /** @var bool  */
@@ -78,7 +78,7 @@ class BaseBlend extends TestCase
         $this->modx = self::getInstance();
 
 
-        $this->consoleUserInteractionHandler = new EmptyUserInteractionHandler();
+        $this->consoleUserInteractionHandler = new VoidUserInteractionHandler();
 
         $this->blender = new Blender($this->modx, $this->consoleUserInteractionHandler, ['blend_modx_migration_dir' => BLEND_MODX_MIGRATION_PATH.'temp/']);
 

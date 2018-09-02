@@ -2,15 +2,8 @@
 
 ini_set('display_errors', 1);
 
-use LCI\Blend\BlendConsole;
-use LCI\Blend\Console\Blend;
-use LCI\Blend\Console\Modx\Install as ModxInstall;
-use LCI\Blend\Console\Modx\Upgrade as ModxUpgrade;
-use LCI\Blend\Console\Modx\InstallPackage as ModxInstallPackage;
-use LCI\Blend\Console\Modx\RefreshCache;
-use LCI\Blend\Console\Migrate;
-use LCI\Blend\Console\Seed;
-
+use LCI\Blend\Application;
+use LCI\MODX\Console\Console;
 
 $autoloader_possible_paths = [
     // if cloned from git:
@@ -38,6 +31,7 @@ if (file_exists($local_config)) {
     require_once $local_config;
 
 } else {
+    // @TODO refactor and use .env file and console->findMODX()
     // search for MODX:
     $modx_possible_paths = [
         // if cloned from git, up from /www like /home/blend in MODXCloud
@@ -102,23 +96,13 @@ if (version_compare(phpversion(),'5.3.0') >= 0) {
     }
 }
 
-/** @var \LCI\Blend\BlendConsole $application */
-$application = new BlendConsole('Bend', '1.0.0 beta2');
-// need a check if MODX is installed:
-if (BlendConsole::isModxInstalled()) {
-    $application->add(new Blend);
-    if (BlendConsole::isBlendInstalled() && !BlendConsole::isBlendRequireUpdate()) {
-        $application->add(new Migrate);
-        $application->add(new Seed);
-    }
+/** @var \LCI\MODX\Console\Console $console */
+$console = new Console($env_directory = __DIR__);
 
-    //$application->add(new ModxUpgrade);
-    //$application->add(new ModxInstallPackage);
-    $application->add(new RefreshCache);
+$console->registerPackageCommands('LCI\Blend\Console\ActivePackageCommands');
 
-} else {
-    //die('MODX is not install, please install MODX or create a config.php file with the proper paths');
-    $application->add(new ModxInstall);
+/** @var \LCI\Blend\Application $application */
+$application = new Application($console);
+$application->loadCommands();
 
-}
 return $application;

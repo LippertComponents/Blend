@@ -9,10 +9,8 @@
 namespace LCI\Blend\Console;
 
 use modX;
-use LCI\Blend\BlendConsole;
 use LCI\Blend\Blender;
-use LCI\Blend\Helpers\ConsoleUserInteractionHandler;
-use Symfony\Component\Console\Command\Command;
+use LCI\MODX\Console\Command\BaseCommand as Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -29,17 +27,6 @@ abstract class BaseCommand extends Command
     /** @var \LCI\Blend\Blender */
     protected $blender;
 
-    /** @var \LCI\Blend\Helpers\ConsoleUserInteractionHandler */
-    protected $consoleUserInteractionHandler;
-
-    /** \Symfony\Component\Console\Input\InputInterface $input */
-    protected $input;
-
-    /** \Symfony\Component\Console\Output\OutputInterface $output */
-    protected $output;
-
-    protected $startTime;
-
     protected $loadMODX = true;
 
     /**
@@ -53,15 +40,10 @@ abstract class BaseCommand extends Command
      */
     public function initialize(InputInterface $input, OutputInterface $output)
     {
-        $this->startTime = microtime(true);
-        $this->input = $input;
-        $this->output = $output;
-
-        $this->consoleUserInteractionHandler = new ConsoleUserInteractionHandler($input, $output);
-        $this->consoleUserInteractionHandler->setCommandObject($this);
+        parent::initialize($input, $output);
 
         if ($this->loadMODX) {
-            $this->modx = BlendConsole::loadMODX();
+            $this->modx = $this->console->loadMODX();
 
             $this->blender = new Blender(
                 $this->modx,
@@ -76,6 +58,7 @@ abstract class BaseCommand extends Command
 
     }
 
+    // @TODO remove
     public function loadModxInstall()
     {
         /* to validate installation, instantiate the modX class and run a few tests */
@@ -103,29 +86,5 @@ abstract class BaseCommand extends Command
         } else {
             $errors[] = '<p>'.$this->lexicon('modx_class_err_nf').'</p>';
         }
-    }
-
-    /**
-     * @return string
-     */
-    public function getRunStats()
-    {
-        $curTime = microtime(true);
-        $duration = $curTime - $this->startTime;
-
-        $output = 'Time: ' . number_format($duration * 1000, 0) . 'ms | ';
-        $output .= 'Memory Usage: ' . $this->convertBytes(memory_get_usage(false)) . ' | ';
-        $output .= 'Peak Memory Usage: ' . $this->convertBytes(memory_get_peak_usage(false));
-        return $output;
-    }
-
-    /**
-     * @param $bytes
-     * @return string
-     */
-    protected function convertBytes($bytes)
-    {
-        $unit = array('b','kb','mb','gb','tb','pb');
-        return @round($bytes/pow(1024,($i=floor(log($bytes,1024)))),2).' '.$unit[$i];
     }
 }
