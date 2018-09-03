@@ -21,17 +21,8 @@
     "symfony/console": ">=3.4",
     "guzzlehttp/guzzle": "^6.3",
     "composer/composer": ">=1.6",
-    "lci/console": "dev-master"
+    "lci/console": ">=1.0"
   },
-  "repositories": [
-    {
-      "type": "vcs",
-      "url": "https://github.com/LippertComponents/Console"
-    }
-  ],
-
-  "minimum-stability": "dev",
-
   "bin": [
     "bin/blend"
   ],

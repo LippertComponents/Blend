@@ -97,7 +97,7 @@ if (version_compare(phpversion(),'5.3.0') >= 0) {
 }
 
 /** @var \LCI\MODX\Console\Console $console */
-$console = new Console($env_directory = __DIR__);
+$console = new Console();
 
 $console->registerPackageCommands('LCI\Blend\Console\ActivePackageCommands');
 
