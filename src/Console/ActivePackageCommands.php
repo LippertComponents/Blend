@@ -102,8 +102,8 @@ class ActivePackageCommands implements PackageCommands
             $class = new $command();
 
             if (is_object($class) ) {
-                if (method_exists($class, 'addConsole')) {
-                    $class->addConsole($this->console);
+                if (method_exists($class, 'setConsole')) {
+                    $class->setConsole($this->console);
                 }
 
                 $application->add($class);

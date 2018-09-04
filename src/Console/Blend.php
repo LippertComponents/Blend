@@ -21,7 +21,7 @@ class Blend extends BaseCommand
      * @see https://symfony.com/doc/current/console.html
      * namespace:project/extra(-sub-part) verb (GET/POST/DELETE) --options
      */
-    protected function configure()
+    protected function configureWithConsole()
     {
         $activePackageCommands = new ActivePackageCommands($this->console);
         if ($activePackageCommands->isBlendInstalled()) {

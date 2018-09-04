@@ -21,7 +21,7 @@
     "symfony/console": ">=3.4",
     "guzzlehttp/guzzle": "^6.3",
     "composer/composer": ">=1.6",
-    "lci/console": ">=1.0"
+    "lci/console": ">=1.0.3"
   },
   "bin": [
     "bin/blend"
