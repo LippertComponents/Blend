@@ -22,14 +22,6 @@ class Application extends ConsoleApplication
     protected static $version = '1.0.0 beta4';
 
     /**
-     * @return string
-     */
-    public function getHelp()
-    {
-        return  parent::getHelp();
-    }
-
-    /**
      * Gets the default input definition.
      *
      * @return InputDefinition An InputDefinition instance
@@ -43,13 +35,5 @@ class Application extends ConsoleApplication
             //new InputOption('--verbose',        '-v|vv|vvv', InputOption::VALUE_NONE, 'Increase the verbosity of messages: 1 for normal output, 2 for more verbose output and 3 for debug.'),
             new InputOption('--version',        '-V', InputOption::VALUE_NONE, 'Display the Blend version.'),
         ));
-    }
-
-    /**
-     * @return bool|string
-     */
-    protected function getArt()
-    {
-        return file_get_contents(__DIR__.'/'.self::$logo);
     }
 }
