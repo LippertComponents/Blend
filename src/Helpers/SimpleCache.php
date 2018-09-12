@@ -8,7 +8,6 @@
 
 namespace LCI\Blend\Helpers;
 
-use LCI\Blend\Helpers\DownloadModxVersion;
 
 class SimpleCache
 {

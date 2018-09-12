@@ -32,8 +32,7 @@ class ActivePackageCommands implements PackageCommands
             'LCI\Blend\Console\Blend'
         ],
         'modx_not_installed' => [
-            // @TODO command will be removed, use Gitify
-            'LCI\Blend\Console\Modx\Install',
+            // @TODO command via Gitify
         ]
     ];
 

@@ -1,3 +1,8 @@
+## [1.0.0 beta6] - 2018=09-12
+
+- Replace config.php files with .env
+- Remove MODX install and update and related migrations. Blend will not do this for 2.x & 3.x
+
 ## [1.0.0 beta] - 2018-03-20
 
  - 497c55b - 2018-03-20 : Add in v1.0.0 beta update and version
