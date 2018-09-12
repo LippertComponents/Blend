@@ -24,12 +24,6 @@ class Migrate extends BaseCommand
             ->setName('blend:migrate')
             ->setDescription('Run Blend Data migrations')
             ->addOption(
-                'generate',
-                'g',
-                InputOption::VALUE_NONE,
-                'Generate/create an empty migration class. Then you can build out a custom migration.'
-            )
-            ->addOption(
                 'name',
                 'n',
                 InputOption::VALUE_OPTIONAL,
@@ -75,15 +69,7 @@ class Migrate extends BaseCommand
         $id = $input->getOption('id');
         $count = $input->getOption('count');
 
-        if ( $input->getOption('generate') ) {
-            $output->writeln('Generate name: '.$name);
-            // create a blank migration class
-            $this->blender->createBlankMigrationClassFile($name, $type);
-
-        } else {
-            $method = $input->getOption('method');
-            $this->blender->runMigration($method, $type, $count, $id, $name);
-
-        }
+        $method = $input->getOption('method');
+        $this->blender->runMigration($method, $type, $count, $id, $name);
     }
 }

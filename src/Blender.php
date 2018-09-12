@@ -8,6 +8,9 @@
 
 namespace LCI\Blend;
 
+use LCI\Blend\Helpers\Format;
+use LCI\Blend\Migrations\MigrationsCreator;
+use LCI\Blend\Model\xPDO\BlendMigrations;
 use modX;
 use LCI\Blend\Blendable\Chunk;
 use LCI\Blend\Blendable\Context;
@@ -937,12 +940,31 @@ class Blender
     /**
      * @param string $name
      * @param string $server_type
+     * @param string|null $migration_path
      *
      * @return bool
      */
-    public function createBlankMigrationClassFile($name, $server_type='master')
+    public function createBlankMigrationClassFile($name, $server_type='master', $migration_path=null)
     {
-        return $this->writeMigrationClassFile('blank', [], $server_type, $name);
+        $migrationCreator = new MigrationsCreator($this->userInteractionHandler);
+
+        if (empty($migration_path)) {
+            $migration_path = $this->getMigrationPath();
+        }
+
+        echo PHP_EOL.__METHOD__.PHP_EOL;
+        echo '----- P: '.$migration_path.PHP_EOL;
+
+        $success = $migrationCreator
+            ->setPathTimeStamp($this->getSeedsDir())
+            ->setName($name)
+            ->setDescription('')
+            ->setServerType($server_type)
+            ->setMigrationsPath($migration_path)
+            ->createBlankMigrationClassFile();
+
+        $this->logCreatedMigration($migrationCreator->getLogData());
+        return $success;
     }
 
     /**
@@ -969,7 +991,18 @@ class Blender
         }
 
         if ($create_migration_file) {
-            $this->writeMigrationClassFile('chunk', $keys, $server_type, $name);
+            /** @var MigrationsCreator $migrationCreator */
+            $migrationCreator = new MigrationsCreator($this->userInteractionHandler, $keys);
+
+            $migrationCreator
+                ->setPathTimeStamp($this->getSeedsDir())
+                ->setName($name)
+                ->setDescription('')
+                ->setServerType($server_type)
+                ->setMigrationsPath($this->getMigrationPath())
+                ->createChunkMigrationClassFile();
+
+            $this->logCreatedMigration($migrationCreator->getLogData());
         }
         return $keys;
     }
@@ -998,7 +1031,18 @@ class Blender
         }
 
         if ($create_migration_file) {
-            $this->writeMigrationClassFile('context', $keys, $server_type, $name);
+            /** @var MigrationsCreator $migrationCreator */
+            $migrationCreator = new MigrationsCreator($this->userInteractionHandler, $keys);
+
+            $migrationCreator
+                ->setPathTimeStamp($this->getSeedsDir())
+                ->setName($name)
+                ->setDescription('')
+                ->setServerType($server_type)
+                ->setMigrationsPath($this->getMigrationPath())
+                ->createContextMigrationClassFile();
+
+            $this->logCreatedMigration($migrationCreator->getLogData());
         }
         return $keys;
     }
@@ -1027,7 +1071,18 @@ class Blender
         }
 
         if ($create_migration_file) {
-            $this->writeMigrationClassFile('mediaSource', $keys, $server_type, $name);
+            /** @var MigrationsCreator $migrationCreator */
+            $migrationCreator = new MigrationsCreator($this->userInteractionHandler, $keys);
+
+            $migrationCreator
+                ->setPathTimeStamp($this->getSeedsDir())
+                ->setName($name)
+                ->setDescription('')
+                ->setServerType($server_type)
+                ->setMigrationsPath($this->getMigrationPath())
+                ->createMediaSourceMigrationClassFile();
+
+            $this->logCreatedMigration($migrationCreator->getLogData());
         }
         return $keys;
     }
@@ -1056,7 +1111,18 @@ class Blender
         }
 
         if ($create_migration_file) {
-            $this->writeMigrationClassFile('plugin', $keys, $server_type, $name);
+            /** @var MigrationsCreator $migrationCreator */
+            $migrationCreator = new MigrationsCreator($this->userInteractionHandler, $keys);
+
+            $migrationCreator
+                ->setPathTimeStamp($this->getSeedsDir())
+                ->setName($name)
+                ->setDescription('')
+                ->setServerType($server_type)
+                ->setMigrationsPath($this->getMigrationPath())
+                ->createPluginMigrationClassFile();
+
+            $this->logCreatedMigration($migrationCreator->getLogData());
         }
         return $keys;
     }
@@ -1091,7 +1157,18 @@ class Blender
         }
 
         if ($create_migration_file) {
-            $this->writeMigrationClassFile('resource', $keys, $server_type, $name);
+            /** @var MigrationsCreator $migrationCreator */
+            $migrationCreator = new MigrationsCreator($this->userInteractionHandler, $keys);
+
+            $migrationCreator
+                ->setPathTimeStamp($this->getSeedsDir())
+                ->setName($name)
+                ->setDescription('')
+                ->setServerType($server_type)
+                ->setMigrationsPath($this->getMigrationPath())
+                ->createResourceMigrationClassFile();
+
+            $this->logCreatedMigration($migrationCreator->getLogData());
         }
         return $keys;
     }
@@ -1120,7 +1197,18 @@ class Blender
         }
 
         if ($create_migration_file) {
-            $this->writeMigrationClassFile('snippet', $keys, $server_type, $name);
+            /** @var MigrationsCreator $migrationCreator */
+            $migrationCreator = new MigrationsCreator($this->userInteractionHandler, $keys);
+
+            $migrationCreator
+                ->setPathTimeStamp($this->getSeedsDir())
+                ->setName($name)
+                ->setDescription('')
+                ->setServerType($server_type)
+                ->setMigrationsPath($this->getMigrationPath())
+                ->createSnippetMigrationClassFile();
+
+            $this->logCreatedMigration($migrationCreator->getLogData());
         }
         return $keys;
     }
@@ -1152,8 +1240,20 @@ class Blender
                 'data' => &$setting_data
             ]
         );
+
         if ($create_migration_file) {
-            $this->writeMigrationClassFile('systemSettings', $setting_data, $server_type, $name);
+            /** @var MigrationsCreator $migrationCreator */
+            $migrationCreator = new MigrationsCreator($this->userInteractionHandler, $setting_data);
+
+            $migrationCreator
+                ->setPathTimeStamp($this->getSeedsDir())
+                ->setName($name)
+                ->setDescription('')
+                ->setServerType($server_type)
+                ->setMigrationsPath($this->getMigrationPath())
+                ->createSystemSettingsMigrationClassFile();
+
+            $this->logCreatedMigration($migrationCreator->getLogData());
         }
         return $setting_data;
     }
@@ -1181,8 +1281,20 @@ class Blender
             $this->out("Template ID: ".$template->get('id').' Key: '.$seed_key);
             $keys[] = $seed_key;
         }
+
         if ($create_migration_file) {
-            $this->writeMigrationClassFile('template', $keys, $server_type, $name);
+            /** @var MigrationsCreator $migrationCreator */
+            $migrationCreator = new MigrationsCreator($this->userInteractionHandler, $keys);
+
+            $migrationCreator
+                ->setPathTimeStamp($this->getSeedsDir())
+                ->setName($name)
+                ->setDescription('')
+                ->setServerType($server_type)
+                ->setMigrationsPath($this->getMigrationPath())
+                ->createTemplateMigrationClassFile();
+
+            $this->logCreatedMigration($migrationCreator->getLogData());
         }
         return $keys;
     }
@@ -1204,7 +1316,18 @@ class Blender
             'templates' => $this->makeTemplateSeeds(null, $server_type, $name, false)
         ];
 
-        $this->writeMigrationClassFile('site', $site_data, $server_type, $name);
+        /** @var MigrationsCreator $migrationCreator */
+        $migrationCreator = new MigrationsCreator($this->userInteractionHandler, $site_data);
+
+        $migrationCreator
+            ->setPathTimeStamp($this->getSeedsDir())
+            ->setName($name)
+            ->setDescription('')
+            ->setServerType($server_type)
+            ->setMigrationsPath($this->getMigrationPath())
+            ->createSiteMigrationClassFile();
+
+        $this->logCreatedMigration($migrationCreator->getLogData());
     }
 
     /**
@@ -1626,151 +1749,8 @@ class Blender
      */
     public function getMigrationName($type, $name=null)
     {
-        $dir_name = 'm'.$this->seeds_dir.'_';
-        if (empty($name)) {
-            $name = ucfirst(strtolower($type));
-            if ($name == 'Mediasource') {
-                $name = 'MediaSource';
-            }
-        }
-
-        $dir_name .= preg_replace('/[^A-Za-z0-9\_]/', '', str_replace(['/', ' '], '_', $name));
-
-        return $dir_name;
-    }
-
-    /**
-     * @param string $type
-     * @param array $class_data
-     * @param string $server_type
-     * @param string $name
-     * @param bool $log
-     *
-     * @return bool
-     */
-    protected function writeMigrationClassFile($type, $class_data=[], $server_type='master', $name=null, $log=true)
-    {
-        $class_name = $this->getMigrationName($type, $name);
-
-        $migration_template = 'blank.txt';
-        $placeholders = [
-            'classCreateDate' => date('Y/m/d'),
-            'classCreateTime' => date('G:i:s T P'),
-            'className' => $class_name,
-            'classUpInners' => '//@TODO',
-            'classDownInners' => '//@TODO',
-            'serverType' => $server_type,
-            'seeds_dir' => $class_name
-        ];
-
-        switch ($type) {
-
-            case 'chunk':
-                $migration_template = 'chunk.txt';
-                $placeholders['chunkData'] = $this->prettyVarExport($class_data);
-                $placeholders['classUpInners'] = '$this->blender->blendManyChunks($this->chunks, $this->getSeedsDir());';
-                $placeholders['classDownInners'] = '$this->blender->revertBlendManyChunks($this->chunks, $this->getSeedsDir());';
-                break;
-
-            case 'context':
-                $migration_template = 'context.txt';
-                $placeholders['contextData'] = $this->prettyVarExport($class_data);
-                $placeholders['classUpInners'] = '$this->blender->blendManyContexts($this->contexts, $this->getSeedsDir());';
-                $placeholders['classDownInners'] = '$this->blender->revertBlendManyContexts($this->contexts, $this->getSeedsDir());';
-                break;
-
-            case 'mediaSource':
-                $migration_template = 'mediaSource.txt';
-                $placeholders['mediaSourceData'] = $this->prettyVarExport($class_data);
-                $placeholders['classUpInners'] = '$this->blender->blendManyMediaSources($this->media_sources, $this->getSeedsDir());';
-                $placeholders['classDownInners'] = '$this->blender->revertBlendManyMediaSources($this->media_sources, $this->getSeedsDir());';
-                break;
-
-            case 'plugin':
-                $migration_template = 'plugin.txt';
-                $placeholders['pluginData'] = $this->prettyVarExport($class_data);
-                $placeholders['classUpInners'] = '$this->blender->blendManyPlugins($this->plugins, $this->getSeedsDir());';
-                $placeholders['classDownInners'] = '$this->blender->revertBlendManyPlugins($this->plugins, $this->getSeedsDir());';
-                break;
-
-            case 'resource':
-                $migration_template = 'resource.txt';
-                $placeholders['resourceData'] = $this->prettyVarExport($class_data);
-                $placeholders['classUpInners'] = '$this->blender->blendManyResources($this->resources, $this->getSeedsDir());';
-                $placeholders['classDownInners'] = '$this->blender->revertBlendManyResources($this->resources, $this->getSeedsDir());';
-                break;
-
-            case 'snippet':
-                $migration_template = 'snippet.txt';
-                $placeholders['snippetData'] = $this->prettyVarExport($class_data);
-                $placeholders['classUpInners'] = '$this->blender->blendManySnippets($this->snippets, $this->getSeedsDir());';
-                $placeholders['classDownInners'] = '$this->blender->revertBlendManySnippets($this->snippets, $this->getSeedsDir());';
-                break;
-
-            case 'systemSettings':
-                $migration_template = 'systemSettings.txt';
-                $placeholders['settingsData'] = $this->prettyVarExport($class_data);
-                $placeholders['classUpInners'] = '$this->blender->blendManySystemSettings($this->settings, $this->getSeedsDir());';
-                $placeholders['classDownInners'] = '$this->blender->revertBlendManySystemSettings($this->settings, $this->getSeedsDir());';
-                break;
-
-            case 'template':
-                $migration_template = 'template.txt';
-                $placeholders['templateData'] = $this->prettyVarExport($class_data);
-                $placeholders['classUpInners'] = '$this->blender->blendManyTemplates($this->templates, $this->getSeedsDir());';
-                $placeholders['classDownInners'] = '$this->blender->revertBlendManyTemplates($this->templates, $this->getSeedsDir());';
-                break;
-
-
-            case 'site':
-                $migration_template = 'site.txt';
-                $placeholders['siteData'] = $this->prettyVarExport($class_data);
-                break;
-        }
-
-        $file_contents = '';
-
-        $migration_template = $this->config['migration_templates_path'].$migration_template;
-        if (file_exists($migration_template)) {
-            $file_contents = file_get_contents($migration_template);
-        }
-
-        foreach ($placeholders as $name => $value) {
-            $file_contents = str_replace('[[+'.$name.']]', $value, $file_contents);
-        }
-
-        $this->out($this->getMigrationPath().$class_name.'.php');
-
-        $write = false;
-        if (file_exists($this->getMigrationPath().$class_name.'.php')) {
-            $this->out($this->getMigrationPath() . $class_name . '.php migration file already exists', true);
-
-        } elseif (is_object($this->modx->getObject($this->blend_class_object, ['name' => $class_name]))) {
-            $this->out($class_name . ' migration already has been created in the blend_migrations table', true);
-
-        } else {
-            try {
-                $write = file_put_contents($this->getMigrationPath() . $class_name . '.php', $file_contents);
-                $migration = $this->modx->newObject($this->blend_class_object);
-                if ($migration && $log) {
-                    $migration->set('name', $class_name);
-                    $migration->set('type', 'master');
-                    $migration->set('description', '');// @TODO
-                    $migration->set('version', '');
-                    $migration->set('status', 'seed export');
-                    $migration->set('created_at', date('Y-m-d H:i:s'));
-                    $migration->save();
-                }
-            } catch (Exception $exception) {
-                $this->out($exception->getMessage(), true);
-            }
-            if (!$write) {
-                $this->out($this->getMigrationPath() . $class_name . '.php Did not write to file', true);
-                $this->out('Verify that the folders exists and are writable by PHP', true);
-            }
-        }
-
-        return $write;
+        $format = new Format($this->seeds_dir);
+        return $format->getMigrationName($type, $name);
     }
 
     /**
@@ -1911,25 +1891,20 @@ class Blender
     }
 
     /**
-     * @param mixed|array $data
-     * @param int $tabs
-     *
-     * @return string
+     * @param $data
      */
-    protected function prettyVarExport($data, $tabs=1)
+    protected function logCreatedMigration($data)
     {
-        $spacing = str_repeat(' ', 4*$tabs);
-
-        $string = '';
-        $parts = preg_split('/\R/', var_export($data, true));
-        foreach ($parts as $k => $part) {
-            if ($k > 0) {
-                $string .= $spacing;
+        try {
+            /** @var BlendMigrations $migration */
+            $migration = $this->modx->newObject($this->blend_class_object);
+            if ($migration) {
+                $migration->fromArray($data);
+                $migration->save();
             }
-            $string .= $part.PHP_EOL;
+        } catch (Exception $exception) {
+            $this->out($exception->getMessage(), true);
         }
-
-        return trim($string);
     }
 }
 /**

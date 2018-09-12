@@ -21,6 +21,9 @@ class ActivePackageCommands implements PackageCommands
 
     /** @var array  */
     protected $commands = [
+        'always' => [
+            'LCI\Blend\Console\GenerateMigration',
+        ],
         'blend_installed' => [
             'LCI\Blend\Console\Migrate',
             'LCI\Blend\Console\Seed'
@@ -63,7 +66,7 @@ class ActivePackageCommands implements PackageCommands
      */
     public function getActiveCommands()
     {
-        $active_commands = [];
+        $active_commands = $this->commands['always'];
 
         if ($this->console->isModxInstalled()) {
 
