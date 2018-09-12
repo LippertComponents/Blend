@@ -1,6 +1,9 @@
 ## [1.0.0 beta6] - 2018=09-12
 
 - Replace config.php files with .env
+- Refactored Blender, pulled out MigrationsCreator and Format 
+- Added command GenerateMigration to run independent of MODX
+- Removed the generate option fo the Migrate command
 - Remove MODX install and update and related migrations. Blend will not do this for 2.x & 3.x
 
 ## [1.0.0 beta] - 2018-03-20
