@@ -72,25 +72,25 @@ class Seed extends BaseCommand
         $id = $input->getOption('id');
         $date = $input->getOption('date');
 
-        if ( $object == 'c' || $object == 'chunk' ) {
+        if ($object == 'c' || $object == 'chunk') {
             $this->seedChunks($type, $name, $id);
 
-        } elseif ( $object == 'p' || $object == 'plugin' ) {
+        } elseif ($object == 'p' || $object == 'plugin') {
             $this->seedPlugins($type, $name, $id);
 
-        } elseif ( $object == 'r' || $object == 'resource' ) {
+        } elseif ($object == 'r' || $object == 'resource') {
             $this->seedResources($type, $name, $id, $date);
 
-        }  elseif ( $object == 's' || $object == 'snippet' ) {
+        }  elseif ($object == 's' || $object == 'snippet') {
             $this->seedSnippets($type, $name, $id);
 
-        } elseif ( $object == 'x' || $object == 'systemSettings'  ) {
+        } elseif ($object == 'x' || $object == 'systemSettings') {
             $this->seedSystemSettings($type, $name, $id, $date);
 
-        } elseif ( $object == 't' || $object == 'template'  ) {
+        } elseif ($object == 't' || $object == 'template') {
             $this->seedTemplates($type, $name, $id);
 
-        } elseif ( $object == 'a' || $object == 'site'  ) {
+        } elseif ($object == 'a' || $object == 'site') {
             $this->blender->getSeedMaker()->makeSiteSeed($type, $name);
 
         }
@@ -199,7 +199,7 @@ class Seed extends BaseCommand
                 $query = $this->modx->newQuery('modResource', ['id:IN' => $ids]);
                 $query->select(['modResource.parent']);
                 $query->prepare();
-                $criteria->orCondition('`modResource`.`id` IN(' . $query->toSQL() . ')');
+                $criteria->orCondition('`modResource`.`id` IN('.$query->toSQL().')');
             }
 
             if ($this->consoleUserInteractionHandler->promptConfirm('Would you like to include direct children?')) {
@@ -208,7 +208,7 @@ class Seed extends BaseCommand
                 $query->select(['modResource.id']);
                 $query->prepare();
                 $children_sql = $query->toSQL();
-                $criteria->orCondition('`modResource`.`id` IN(' . $children_sql . ')');
+                $criteria->orCondition('`modResource`.`id` IN('.$children_sql.')');
 
                 if ($this->consoleUserInteractionHandler->promptConfirm('Would you like to include direct grand children?')) {
                     // get grand children

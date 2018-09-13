@@ -50,7 +50,7 @@ class SeedMaker
      *
      * @return array
      */
-    public function makeChunkSeeds($criteria, $server_type='master', $name=null, $create_migration_file=true)
+    public function makeChunkSeeds($criteria, $server_type = 'master', $name = null, $create_migration_file = true)
     {
         $keys = [];
         $collection = $this->modx->getCollection('modChunk', $criteria);
@@ -90,7 +90,7 @@ class SeedMaker
      *
      * @return array
      */
-    public function makeContextSeeds($criteria, $server_type='master', $name=null, $create_migration_file=true)
+    public function makeContextSeeds($criteria, $server_type = 'master', $name = null, $create_migration_file = true)
     {
         $keys = [];
         $collection = $this->modx->getCollection('modContext', $criteria);
@@ -130,7 +130,7 @@ class SeedMaker
      *
      * @return array
      */
-    public function makeMediaSourceSeeds($criteria, $server_type='master', $name=null, $create_migration_file=true)
+    public function makeMediaSourceSeeds($criteria, $server_type = 'master', $name = null, $create_migration_file = true)
     {
         $keys = [];
         $collection = $this->modx->getCollection('modMediaSource', $criteria);
@@ -170,7 +170,7 @@ class SeedMaker
      *
      * @return array
      */
-    public function makePluginSeeds($criteria, $server_type='master', $name=null, $create_migration_file=true)
+    public function makePluginSeeds($criteria, $server_type = 'master', $name = null, $create_migration_file = true)
     {
         $keys = [];
         $collection = $this->modx->getCollection('modPlugin', $criteria);
@@ -210,7 +210,7 @@ class SeedMaker
      *
      * @return array
      */
-    public function makeResourceSeeds($criteria, $server_type='master', $name=null, $create_migration_file=true)
+    public function makeResourceSeeds($criteria, $server_type = 'master', $name = null, $create_migration_file = true)
     {
         $keys = [
             'web' => []
@@ -256,7 +256,7 @@ class SeedMaker
      *
      * @return array
      */
-    public function makeSnippetSeeds($criteria, $server_type='master', $name=null, $create_migration_file=true)
+    public function makeSnippetSeeds($criteria, $server_type = 'master', $name = null, $create_migration_file = true)
     {
         $keys = [];
         $collection = $this->modx->getCollection('modSnippet', $criteria);
@@ -296,7 +296,7 @@ class SeedMaker
      *
      * @return array
      */
-    public function makeSystemSettingSeeds($criteria, $server_type='master', $name=null, $create_migration_file=true)
+    public function makeSystemSettingSeeds($criteria, $server_type = 'master', $name = null, $create_migration_file = true)
     {
         $collection = $this->modx->getCollection('modSystemSetting', $criteria);
 
@@ -341,7 +341,7 @@ class SeedMaker
      *
      * @return array
      */
-    public function makeTemplateSeeds($criteria, $server_type='master', $name=null, $create_migration_file=true)
+    public function makeTemplateSeeds($criteria, $server_type = 'master', $name = null, $create_migration_file = true)
     {
         $keys = [];
         $collection = $this->modx->getCollection('modTemplate', $criteria);
@@ -378,7 +378,7 @@ class SeedMaker
      * @param string $server_type
      * @param null|string $name
      */
-    public function makeSiteSeed($server_type='master', $name=null)
+    public function makeSiteSeed($server_type = 'master', $name = null)
     {
         $site_data = [
             'mediaSources' => $this->makeMediaSourceSeeds(null, $server_type, $name, false),
@@ -408,7 +408,7 @@ class SeedMaker
     /**
      * @param array $data
      */
-    protected function logCreatedSeedMigration($data=[])
+    protected function logCreatedSeedMigration($data = [])
     {
         try {
             /** @var BlendMigrations $migration */

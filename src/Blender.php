@@ -81,7 +81,7 @@ class Blender
      * @param UserInteractionHandler $userInteractionHandler
      * @param array $config
      */
-    public function __construct(modX $modx, UserInteractionHandler $userInteractionHandler, $config=[])
+    public function __construct(modX $modx, UserInteractionHandler $userInteractionHandler, $config = [])
     {
         $this->modx = $modx;
 
@@ -89,7 +89,7 @@ class Blender
 
         $this->userInteractionHandler = $userInteractionHandler;
 
-        if (version_compare($this->modx_version_info['full_version'], '3.0') >= 0 ) {
+        if (version_compare($this->modx_version_info['full_version'], '3.0') >= 0) {
             $this->xpdo_version = 3;
             $this->blend_class_object = 'LCI\\Blend\\Model\\xPDO\\BlendMigrations';
             $this->blend_package = 'LCI\\Blend\\Model\\xPDO';
@@ -104,10 +104,10 @@ class Blender
         }
 
         $this->config = [
-            'migration_templates_path' => __DIR__. '/Migrations/templates/',
+            'migration_templates_path' => __DIR__.'/Migrations/templates/',
             'migrations_path' => $blend_modx_migration_dir.'database/migrations/',
             'seeds_path' => $blend_modx_migration_dir.'database/seeds/',
-            'model_dir' => __DIR__ . ($this->xpdo_version >= 3 ? '/' : '/xpdo2/'),
+            'model_dir' => __DIR__.($this->xpdo_version >= 3 ? '/' : '/xpdo2/'),
             'extras' => [
                 'tagger' => false
             ]
@@ -116,7 +116,7 @@ class Blender
 
         $this->seeds_dir = date('Y_m_d_His');
 
-        $tagger_path = $this->modx->getOption('tagger.core_path', null, $this->modx->getOption('core_path') . 'components/tagger/') . 'model/tagger/';
+        $tagger_path = $this->modx->getOption('tagger.core_path', null, $this->modx->getOption('core_path').'components/tagger/').'model/tagger/';
         if (is_dir($tagger_path)) {
             $this->config['extras']['tagger'] = true;
             /** @var \Tagger $tagger */
@@ -178,11 +178,11 @@ class Blender
      * @param null $directory_key
      * @return string
      */
-    public function getSeedsPath($directory_key=null)
+    public function getSeedsPath($directory_key = null)
     {
         $seed_path = $this->config['seeds_path'];
         if (!empty($directory_key)) {
-            $seed_path .= trim($directory_key, '/') . DIRECTORY_SEPARATOR;
+            $seed_path .= trim($directory_key, '/').DIRECTORY_SEPARATOR;
         }
         return $seed_path;
     }
@@ -204,21 +204,21 @@ class Blender
      *
      * @return array ~ array of \BlendMigrations
      */
-    public function getBlendMigrationCollection($reload=false, $dir='ASC', $count=0, $id=0, $name=null)
+    public function getBlendMigrationCollection($reload = false, $dir = 'ASC', $count = 0, $id = 0, $name = null)
     {
         if (!$this->blendMigrations || $reload) {
             $blendMigrations = [];
 
             /** @var \xPDOQuery $query */
             $query = $this->modx->newQuery($this->blend_class_object);
-            if ($id > 0 ) {
+            if ($id > 0) {
                 $query->where(['id' => $id]);
             } elseif (!empty($name)) {
                 $query->where(['name' => $name]);
             }
             // @TODO need a ran sequence column to better order of down
             $query->sortBy('name', $dir);
-            if ($count > 0 ) {
+            if ($count > 0) {
                 $query->limit($count);
             }
             $query->prepare();
@@ -246,7 +246,7 @@ class Blender
      * @param bool $refresh
      * @return array
      */
-    public function getCategoryMap($refresh=false)
+    public function getCategoryMap($refresh = false)
     {
         if (count($this->category_map) == 0 || $refresh) {
             $this->category_map = [
@@ -291,14 +291,14 @@ class Blender
     public function getBlendableChunk($name)
     {
         /** @var \LCI\Blend\Blendable\Chunk $chunk */
-        $chunk =  new Chunk($this->modx, $this, $name);
+        $chunk = new Chunk($this->modx, $this, $name);
         return $chunk->setSeedsDir($this->getSeedsDir());
     }
     /**
      * @param array $chunks
      * @param string $seeds_dir
      */
-    public function blendManyChunks($chunks=[], $seeds_dir='')
+    public function blendManyChunks($chunks = [], $seeds_dir = '')
     {
         // will update if element does exist or create new
         foreach ($chunks as $seed_key) {
@@ -310,7 +310,7 @@ class Blender
             if ($blendChunk->blendFromSeed($seed_key)) {
                 $this->out($seed_key.' has been blended into ID: ');
 
-            } elseif($blendChunk->isExists()) {
+            } elseif ($blendChunk->isExists()) {
                 // @TODO prompt Do you want to blend Y/N/Compare
                 $this->out($seed_key.' chunk already exists', true);
                 if ($this->prompt('Would you like to update?', 'Y') === 'Y') {
@@ -328,7 +328,7 @@ class Blender
      * @param array $chunks
      * @param string $seeds_dir
      */
-    public function revertBlendManyChunks($chunks=[], $seeds_dir='')
+    public function revertBlendManyChunks($chunks = [], $seeds_dir = '')
     {
         // will update if system setting does exist or create new
         foreach ($chunks as $seed_key) {
@@ -338,7 +338,7 @@ class Blender
                 $blendChunk->setSeedsDir($seeds_dir);
             }
 
-            if ( $blendChunk->revertBlend() ) {
+            if ($blendChunk->revertBlend()) {
                 $this->out($blendChunk->getFieldName().' chunk has been reverted to '.$seeds_dir);
 
             } else {
@@ -355,7 +355,7 @@ class Blender
     public function getBlendableContext($key)
     {
         /** @var \LCI\Blend\Blendable\Context $chunk */
-        $context =  new Context($this->modx, $this, $key);
+        $context = new Context($this->modx, $this, $key);
         return $context->setSeedsDir($this->getSeedsDir());
     }
 
@@ -363,7 +363,7 @@ class Blender
      * @param array $contexts
      * @param string $seeds_dir
      */
-    public function blendManyContexts($contexts=[], $seeds_dir='')
+    public function blendManyContexts($contexts = [], $seeds_dir = '')
     {
         // will update if element does exist or create new
         foreach ($contexts as $seed_key) {
@@ -375,7 +375,7 @@ class Blender
             if ($blendContext->blendFromSeed($seed_key)) {
                 $this->out($seed_key.' has been blended ');
 
-            } elseif($blendContext->isExists()) {
+            } elseif ($blendContext->isExists()) {
                 // @TODO prompt Do you want to blend Y/N/Compare
                 $this->out($seed_key.' chunk already exists', true);
                 if ($this->prompt('Would you like to update?', 'Y') === 'Y') {
@@ -393,7 +393,7 @@ class Blender
      * @param array $contexts
      * @param string $seeds_dir
      */
-    public function revertBlendManyContexts($contexts=[], $seeds_dir='')
+    public function revertBlendManyContexts($contexts = [], $seeds_dir = '')
     {
         // will update if system setting does exist or create new
         foreach ($contexts as $seed_key) {
@@ -403,7 +403,7 @@ class Blender
                 $blendContext->setSeedsDir($seeds_dir);
             }
 
-            if ( $blendContext->revertBlend() ) {
+            if ($blendContext->revertBlend()) {
                 $this->out($blendContext->getFieldKey().' context has been reverted to '.$seeds_dir);
 
             } else {
@@ -420,7 +420,7 @@ class Blender
     public function getBlendableMediaSource($name)
     {
         /** @var \LCI\Blend\Blendable\MediaSource $mediaSource */
-        $mediaSource =  new MediaSource($this->modx, $this, $name);
+        $mediaSource = new MediaSource($this->modx, $this, $name);
         return $mediaSource
             ->setFieldName($name)
             ->setSeedsDir($this->getSeedsDir());
@@ -430,7 +430,7 @@ class Blender
      * @param array $media_sources
      * @param string $seeds_dir
      */
-    public function blendManyMediaSources($media_sources=[], $seeds_dir='')
+    public function blendManyMediaSources($media_sources = [], $seeds_dir = '')
     {
         // will update if element does exist or create new
         foreach ($media_sources as $seed_key) {
@@ -442,7 +442,7 @@ class Blender
             if ($blendMediaSource->blendFromSeed($seed_key)) {
                 $this->out($seed_key.' has been blended into ID: ');
 
-            } elseif($blendMediaSource->isExists()) {
+            } elseif ($blendMediaSource->isExists()) {
                 // @TODO add Compare as option
                 $this->out($seed_key.' media source already exists', true);
                 if ($this->prompt('Would you like to update?', 'Y') === 'Y') {
@@ -460,7 +460,7 @@ class Blender
      * @param array $media_sources
      * @param string $seeds_dir
      */
-    public function revertBlendManyMediaSources($media_sources=[], $seeds_dir='')
+    public function revertBlendManyMediaSources($media_sources = [], $seeds_dir = '')
     {
         // will update if system setting does exist or create new
         foreach ($media_sources as $seed_key) {
@@ -470,7 +470,7 @@ class Blender
                 $blendMediaSource->setSeedsDir($seeds_dir);
             }
 
-            if ( $blendMediaSource->revertBlend() ) {
+            if ($blendMediaSource->revertBlend()) {
                 $this->out($blendMediaSource->getFieldName().' media source has been reverted to '.$seeds_dir);
 
             } else {
@@ -487,7 +487,7 @@ class Blender
     public function getBlendablePlugin($name)
     {
         /** @var \LCI\Blend\Blendable\Plugin $plugin */
-        $plugin =  new Plugin($this->modx, $this, $name);
+        $plugin = new Plugin($this->modx, $this, $name);
         return $plugin->setSeedsDir($this->getSeedsDir());
     }
 
@@ -495,7 +495,7 @@ class Blender
      * @param array $plugins
      * @param string $seeds_dir
      */
-    public function blendManyPlugins($plugins=[], $seeds_dir='')
+    public function blendManyPlugins($plugins = [], $seeds_dir = '')
     {
         // will update if element does exist or create new
         foreach ($plugins as $seed_key) {
@@ -507,7 +507,7 @@ class Blender
             if ($blendPlugin->blendFromSeed($seed_key)) {
                 $this->out($seed_key.' has been blended into ID: ');
 
-            } elseif($blendPlugin->isExists()) {
+            } elseif ($blendPlugin->isExists()) {
                 // @TODO prompt Do you want to blend Y/N/Compare
                 $this->out($seed_key.' plugin already exists', true);
                 if ($this->prompt('Would you like to update?', 'Y') === 'Y') {
@@ -525,7 +525,7 @@ class Blender
      * @param array $plugins
      * @param string $seeds_dir
      */
-    public function revertBlendManyPlugins($plugins=[], $seeds_dir='')
+    public function revertBlendManyPlugins($plugins = [], $seeds_dir = '')
     {
         // will update if system setting does exist or create new
         foreach ($plugins as $seed_key) {
@@ -535,7 +535,7 @@ class Blender
                 $blendPlugin->setSeedsDir($seeds_dir);
             }
 
-            if ( $blendPlugin->revertBlend() ) {
+            if ($blendPlugin->revertBlend()) {
                 $this->out($blendPlugin->getFieldName().' plugin has been reverted to '.$seeds_dir);
 
             } else {
@@ -552,7 +552,7 @@ class Blender
     public function getBlendableSnippet($name)
     {
         /** @var Snippet $snippet */
-        $snippet =  new Snippet($this->modx, $this, $name);
+        $snippet = new Snippet($this->modx, $this, $name);
         return $snippet->setSeedsDir($this->getSeedsDir());
     }
 
@@ -560,7 +560,7 @@ class Blender
      * @param array $snippets
      * @param string $seeds_dir
      */
-    public function blendManySnippets($snippets=[], $seeds_dir='')
+    public function blendManySnippets($snippets = [], $seeds_dir = '')
     {
         // will update if element does exist or create new
         foreach ($snippets as $seed_key) {
@@ -572,7 +572,7 @@ class Blender
             if ($blendSnippet->blendFromSeed($seed_key)) {
                 $this->out($seed_key.' has been blended');
 
-            } elseif($blendSnippet->isExists()) {
+            } elseif ($blendSnippet->isExists()) {
                 // @TODO prompt Do you want to blend Y/N/Compare
                 $this->out($seed_key.' snippet already exists', true);
                 if ($this->prompt('Would you like to update?', 'Y') === 'Y') {
@@ -589,7 +589,7 @@ class Blender
      * @param array $snippets
      * @param string $seeds_dir
      */
-    public function revertBlendManySnippets($snippets=[], $seeds_dir='')
+    public function revertBlendManySnippets($snippets = [], $seeds_dir = '')
     {
         // will update if system setting does exist or create new
         foreach ($snippets as $seed_key) {
@@ -599,7 +599,7 @@ class Blender
                 $blendSnippet->setSeedsDir($seeds_dir);
             }
 
-            if ( $blendSnippet->revertBlend() ) {
+            if ($blendSnippet->revertBlend()) {
                 $this->out($blendSnippet->getFieldName().' snippet has been reverted to '.$seeds_dir);
 
             } else {
@@ -616,7 +616,7 @@ class Blender
     public function getBlendableTemplate($name)
     {
         /** @var \LCI\Blend\Blendable\Template $template */
-        $template =  new Template($this->modx, $this, $name);
+        $template = new Template($this->modx, $this, $name);
         return $template->setSeedsDir($this->seeds_dir);
     }
 
@@ -625,7 +625,7 @@ class Blender
      * @param string $seeds_dir
      * @param bool $overwrite
      */
-    public function blendManyTemplates($templates=[], $seeds_dir='', $overwrite=false)
+    public function blendManyTemplates($templates = [], $seeds_dir = '', $overwrite = false)
     {
         // will update if template does exist or create new
         foreach ($templates as $seed_key) {
@@ -638,7 +638,7 @@ class Blender
             if ($blendTemplate->blendFromSeed($seed_key, $overwrite)) {
                 $this->out($seed_key.' has been blended');
 
-            } elseif($blendTemplate->isExists()) {
+            } elseif ($blendTemplate->isExists()) {
                 $this->out($seed_key.' template already exists', true);
                 if ($this->prompt('Would you like to update?', 'Y') === 'Y') {
                     if ($blendTemplate->blendFromSeed($seed_key, true)) {
@@ -655,7 +655,7 @@ class Blender
      * @param array $templates
      * @param string $seeds_dir
      */
-    public function revertBlendManyTemplates($templates=[], $seeds_dir='')
+    public function revertBlendManyTemplates($templates = [], $seeds_dir = '')
     {
         // will update if system setting does exist or create new
         foreach ($templates as $seed_key) {
@@ -665,7 +665,7 @@ class Blender
                 $blendTemplate->setSeedsDir($seeds_dir);
             }
 
-            if ( $blendTemplate->revertBlend() ) {
+            if ($blendTemplate->revertBlend()) {
                 $this->out($blendTemplate->getFieldName().' template has been reverted to '.$seeds_dir);
 
             } else {
@@ -682,7 +682,7 @@ class Blender
     public function getBlendableTemplateVariable($name)
     {
         /** @var \LCI\Blend\Blendable\TemplateVariable $tv */
-        $tv =  new TemplateVariable($this->modx, $this, $name);
+        $tv = new TemplateVariable($this->modx, $this, $name);
         return $tv->setSeedsDir($this->seeds_dir);
     }
 
@@ -691,10 +691,10 @@ class Blender
      * @param  string $context
      * @return \LCI\Blend\Blendable\Resource
      */
-    public function getBlendableResource($alias, $context='web')
+    public function getBlendableResource($alias, $context = 'web')
     {
         /** @var \LCI\Blend\Blendable\Resource $resource */
-        $resource =  new Resource($this->modx, $this, $alias, $context);
+        $resource = new Resource($this->modx, $this, $alias, $context);
         return $resource
             ->setSeedsDir($this->getSeedsDir());
     }
@@ -705,7 +705,7 @@ class Blender
      *
      * @return bool
      */
-    public function blendManyResources($resources=[], $seeds_dir='', $overwrite=false)
+    public function blendManyResources($resources = [], $seeds_dir = '', $overwrite = false)
     {
         $saved = true;
         // will update if resource does exist or create new
@@ -719,19 +719,19 @@ class Blender
                 }
 
                 if ($blendResource->blendFromSeed($seed_key, $overwrite)) {
-                    $this->out($seed_key . ' has been blended into ID: ');
+                    $this->out($seed_key.' has been blended into ID: ');
 
                 } elseif ($blendResource->isExists()) {
                     // @TODO prompt Do you want to blend Y/N/Compare
-                    $this->out($seed_key . ' already exists', true);
+                    $this->out($seed_key.' already exists', true);
                     if ($this->prompt('Would you like to update?', 'Y') === 'Y') {
                         if ($blendResource->blendFromSeed($seed_key, true)) {
-                            $this->out($seed_key . ' has been blended into ID: ');
+                            $this->out($seed_key.' has been blended into ID: ');
                         }
                     }
                 } else {
-                    $this->out('There was an error saving ' . $seed_key, true);
-                    echo 'There was an error saving ' . $seed_key; exit();
+                    $this->out('There was an error saving '.$seed_key, true);
+                    echo 'There was an error saving '.$seed_key; exit();
                     $saved = false;
                 }
             }
@@ -747,7 +747,7 @@ class Blender
      *
      * @return bool
      */
-    public function revertBlendManyResources($resources=[], $seeds_dir='', $overwrite=false)
+    public function revertBlendManyResources($resources = [], $seeds_dir = '', $overwrite = false)
     {
         $saved = true;
         // will update if resource does exist or create new
@@ -760,10 +760,10 @@ class Blender
                     $blendResource->setSeedsDir($seeds_dir);
                 }
                 if ($blendResource->revertBlend()) {
-                    $this->out($seed_key . ' has been reverted ');
+                    $this->out($seed_key.' has been reverted ');
 
                 } else {
-                    $this->out('There was an error reverting resource ' . $seed_key, true);
+                    $this->out('There was an error reverting resource '.$seed_key, true);
                     $saved = false;
                 }
             }
@@ -776,10 +776,10 @@ class Blender
      * @param string $key
      * @return \LCI\Blend\Blendable\SystemSetting
      */
-    public function getBlendableSystemSetting($key='')
+    public function getBlendableSystemSetting($key = '')
     {
         /** @var \LCI\Blend\Blendable\SystemSetting $systemSetting */
-        $systemSetting =  new SystemSetting($this->modx, $this, $key);
+        $systemSetting = new SystemSetting($this->modx, $this, $key);
         return $systemSetting->setSeedsDir($this->getSeedsDir());
     }
 
@@ -789,7 +789,7 @@ class Blender
      *
      * @return bool
      */
-    public function blendManySystemSettings($settings=[], $seeds_dir='')
+    public function blendManySystemSettings($settings = [], $seeds_dir = '')
     {
         $success = true;
         // will update if system setting does exist or create new
@@ -834,7 +834,7 @@ class Blender
      *
      * @return bool
      */
-    public function revertBlendManySystemSettings($settings=[], $seeds_dir='')
+    public function revertBlendManySystemSettings($settings = [], $seeds_dir = '')
     {
         $success = true;
         // will update if system setting does exist or create new
@@ -864,7 +864,7 @@ class Blender
                 $systemSetting->setSeedsDir($seeds_dir);
             }
 
-            if ( $systemSetting->revertBlend() ) {
+            if ($systemSetting->revertBlend()) {
                 $this->out($systemSetting->getFieldName().' setting has been reverted to '.$seeds_dir);
 
             } else {
@@ -882,7 +882,7 @@ class Blender
      *
      * @return mixed
      */
-    protected function prompt($question, $default='')
+    protected function prompt($question, $default = '')
     {
         return $this->userInteractionHandler->promptInput($question, $default);
     }
@@ -892,7 +892,7 @@ class Blender
      * @param bool $default
      * @return bool
      */
-    protected function promptConfirm($question, $default=true)
+    protected function promptConfirm($question, $default = true)
     {
         return $this->userInteractionHandler->promptConfirm($question, $default);
     }
@@ -903,7 +903,7 @@ class Blender
      * @param array $options ~ ex: ['Option1' => 'value', 'Option2' => 'value2', ...]
      * @return mixed ~ selected value
      */
-    protected function promptSelectOneOption($question, $default, $options=[])
+    protected function promptSelectOneOption($question, $default, $options = [])
     {
         return $this->userInteractionHandler->promptSelectOneOption($question, $default, $options);
     }
@@ -914,7 +914,7 @@ class Blender
      * @param array $options ~ ex: ['Option1' => 'value', 'Option2' => 'value2', ...]
      * @return array ~ array of selected values
      */
-    protected function promptSelectMultipleOptions($question, $default, $options=[])
+    protected function promptSelectMultipleOptions($question, $default, $options = [])
     {
         return $this->userInteractionHandler->promptSelectMultipleOptions($question, $default, $options);
     }
@@ -923,7 +923,7 @@ class Blender
      * @param string $message
      * @param bool $error
      */
-    public function out($message, $error=false)
+    public function out($message, $error = false)
     {
         if ($error) {
             $this->userInteractionHandler->tellUser($message, userInteractionHandler::MASSAGE_ERROR);
@@ -948,7 +948,7 @@ class Blender
      *
      * @return bool
      */
-    public function createBlankMigrationClassFile($name, $server_type='master', $migration_path=null)
+    public function createBlankMigrationClassFile($name, $server_type = 'master', $migration_path = null)
     {
         $migrationCreator = new MigrationsCreator($this->userInteractionHandler);
 
@@ -980,7 +980,7 @@ class Blender
      * @param string $method
      * @param bool $prompt
      */
-    public function install($method='up', $prompt=false)
+    public function install($method = 'up', $prompt = false)
     {
         $migration_name = 'install_blender';
         $custom_migration_dir = __DIR__.'/Migrations/Blend/';
@@ -995,7 +995,7 @@ class Blender
      * @param string $method
      * @param bool $prompt
      */
-    protected function runInstallMigration($migration_name, $custom_migration_path=null, $seed_root_path=null, $method='up', $prompt=false)
+    protected function runInstallMigration($migration_name, $custom_migration_path = null, $seed_root_path = null, $method = 'up', $prompt = false)
     {
         // new blender for each instance
         $config = $this->config;
@@ -1030,10 +1030,10 @@ class Blender
                 $migration->set('status', 'up_complete');
                 $migration->set('created_at', date('Y-m-d H:i:s'));
                 $migration->set('processed_at', date('Y-m-d H:i:s'));
-                if ($migration->save() ) {
+                if ($migration->save()) {
                     $this->outSuccess($migration_name.' ran and logged');
                 } else {
-                    $this->out($migration_name . ' did not log correctly', true);
+                    $this->out($migration_name.' did not log correctly', true);
                 }
 
                 // does the migration directory exist?
@@ -1048,12 +1048,12 @@ class Blender
                     }
                     if ($create) {
                         mkdir($this->getMigrationPath(), 0700, true);
-                        $this->outSuccess('Created migration directory: '. $this->getMigrationPath());
+                        $this->outSuccess('Created migration directory: '.$this->getMigrationPath());
                     }
                 }
 
             } else {
-                $this->out($migration_name . ' did not log correctly', true);
+                $this->out($migration_name.' did not log correctly', true);
             }
 
         } elseif ($method == 'down') {
@@ -1076,7 +1076,7 @@ class Blender
     /**
      * @param string $method
      */
-    public function update($method='up')
+    public function update($method = 'up')
     {
         $current_vesion = $this->modx->getOption('blend.version');
 
@@ -1087,7 +1087,7 @@ class Blender
         $blender = new Blender($this->modx, $this->getUserInteractionHandler(), $config);
 
         foreach ($this->update_migrations as $v => $migration_name) {
-            if (version_compare($v, $current_vesion) === 1 ) {
+            if (version_compare($v, $current_vesion) === 1) {
                 // can not use as xPDO get queries fill the SELECT with the DB fields and since we are adding one this is a SQL error
                 //$blender->runMigration($method, 'master', 0, 0, $migration_name);
 
@@ -1112,7 +1112,7 @@ class Blender
                         $migration->set('status', 'up_complete');
                         $migration->set('created_at', date('Y-m-d H:i:s'));
                         $migration->set('processed_at', date('Y-m-d H:i:s'));
-                        if ($migration->save() ) {
+                        if ($migration->save()) {
                             $this->outSuccess('Blend updated to '.$v);
                         } else {
                             $this->out('Blend did not update to '.$v, true);
@@ -1152,7 +1152,7 @@ class Blender
 
         $current_vesion = $this->modx->getOption('blend.version');
         //                                      FILE version,        DB Version
-        if ( $this->isBlendInstalledInModx() && ( !$current_vesion || version_compare($this->getVersion(), $current_vesion)) ) {
+        if ($this->isBlendInstalledInModx() && (!$current_vesion || version_compare($this->getVersion(), $current_vesion))) {
             $upgrade = true;
         }
 
@@ -1197,7 +1197,7 @@ class Blender
      * @param int $id
      * @param string $name
      */
-    public function runMigration($method='up', $type='master', $count=0, $id=0, $name=null)
+    public function runMigration($method = 'up', $type = 'master', $count = 0, $id = 0, $name = null)
     {
         $dir = 'ASC';
         if ($method == 'down') {
@@ -1231,7 +1231,7 @@ class Blender
             /** @var string $server_type */
             $server_type = $migration->get('type');
 
-            if ( ($server_type != $type) || ($method == 'up' && $status == 'up_complete') || ($method == 'down' && $status != 'up_complete') ) {
+            if (($server_type != $type) || ($method == 'up' && $status == 'up_complete') || ($method == 'down' && $status != 'up_complete')) {
                 continue;
             }
 
@@ -1329,7 +1329,7 @@ class Blender
         if (file_exists($file)) {
             require_once $file;
 
-            if(class_exists($name)) {
+            if (class_exists($name)) {
                 /** @var Migrations $migrationProcessClass */
                 $migrationProcessClass = new $name($this->modx, $blender);
             }
@@ -1343,7 +1343,7 @@ class Blender
      * @param null $name
      * @return string
      */
-    public function getMigrationName($type, $name=null)
+    public function getMigrationName($type, $name = null)
     {
         $format = new Format($this->seeds_dir);
         return $format->getMigrationName($type, $name);
@@ -1361,21 +1361,21 @@ class Blender
         $class_name = $this->getMigrationName($type, $name);
 
         $removed = false;
-        $migration_file = $this->getMigrationPath() . $class_name . '.php';
+        $migration_file = $this->getMigrationPath().$class_name.'.php';
         if (file_exists($migration_file)) {
             if (unlink($migration_file)) {
                 $removed = true;
                 $migration = $this->modx->getObject($this->blend_class_object, ['name' => $class_name]);
                 if (is_object($migration) && $migration->remove()) {
-                    $this->out($class_name . ' migration has been removed from the blend_migrations table');
+                    $this->out($class_name.' migration has been removed from the blend_migrations table');
 
                 }
             } else {
-                $this->out($class_name . ' migration has not been removed from the blend_migrations table', true);
+                $this->out($class_name.' migration has not been removed from the blend_migrations table', true);
             }
 
         } else {
-            $this->out($this->getMigrationPath() . $class_name . '.php migration could not be found to remove', true);
+            $this->out($this->getMigrationPath().$class_name.'.php migration could not be found to remove', true);
         }
 
         return $removed;
@@ -1413,7 +1413,7 @@ class Blender
      *
      * @return bool|int
      */
-    public function getResourceIDFromSeedKey($seed_key, $context='web')
+    public function getResourceIDFromSeedKey($seed_key, $context = 'web')
     {
         if (!isset($this->resource_seek_key_map[$context])) {
             $this->resource_seek_key_map[$context] = [];
