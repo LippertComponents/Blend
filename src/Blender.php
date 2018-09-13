@@ -952,9 +952,6 @@ class Blender
             $migration_path = $this->getMigrationPath();
         }
 
-        echo PHP_EOL.__METHOD__.PHP_EOL;
-        echo '----- P: '.$migration_path.PHP_EOL;
-
         $success = $migrationCreator
             ->setPathTimeStamp($this->getSeedsDir())
             ->setName($name)
@@ -1425,15 +1422,6 @@ class Blender
             }
 
         }
-    }
-
-    /**
-     * @param string $version_key
-     */
-    protected function cacheUserInstallConfig($version_key, $config=[])
-    {
-        $simpleCache = new SimpleCache(BLEND_CACHE_DIR . 'modx/');
-        $simpleCache->set('install-config-'.$version_key, $config);
     }
 
     /**
