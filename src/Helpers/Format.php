@@ -47,6 +47,14 @@ class Format
     }
 
     /**
+     * @return false|string
+     */
+    public function getPathTimeStamp()
+    {
+        return $this->path_time_stamp;
+    }
+
+    /**
      * @param mixed|array $data
      * @param int $tabs
      *
@@ -66,6 +74,16 @@ class Format
         }
 
         return trim($string);
+    }
+
+    /**
+     * @param false|string $path_time_stamp
+     * @return Format
+     */
+    public function setPathTimeStamp($path_time_stamp)
+    {
+        $this->path_time_stamp = $path_time_stamp;
+        return $this;
     }
 
 }

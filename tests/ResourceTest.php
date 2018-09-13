@@ -207,7 +207,7 @@ final class ResourceTest extends BaseBlend
 
         $seeds_directory = $this->blender->getMigrationName('resource');
 
-        $seeds = $this->blender->makeResourceSeeds(['alias:IN' => $aliases]);
+        $seeds = $this->blender->getSeedMaker()->makeResourceSeeds(['alias:IN' => $aliases]);
 
         $this->assertEquals(
             $this->removeStringLineEndings($this->getStringAfterFirstComment(file_get_contents(BLEND_COMPARE_DIRECTORY.'testResource2.migration.php'))),

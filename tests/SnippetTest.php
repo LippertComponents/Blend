@@ -95,7 +95,7 @@ final class SnippetTest extends BaseBlend
 
         $seeds_directory = $this->blender->getMigrationName('snippet');
 
-        $this->blender->makeSnippetSeeds(['name' => $snippet_name]);
+        $this->blender->getSeedMaker()->makeSnippetSeeds(['name' => $snippet_name]);
 
         $this->assertEquals(
             $this->removeStringLineEndings($this->getStringAfterFirstComment(file_get_contents(BLEND_COMPARE_DIRECTORY.$snippet_name.'.migration.php'))),

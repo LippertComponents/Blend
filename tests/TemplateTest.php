@@ -100,7 +100,7 @@ final class TemplateTest extends BaseBlend
 
         $seeds_directory = $this->blender->getMigrationName('template');
 
-        $this->blender->makeTemplateSeeds(['templatename' => $template_name]);
+        $this->blender->getSeedMaker()->makeTemplateSeeds(['templatename' => $template_name]);
 
         $this->assertEquals(
             $this->removeStringLineEndings($this->getStringAfterFirstComment(file_get_contents(BLEND_COMPARE_DIRECTORY.$template_name.'.migration.php'))),

@@ -135,7 +135,7 @@ final class ContextTest extends BaseBlend
 
         $seeds_directory = $this->blender->getMigrationName('context');
 
-        $this->blender->makeContextSeeds(['key' => $context_key]);
+        $this->blender->getSeedMaker()->makeContextSeeds(['key' => $context_key]);
 
         $this->blender->out('DIR: '.BLEND_COMPARE_DIRECTORY.$context_key.'.php', true);
         $this->assertEquals(

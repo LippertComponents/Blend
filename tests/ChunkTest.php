@@ -104,7 +104,7 @@ final class ChunkTest extends BaseBlend
 
         $seeds_directory = $this->blender->getMigrationName('chunk');
 
-        $this->blender->makeChunkSeeds(['name' => $chunk_name]);
+        $this->blender->getSeedMaker()->makeChunkSeeds(['name' => $chunk_name]);
 
         $this->blender->out('DIR: '.BLEND_COMPARE_DIRECTORY.$chunk_name.'.php', true);
         $this->assertEquals(

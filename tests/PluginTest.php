@@ -137,7 +137,7 @@ final class PluginTest extends BaseBlend
 
         $seeds_directory = $this->blender->getMigrationName('plugin');
 
-        $this->blender->makePluginSeeds(['name' => $plugin_name]);
+        $this->blender->getSeedMaker()->makePluginSeeds(['name' => $plugin_name]);
 
         $this->assertEquals(
             $this->removeStringLineEndings($this->getStringAfterFirstComment(file_get_contents(BLEND_COMPARE_DIRECTORY.$plugin_name.'.migration.php'))),

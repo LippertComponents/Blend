@@ -74,7 +74,7 @@ final class MediaSourceTest extends BaseBlend
 
         $seeds_directory = $this->blender->getMigrationName('mediaSource');
 
-        $this->blender->makeMediaSourceSeeds(['name' => $media_source_name]);
+        $this->blender->getSeedMaker()->makeMediaSourceSeeds(['name' => $media_source_name]);
 
         $this->blender->out('DIR: '.BLEND_COMPARE_DIRECTORY.$media_source_name.'.php', true);
         $this->assertEquals(

@@ -91,7 +91,7 @@ class Seed extends BaseCommand
             $this->seedTemplates($type, $name, $id);
 
         } elseif ( $object == 'a' || $object == 'site'  ) {
-            $this->blender->makeSiteSeed($type, $name);
+            $this->blender->getSeedMaker()->makeSiteSeed($type, $name);
 
         }
     }
@@ -125,7 +125,7 @@ class Seed extends BaseCommand
             ));
         }
 
-        $this->blender->makeChunkSeeds($criteria, $type, $name);
+        $this->blender->getSeedMaker()->makeChunkSeeds($criteria, $type, $name);
     }
 
     /**
@@ -158,7 +158,7 @@ class Seed extends BaseCommand
             ));
         }
 
-        $this->blender->makePluginSeeds($criteria, $type, $name);
+        $this->blender->getSeedMaker()->makePluginSeeds($criteria, $type, $name);
     }
 
     /**
@@ -221,7 +221,7 @@ class Seed extends BaseCommand
             }
         }
 
-        $this->blender->makeResourceSeeds($criteria, $type, $name);
+        $this->blender->getSeedMaker()->makeResourceSeeds($criteria, $type, $name);
     }
 
     /**
@@ -254,7 +254,7 @@ class Seed extends BaseCommand
             ));
         }
 
-        $this->blender->makeSnippetSeeds($criteria, $type, $name);
+        $this->blender->getSeedMaker()->makeSnippetSeeds($criteria, $type, $name);
     }
 
     /**
@@ -285,7 +285,7 @@ class Seed extends BaseCommand
                 'key:IN' => explode(',', $names)
             ]);
         }
-        $this->blender->makeSystemSettingSeeds($criteria, $type, $name);
+        $this->blender->getSeedMaker()->makeSystemSettingSeeds($criteria, $type, $name);
     }
 
     /**
@@ -317,7 +317,7 @@ class Seed extends BaseCommand
 
         }
 
-        $this->blender->makeTemplateSeeds($criteria, $type, $name);
+        $this->blender->getSeedMaker()->makeTemplateSeeds($criteria, $type, $name);
     }
 
 }

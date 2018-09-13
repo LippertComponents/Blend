@@ -118,7 +118,7 @@ final class SystemSettingsTest extends BaseBlend
         $actual_timestamp = $this->blender->getSeedsDir();
         $this->blender->setSeedsDir(BLEND_TEST_SEEDS_DIR);
 
-        $seed_data = $this->blender->makeSystemSettingSeeds(['key' => $setting['key']]);
+        $seed_data = $this->blender->getSeedMaker()->makeSystemSettingSeeds(['key' => $setting['key']]);
 
         $this->assertEquals(
             $this->removeStringLineEndings($this->removeDateFromStringArrayValue($this->getStringAfterFirstComment(file_get_contents(BLEND_COMPARE_DIRECTORY.$setting['key'].'.migration.php')))),

@@ -49,7 +49,7 @@ final class SiteTest extends BaseBlend
 
         $seeds_directory = $this->blender->getMigrationName('site', 'SiteExample');
 
-        $this->blender->makeSiteSeed('master', 'SiteExample');
+        $this->blender->getSeedMaker()->makeSiteSeed('master', 'SiteExample');
 
         // does migration file exist?
         $this->assertEquals(
