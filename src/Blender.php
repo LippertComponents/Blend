@@ -1428,47 +1428,6 @@ class Blender
     }
 
     /**
-     * @param string $branch
-     */
-    public function runModxInstallGitBranchMigration($branch, $config=[])
-    {
-        $version = '';
-        switch ($branch) {
-            case '3.x':
-                $version = 'v3_0_0_dev_install';
-                break;
-
-        }
-
-        $this->cacheUserInstallConfig($version, $config);
-        $this->runModxInstallMigration($version);
-    }
-
-    /**
-     * @param string $release
-     */
-    public function runModxInstallGitReleaseMigration($release, $config=[])
-    {
-        $release = str_replace(['.', '-'], '_', $release);
-
-        $this->cacheUserInstallConfig($release, $config);
-        $this->runModxInstallMigration($release);
-    }
-
-    /**
-     * @param string $migration_name
-     * @param string $method
-     * @param bool $prompt
-     */
-    protected function runModxInstallMigration($migration_name= 'v3_0_0_dev_install', $method='up', $prompt=false)
-    {
-        $custom_migration_dir = __DIR__.'/database/modx/migration/';
-        $seeds_root_path = __DIR__.'/database/modx/seeds/';
-
-        $this->runInstallMigration($migration_name, $custom_migration_dir, $seeds_root_path, $method, $prompt);
-    }
-
-    /**
      * @param string $version_key
      */
     protected function cacheUserInstallConfig($version_key, $config=[])
