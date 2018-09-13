@@ -27,8 +27,8 @@ class Format
     }
 
     /**
-     * @param $type
-     * @param null $name
+     * @param string $type
+     * @param string|null $name
      * @return string
      */
     public function getMigrationName($type, $name=null)
