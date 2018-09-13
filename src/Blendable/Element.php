@@ -28,12 +28,12 @@ abstract class Element extends Blendable
         'category' => '',
         //'cache_type' => 0,//bool
         //content: 'snippet', plugincode
-        'description' => '',// 191
+        'description' => '', // 191
         'editor_type' => 0, // int?
         'locked' => 0, // bool
         'name' => '',
-        'property_preprocess' => 0,// bool
-        'properties' => '',//??
+        'property_preprocess' => 0, // bool
+        'properties' => '', //??
         'source' => 1,
         'static' =>  0,
         'static_file' => ''
@@ -113,7 +113,7 @@ abstract class Element extends Blendable
      * @param bool $overwrite_static ~ if the setAsStatic is ran, false will keep the static content code, true will overwrite the static file
      * @return $this
      */
-    public function setFieldCode($code, $overwrite_static=false)
+    public function setFieldCode($code, $overwrite_static = false)
     {
         $this->blendable_xpdo_simple_object_data['content'] = $code;
         $this->overwrite_static = $overwrite_static;
@@ -126,7 +126,7 @@ abstract class Element extends Blendable
      * @param bool $overwrite_static ~ if the setAsStatic is ran, false will keep the static content code, true will overwrite the static file
      * @return $this
      */
-    public function setFieldContent($code, $overwrite_static=false)
+    public function setFieldContent($code, $overwrite_static = false)
     {
         return $this->setFieldCode($code, $overwrite_static);
     }
@@ -176,7 +176,7 @@ abstract class Element extends Blendable
      *
      * @return $this
      */
-    public function setAsStatic($file, $media_source='Filesystem')
+    public function setAsStatic($file, $media_source = 'Filesystem')
     {
         $this->blendable_xpdo_simple_object_data['source'] = $media_source;
         $this->blendable_xpdo_simple_object_data['static'] = true;
@@ -254,7 +254,7 @@ abstract class Element extends Blendable
      *
      * @return string
      */
-    public function seedCategory($category_id=0)
+    public function seedCategory($category_id = 0)
     {
         $categories = $this->blender->getCategoryMap();
         if (isset($categories['ids'][$category_id]) && isset($categories['ids'][$category_id]['lineage'])) {

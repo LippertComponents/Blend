@@ -125,7 +125,7 @@ class Template extends Element
      *
      * @return $this
      */
-    public function attachTemplateVariable($tv_name, $rank=0)
+    public function attachTemplateVariable($tv_name, $rank = 0)
     {
         if (!isset($this->related_data['attach'])) {
             $this->related_data['attach'] = [];
@@ -224,7 +224,7 @@ class Template extends Element
     /**
      * @var string $type blend or revert
      */
-    protected function seedRelated($type='blend')
+    protected function seedRelated($type = 'blend')
     {
         // get all related TVs:
         $tv_keys = [];
@@ -244,7 +244,7 @@ class Template extends Element
                     'name' => $tv_name,
                     'rank' => $tvTemplate->get('rank')
                 ];
-                $this->blender->out('TV ' . $tv_name . ' has been seeded: ' . $seed_key);
+                $this->blender->out('TV '.$tv_name.' has been seeded: '.$seed_key);
             }
 
             $this->related_data['seeds'] = $tv_keys;

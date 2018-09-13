@@ -40,7 +40,7 @@ class Context extends Blendable
      * @param Blender $blender
      * @param string $key ~ the context key
      */
-    public function __construct(\modx $modx, Blender $blender, $key='')
+    public function __construct(\modx $modx, Blender $blender, $key = '')
     {
         $this->setFieldKey($key);
         parent::__construct($modx, $blender, $key);
@@ -71,14 +71,14 @@ class Context extends Blendable
      * @param string $type ~ seed or revert
      * @return string
      */
-    public function getSeedKey($type='seed')
+    public function getSeedKey($type = 'seed')
     {
         $name = $this->getFieldKey();
         $key = $this->blender->getSeedKeyFromName($name);
 
         switch ($type) {
             case 'revert':
-                $seed_key = 'revert-' . $key;
+                $seed_key = 'revert-'.$key;
                 break;
 
             case 'seed':
@@ -155,7 +155,7 @@ class Context extends Blendable
      * @param string $namespace
      * @return $this
      */
-    public function addSetting($key, $value, $xtype='textfield', $area='', $namespace='core')
+    public function addSetting($key, $value, $xtype = 'textfield', $area = '', $namespace = 'core')
     {
         // @TODO how to use the SystemSetting class to make blendable context settings and IDE helpers
         $this->related_data['settings'][] = [

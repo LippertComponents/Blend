@@ -40,7 +40,7 @@ class Plugin extends Element
      * @param int $property_set
      * @return $this
      */
-    public function attachOnEvent($event_name, $priority=0, $property_set=0)
+    public function attachOnEvent($event_name, $priority = 0, $property_set = 0)
     {
         $this->related_data[] = [
             'event' => $event_name,
@@ -137,7 +137,7 @@ class Plugin extends Element
     /**
      * @var string $type blend or revert
      */
-    protected function seedRelated($type='blend')
+    protected function seedRelated($type = 'blend')
     {
         // get all related Events:
         $events = [];

@@ -63,14 +63,14 @@ interface BlendableInterface
      *
      * @return bool
      */
-    public function blendFromSeed($seed_key, $overwrite=false);
+    public function blendFromSeed($seed_key, $overwrite = false);
 
     /**
      * @param bool $overwrite ~ overwrite existing data object
      *
      * @return bool
      */
-    public function blend($overwrite=false);
+    public function blend($overwrite = false);
 
     /**
      * @return bool

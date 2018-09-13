@@ -811,7 +811,7 @@ class Resource extends Blendable
      */
     protected function assignResourceGroups()
     {
-        $new_groups = (isset($this->related_data['resource_groups']) ? $this->related_data['resource_groups'] : [] );
+        $new_groups = (isset($this->related_data['resource_groups']) ? $this->related_data['resource_groups'] : []);
 
         // resource groups
         $current_groups = $this->xPDOSimpleObject->getResourceGroupNames();
@@ -844,7 +844,7 @@ class Resource extends Blendable
      *
      * @return bool|\modResource
      */
-    public function getResourceFromSeedKey($seed_key, $context='web')
+    public function getResourceFromSeedKey($seed_key, $context = 'web')
     {
         // get the alias:
         $alias = $this->blender->getAliasFromSeedKey($seed_key);
@@ -856,13 +856,13 @@ class Resource extends Blendable
      * @param string $type ~ seed or revert
      * @return string
      */
-    public function getSeedKey($type='seed')
+    public function getSeedKey($type = 'seed')
     {
         $key = $this->blender->getSeedKeyFromAlias($this->blendable_xpdo_simple_object_data['alias']);
 
         switch ($type) {
             case 'revert':
-                $seed_key = 'revert-' . $key;
+                $seed_key = 'revert-'.$key;
                 break;
 
             case 'seed':
@@ -906,7 +906,7 @@ class Resource extends Blendable
         /** @var \modResource $this->xPDOSimpleObject */
         $this->xPDOSimpleObject;
         // no IDs only TV name
-        $tvs = [];// TemplateVarResources modTemplateVarResource
+        $tvs = []; // TemplateVarResources modTemplateVarResource
 
         $template = false;
         $resource_groups = [];
@@ -955,7 +955,7 @@ class Resource extends Blendable
         $type = false;
 
         // These are set via system settings:
-        if (isset($this->portable_template_variables[$tv_name]) ) {
+        if (isset($this->portable_template_variables[$tv_name])) {
             return $this->portable_template_variables[$tv_name];
         }
 
@@ -1030,7 +1030,7 @@ class Resource extends Blendable
             // @TODO throw exception
             return 0;
         }
-        return (int) $this->blender->getResourceIDFromSeedKey(
+        return (int)$this->blender->getResourceIDFromSeedKey(
             $parent['seed_key'],
             $parent['context']
         );
@@ -1191,7 +1191,7 @@ class Resource extends Blendable
                     $tag_columns[$name] = $value;
                 }
             }
-            if ( !isset($tags[$tag['group_name']])) {
+            if (!isset($tags[$tag['group_name']])) {
                 $tags[$tag['group_alias']] = [
                     'columns' => $group_columns,
                     'tags' => []
@@ -1208,7 +1208,7 @@ class Resource extends Blendable
      * @param \modResource $resource
      * @param array $tags
      */
-    protected function setResourceTags(\modResource $resource, $tags=[])
+    protected function setResourceTags(\modResource $resource, $tags = [])
     {
         $tagger_groups = [];
 

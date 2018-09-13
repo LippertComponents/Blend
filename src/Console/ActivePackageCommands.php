@@ -103,7 +103,7 @@ class ActivePackageCommands implements PackageCommands
         foreach ($commands as $command) {
             $class = new $command();
 
-            if (is_object($class) ) {
+            if (is_object($class)) {
                 if (method_exists($class, 'setConsole')) {
                     $class->setConsole($this->console);
                 }

@@ -81,7 +81,7 @@ class Seed extends BaseCommand
         } elseif ($object == 'r' || $object == 'resource') {
             $this->seedResources($type, $name, $id, $date);
 
-        }  elseif ($object == 's' || $object == 'snippet') {
+        } elseif ($object == 's' || $object == 'snippet') {
             $this->seedSnippets($type, $name, $id);
 
         } elseif ($object == 'x' || $object == 'systemSettings') {

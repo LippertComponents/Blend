@@ -49,7 +49,7 @@ class Properties
      *
      * @return $this
      */
-    public function mergePropertiesFromArray(array $data=[])
+    public function mergePropertiesFromArray(array $data = [])
     {
         if ($this->verifyArray($data)) {
             $this->data = array_merge($data, $this->data);

@@ -53,7 +53,7 @@ class MigrationsCreator
      * @param UserInteractionHandler $userInteractionHandler
      * @param array $class_data
      */
-    public function __construct(UserInteractionHandler $userInteractionHandler, $class_data=[])
+    public function __construct(UserInteractionHandler $userInteractionHandler, $class_data = [])
     {
         $this->class_data = $class_data;
 
@@ -62,8 +62,8 @@ class MigrationsCreator
         $this->path_time_stamp = date('Y_m_d_His');
         $this->format = new Format($this->path_time_stamp);
 
-        $this->migration_templates_path = __DIR__. '/templates/';
-        $this->setBaseMigrationsPath(dirname(__DIR__) . DIRECTORY_SEPARATOR);
+        $this->migration_templates_path = __DIR__.'/templates/';
+        $this->setBaseMigrationsPath(dirname(__DIR__).DIRECTORY_SEPARATOR);
     }
 
     /**
@@ -71,20 +71,20 @@ class MigrationsCreator
      * @param bool $append ~ if true will create database/migrations with in the path
      * @return $this
      */
-    public function setMigrationsPath($path, $append=false)
+    public function setMigrationsPath($path, $append = false)
     {
         $this->migrations_path = $path;
 
         if (file_exists($path) && $append) {
-            if (!file_exists($path . 'database')) {
-                mkdir($path . 'database');
+            if (!file_exists($path.'database')) {
+                mkdir($path.'database');
             }
-            if (!file_exists($path . 'database/migrations')) {
-                mkdir($path . 'database/migrations');
+            if (!file_exists($path.'database/migrations')) {
+                mkdir($path.'database/migrations');
             }
-            $this->migrations_path = $path . 'database/migrations/';
+            $this->migrations_path = $path.'database/migrations/';
 
-        } elseif( !file_exists($path) && !$append) {
+        } elseif (!file_exists($path) && !$append) {
             // @TODO review:
             mkdir($path, 0777, true);
         }
@@ -96,20 +96,20 @@ class MigrationsCreator
      * @param bool $append ~ if true will create database/seeds with in the path
      * @return $this
      */
-    public function setSeedsPath($path, $append=false)
+    public function setSeedsPath($path, $append = false)
     {
         $this->seeds_path = $path;
 
         if (file_exists($path) && $append) {
-            if (!file_exists($path . 'database')) {
-                mkdir($path . 'database');
+            if (!file_exists($path.'database')) {
+                mkdir($path.'database');
             }
-            if (!file_exists($path . 'database/seeds')) {
-                mkdir($path . 'database/seeds');
+            if (!file_exists($path.'database/seeds')) {
+                mkdir($path.'database/seeds');
             }
-            $this->seeds_path = $path . 'database/seeds/';
+            $this->seeds_path = $path.'database/seeds/';
 
-        } elseif( !file_exists($path) && !$append) {
+        } elseif (!file_exists($path) && !$append) {
             // @TODO review:
             mkdir($path, 0777, true);
         }
@@ -364,7 +364,7 @@ class MigrationsCreator
      */
     protected function writeMigrationClassFile()
     {
-        $class_name = $this->format->getMigrationName(substr($this->migration_template, 0,-4), $this->name);
+        $class_name = $this->format->getMigrationName(substr($this->migration_template, 0, -4), $this->name);
 
         $placeholders = array_merge(
             [
@@ -383,22 +383,22 @@ class MigrationsCreator
 
         $file_contents = '';
 
-        $migration_template = $this->migration_templates_path . $this->migration_template;
+        $migration_template = $this->migration_templates_path.$this->migration_template;
         if (file_exists($migration_template)) {
             $file_contents = file_get_contents($migration_template);
         } else {
-            $this->out('Migration template file not found: ' . $migration_template, true);
+            $this->out('Migration template file not found: '.$migration_template, true);
         }
 
         foreach ($placeholders as $name => $value) {
             $file_contents = str_replace('[[+'.$name.']]', $value, $file_contents);
         }
 
-        $this->out($this->migrations_path . $class_name.'.php');
+        $this->out($this->migrations_path.$class_name.'.php');
 
         $write = false;
-        if (file_exists($this->migrations_path . $class_name . '.php')) {
-            $this->out($this->migrations_path . $class_name . '.php migration file already exists', true);
+        if (file_exists($this->migrations_path.$class_name.'.php')) {
+            $this->out($this->migrations_path.$class_name.'.php migration file already exists', true);
 
         }
         /**
@@ -409,7 +409,7 @@ class MigrationsCreator
         } */
         else {
             try {
-                $write = file_put_contents($this->migrations_path . $class_name . '.php', $file_contents);
+                $write = file_put_contents($this->migrations_path.$class_name.'.php', $file_contents);
                  $this->log_data = [
                     'name' => $class_name,
                     'type' => $this->getServerType(),
@@ -423,7 +423,7 @@ class MigrationsCreator
             }
 
             if (!$write) {
-                $this->out($this->migrations_path . $class_name . '.php Did not write to file', true);
+                $this->out($this->migrations_path.$class_name.'.php Did not write to file', true);
                 $this->out('Verify that the folders exists and are writable by PHP', true);
             }
         }
@@ -435,7 +435,7 @@ class MigrationsCreator
      * @param string $message
      * @param bool $error
      */
-    public function out($message, $error=false)
+    public function out($message, $error = false)
     {
         if ($error) {
             $this->userInteractionHandler->tellUser($message, userInteractionHandler::MASSAGE_ERROR);

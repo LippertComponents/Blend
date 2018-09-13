@@ -21,7 +21,7 @@ trait Files
      * @param string $destination ~ full path of destination
      * @param int $file_count
      */
-    public function copyDirectory($source, $destination, $file_count=4000)
+    public function copyDirectory($source, $destination, $file_count = 4000)
     {
         if (!is_dir($destination)) {
             mkdir($destination, 0700);
@@ -44,13 +44,13 @@ trait Files
         /** @var \DirectoryIterator $item */
         foreach ($recursiveIteratorIterator as $item) {
             if ($item->isDir()) {
-                if (is_dir($destination. DIRECTORY_SEPARATOR. $recursiveIteratorIterator->getSubPathName())) {
+                if (is_dir($destination.DIRECTORY_SEPARATOR.$recursiveIteratorIterator->getSubPathName())) {
                     continue;
                 }
-                mkdir($destination . DIRECTORY_SEPARATOR . $recursiveIteratorIterator->getSubPathName());
+                mkdir($destination.DIRECTORY_SEPARATOR.$recursiveIteratorIterator->getSubPathName());
 
             } else {
-                copy($item, $destination . DIRECTORY_SEPARATOR . $recursiveIteratorIterator->getSubPathName());
+                copy($item, $destination.DIRECTORY_SEPARATOR.$recursiveIteratorIterator->getSubPathName());
             }
 
             if (isset($progress) && $progress instanceof ProgressBar) {

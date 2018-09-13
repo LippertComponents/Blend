@@ -37,7 +37,7 @@ class TemplateVariable extends Element
      *
      * @return $this
      */
-    public function attachToTemplate($template_name, $rank=0)
+    public function attachToTemplate($template_name, $rank = 0)
     {
         $this->template_names[] = [
             'name' => $template_name,

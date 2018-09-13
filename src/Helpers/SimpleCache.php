@@ -33,7 +33,7 @@ class SimpleCache
      * @param string $key
      * @return bool|mixed
      */
-    public function get($key='install-config')
+    public function get($key = 'install-config')
     {
         $path = $this->getFullKeyPath($key);
         $data = false;
@@ -49,10 +49,10 @@ class SimpleCache
      * @param string $key
      * @param array $data
      */
-    public function set($key='install-config', $data=[])
+    public function set($key = 'install-config', $data = [])
     {
         $content = '<?php '.PHP_EOL.
-            'return ' . var_export($data, true) . ';';
+            'return '.var_export($data, true).';';
 
         file_put_contents($this->getFullKeyPath($key), $content);
     }
@@ -60,7 +60,7 @@ class SimpleCache
     /**
      * @param null|string $key ~ if null will delete the complete directory
      */
-    public function remove($key=null)
+    public function remove($key = null)
     {
         if (!empty($key)) {
             $path = $this->getFullKeyPath($key);
@@ -70,7 +70,7 @@ class SimpleCache
 
         } else {
             // clean the directory:
-            $this->deleteDirectory(MODX_PATH . $this->directory);
+            $this->deleteDirectory(MODX_PATH.$this->directory);
         }
     }
 
@@ -80,8 +80,8 @@ class SimpleCache
      */
     protected function getFullKeyPath($key)
     {
-        return rtrim($this->directory, '/') . DIRECTORY_SEPARATOR .
-            preg_replace('/[^A-Za-z0-9\_\-]/', '', str_replace(['/', ' '], '_', $key)) .
+        return rtrim($this->directory, '/').DIRECTORY_SEPARATOR.
+            preg_replace('/[^A-Za-z0-9\_\-]/', '', str_replace(['/', ' '], '_', $key)).
             '.php';
     }
 

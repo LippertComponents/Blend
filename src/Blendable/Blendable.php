@@ -81,11 +81,11 @@ abstract class Blendable implements BlendableInterface
      * @param Blender $blender
      * @param string|array $unique_value
      */
-    public function __construct(\modx $modx, Blender $blender, $unique_value='')
+    public function __construct(\modx $modx, Blender $blender, $unique_value = '')
     {
         $this->modx = $modx;
         $this->blender = $blender;
-        if (method_exists($this, 'loadProperties') ) {
+        if (method_exists($this, 'loadProperties')) {
             $this->loadProperties();
         }
 
@@ -134,9 +134,9 @@ abstract class Blendable implements BlendableInterface
      */
     public function setSeedsDir($dir)
     {
-        $this->seeds_dir = (string) $dir;
+        $this->seeds_dir = (string)$dir;
         if (!empty($this->seeds_dir)) {
-            $this->cacheOptions[\xPDO::OPT_CACHE_PATH] = $this->blender->getSeedsPath() . $dir . '/';
+            $this->cacheOptions[\xPDO::OPT_CACHE_PATH] = $this->blender->getSeedsPath().$dir.'/';
         }
         return $this;
     }
@@ -169,7 +169,7 @@ abstract class Blendable implements BlendableInterface
      * @param string $type ~ seed or revert
      * @return string
      */
-    public function getSeedKey($type='seed')
+    public function getSeedKey($type = 'seed')
     {
         $name = $this->blendable_xpdo_simple_object_data[$this->unique_key_column];
         if (method_exists($this, 'getFieldName')) {
@@ -179,7 +179,7 @@ abstract class Blendable implements BlendableInterface
 
         switch ($type) {
             case 'revert':
-                $seed_key = 'revert-' . $key;
+                $seed_key = 'revert-'.$key;
                 break;
 
             case 'seed':
@@ -204,7 +204,7 @@ abstract class Blendable implements BlendableInterface
      * @param bool $overwrite
      * @return bool
      */
-    public function blendFromArray($data, $overwrite=false)
+    public function blendFromArray($data, $overwrite = false)
     {
         if (isset($data['columns'])) {
             $this->blendable_xpdo_simple_object_data = $data['columns'];
@@ -229,7 +229,7 @@ abstract class Blendable implements BlendableInterface
      *
      * @return bool
      */
-    public function blendFromSeed($seed_key, $overwrite=false)
+    public function blendFromSeed($seed_key, $overwrite = false)
     {
         $this->loadObjectDataFromSeed($seed_key);
         return $this->blend($overwrite);
@@ -240,7 +240,7 @@ abstract class Blendable implements BlendableInterface
      *
      * @return bool
      */
-    public function blend($overwrite=false)
+    public function blend($overwrite = false)
     {
         if ($this->type == 'blend') {
             /** @var \LCI\Blend\Blendable\Blendable $currentVersion */
@@ -285,26 +285,26 @@ abstract class Blendable implements BlendableInterface
      * @param bool $make_revert_seed
      * @return bool
      */
-    public function delete($make_revert_seed=true)
+    public function delete($make_revert_seed = true)
     {
         if ($make_revert_seed) {
             $this->seed('revert');
         }
         $removed = false;
         if (!is_object($this->xPDOSimpleObject)) {
-            $this->blender->out($this->blendable_xpdo_simple_object_data[$this->unique_key_column] . ' of xPDO class '.
+            $this->blender->out($this->blendable_xpdo_simple_object_data[$this->unique_key_column].' of xPDO class '.
                 $this->xpdo_simple_object_class.' was not found, could not be removed/deleted', true);
 
         } elseif ($this->xPDOSimpleObject->remove()) {
             $this->onDeleteRevertRelatedPieces();
             if ($this->isDebug()) {
-                $this->blender->out($this->blendable_xpdo_simple_object_data[$this->unique_key_column] . ' has been removed/deleted');
+                $this->blender->out($this->blendable_xpdo_simple_object_data[$this->unique_key_column].' has been removed/deleted');
             }
             $removed = true;
 
         } else {
             if ($this->isDebug()) {
-                $this->blender->out($this->blendable_xpdo_simple_object_data[$this->unique_key_column] . ' did not remove/delete', true);
+                $this->blender->out($this->blendable_xpdo_simple_object_data[$this->unique_key_column].' did not remove/delete', true);
             }
         }
 
@@ -329,7 +329,7 @@ abstract class Blendable implements BlendableInterface
      * @param string $type ~ seed or revert
      * @return string ~ the related seed key
      */
-    public function seed($type='seed')
+    public function seed($type = 'seed')
     {
         $data = false;
         // No IDs! must get the alias and get a seed key,
@@ -353,7 +353,7 @@ abstract class Blendable implements BlendableInterface
      * @param string $seed_key
      * @return array
      */
-    public function seedToArray($type='seed', $seed_key='')
+    public function seedToArray($type = 'seed', $seed_key = '')
     {
         if (is_object($this->xPDOSimpleObject)) {
             $this->current_xpdo_simple_object_data = $this->xPDOSimpleObject->toArray();
@@ -364,7 +364,7 @@ abstract class Blendable implements BlendableInterface
                 }
                 // Any child class can create a seed method, an example for modResource:
                 // seedTemplate(1) and would return the string name
-                $method = 'seed' . $this->makeStudyCase($column);
+                $method = 'seed'.$this->makeStudyCase($column);
                 if (method_exists($this, $method)) {
                     $value = $this->$method($value);
                 }
@@ -420,15 +420,15 @@ abstract class Blendable implements BlendableInterface
      *
      * @return bool
      */
-    protected function save($overwrite=false)
+    protected function save($overwrite = false)
     {
         $saved = false;
 
         if (is_object($this->xPDOSimpleObject)) {
             if (!$overwrite) {
                 $this->error = true;
-                $this->error_messages['exits'] = $this->xpdo_simple_object_class.': ' .
-                    $this->blendable_xpdo_simple_object_data[$this->unique_key_column] . ' already exists ';
+                $this->error_messages['exits'] = $this->xpdo_simple_object_class.': '.
+                    $this->blendable_xpdo_simple_object_data[$this->unique_key_column].' already exists ';
                 return $saved;
             }
         } else {
@@ -456,13 +456,13 @@ abstract class Blendable implements BlendableInterface
         if ($this->xPDOSimpleObject->save()) {
             $this->attachRelatedPiecesAfterSave();
             if ($this->isDebug()) {
-                $this->blender->out($this->blendable_xpdo_simple_object_data[$this->unique_key_column] . ' has been installed/saved');
+                $this->blender->out($this->blendable_xpdo_simple_object_data[$this->unique_key_column].' has been installed/saved');
             }
             $saved = true;
 
         } else {
             if ($this->isDebug()) {
-                $this->blender->out($this->blendable_xpdo_simple_object_data[$this->unique_key_column] . ' did not install/update', true);
+                $this->blender->out($this->blendable_xpdo_simple_object_data[$this->unique_key_column].' did not install/update', true);
             }
 
         }
@@ -509,7 +509,7 @@ abstract class Blendable implements BlendableInterface
      *
      * @return $this
      */
-    protected function loadFromArray($data=[])
+    protected function loadFromArray($data = [])
     {
         foreach ($data as $column => $value) {
             $method_name = 'seed'.$this->makeStudyCase($column);
@@ -537,7 +537,7 @@ abstract class Blendable implements BlendableInterface
                 }
                 $this->$method_name($value);
                 
-            } elseif($this->isDebug()) {
+            } elseif ($this->isDebug()) {
                 $this->blender->out(__METHOD__.' missing: '.$method_name.' V: '.$value, true);
             }
         }
@@ -626,7 +626,7 @@ abstract class Blendable implements BlendableInterface
     /**
      * @var string $type blend or revert
      */
-    protected function seedRelated($type='blend')
+    protected function seedRelated($type = 'blend')
     {
         // load related data:
         $this->loadRelatedData();

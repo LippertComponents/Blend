@@ -237,13 +237,13 @@ class SystemSetting extends Blendable
      * @param string $type ~ seed or revert
      * @return string
      */
-    public function getSeedKey($type='seed')
+    public function getSeedKey($type = 'seed')
     {
         $key = $this->blender->getSeedKeyFromName($this->getFieldNamespace().'-'.$this->getFieldName());
 
         switch ($type) {
             case 'revert':
-                $seed_key = 'revert-' . $key;
+                $seed_key = 'revert-'.$key;
                 break;
 
             case 'seed':
@@ -350,7 +350,7 @@ class SystemSetting extends Blendable
     /**
      * @param bool $load_defaults
      */
-    protected function loadObject($load_defaults=false)
+    protected function loadObject($load_defaults = false)
     {
         parent::loadObject();
 

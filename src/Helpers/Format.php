@@ -17,7 +17,7 @@ class Format
      * Format constructor.
      * @param null $path_time_stamp
      */
-    public function __construct($path_time_stamp=null)
+    public function __construct($path_time_stamp = null)
     {
         if (!empty($path_time_stamp)) {
             $this->path_time_stamp = $path_time_stamp;
@@ -31,7 +31,7 @@ class Format
      * @param string|null $name
      * @return string
      */
-    public function getMigrationName($type, $name=null)
+    public function getMigrationName($type, $name = null)
     {
         $dir_name = 'm'.$this->path_time_stamp.'_';
         if (empty($name)) {
@@ -60,9 +60,9 @@ class Format
      *
      * @return string
      */
-    public function prettyVarExport($data, $tabs=1)
+    public function prettyVarExport($data, $tabs = 1)
     {
-        $spacing = str_repeat(' ', 4*$tabs);
+        $spacing = str_repeat(' ', 4 * $tabs);
 
         $string = '';
         $parts = preg_split('/\R/', var_export($data, true));
