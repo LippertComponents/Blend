@@ -381,12 +381,10 @@ abstract class Blendable implements BlendableInterface
 
         } elseif ($type == 'revert') {
 
-            $this->seedRelated($type);
-
             $data = [
                 'columns' => false,
                 'primaryKeyHistory' => [],
-                'related' => $this->related_data
+                'related' => []
             ];
 
             if ($this->isDebug()) {
