@@ -1,3 +1,12 @@
+## [1.0.0 beta8] - 2018=09-15
+
+- Fix seedToArray remove call to seedRelated on non existing xPDO Object
+
+## [1.0.0 beta7] - 2018=09-13
+
+- Refactor Blender, pulled out makeSeeds Methods into SeedMaker class
+- Remove MODX install related code
+
 ## [1.0.0 beta6] - 2018=09-12
 
 - Replace config.php files with .env
