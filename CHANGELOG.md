@@ -1,3 +1,13 @@
+## [1.0.0 beta10] - 2018=09-25
+
+- Fix for migration paths to have proper directory separator 
+- Use MODX_CORE_PATH as base path for GenerateMigrations to allow Blend to still work as standalone out of the box
+- Fix Blend ascii logo path
+
+## [1.0.0 beta9] - 2018=09-25
+
+- Remove unneeded dependencies from composer.json
+
 ## [1.0.0 beta8] - 2018=09-15
 
 - Fix seedToArray remove call to seedRelated on non existing xPDO Object

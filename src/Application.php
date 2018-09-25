@@ -15,11 +15,11 @@ use Symfony\Component\Console\Input\InputOption;
 
 class Application extends ConsoleApplication
 {
-    protected static $logo = 'art/blend.txt';
+    protected static $logo = __DIR__ . '/art/blend.txt';
 
     protected static $name = 'Blend Console';
 
-    protected static $version = '1.0.0 beta9';
+    protected static $version = '1.0.0 beta10';
 
     /**
      * Gets the default input definition.
