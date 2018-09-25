@@ -19,7 +19,7 @@ class Application extends ConsoleApplication
 
     protected static $name = 'Blend Console';
 
-    protected static $version = '1.0.0 beta10';
+    protected static $version = '1.0.0 beta11';
 
     /**
      * Gets the default input definition.

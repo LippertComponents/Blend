@@ -1,3 +1,7 @@
+## [1.0.0 beta11] - 2018=09-25
+
+- Fix Blender to use promptConfirm method 
+
 ## [1.0.0 beta10] - 2018=09-25
 
 - Fix for migration paths to have proper directory separator 
