@@ -69,7 +69,14 @@ class GenerateMigration extends BaseCommand
                 $path = $config['BLEND_LOCAL_MIGRATION_PATH'];
 
             } else {
-                $path = dirname(dirname(dirname(dirname(__DIR__)))).'components/';
+                // MODX components path
+                if (defined('MODX_CORE_PATH')) {
+                    $path = MODX_CORE_PATH;
+                } else {
+                    $path = dirname(dirname(dirname(dirname(__DIR__)))) . DIRECTORY_SEPARATOR;
+                }
+                $path .= 'components/';
+
                 if (file_exists($path)) {
                     $path .= 'blend/';
                     if (!file_exists($path)) {

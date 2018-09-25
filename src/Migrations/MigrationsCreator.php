@@ -73,7 +73,7 @@ class MigrationsCreator
      */
     public function setMigrationsPath($path, $append = false)
     {
-        $this->migrations_path = $path;
+        $this->migrations_path = rtrim($path, '\/\\') . DIRECTORY_SEPARATOR;
 
         if (file_exists($path) && $append) {
             if (!file_exists($path.'database')) {
@@ -91,6 +91,7 @@ class MigrationsCreator
 
         return $this;
     }
+
     /**
      * @param string $path ~ like /var/www/public/core/components/blend/
      * @param bool $append ~ if true will create database/seeds with in the path
@@ -98,7 +99,7 @@ class MigrationsCreator
      */
     public function setSeedsPath($path, $append = false)
     {
-        $this->seeds_path = $path;
+        $this->seeds_path = rtrim($path, '\/\\') . DIRECTORY_SEPARATOR;
 
         if (file_exists($path) && $append) {
             if (!file_exists($path.'database')) {
