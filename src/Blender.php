@@ -311,9 +311,8 @@ class Blender
                 $this->out($seed_key.' has been blended into ID: ');
 
             } elseif ($blendChunk->isExists()) {
-                // @TODO prompt Do you want to blend Y/N/Compare
                 $this->out($seed_key.' chunk already exists', true);
-                if ($this->prompt('Would you like to update?', 'Y') === 'Y') {
+                if ($this->promptConfirm('Would you like to update?')) {
                     if ($blendChunk->blendFromSeed($seed_key, true)) {
                         $this->out($seed_key.' has been blended');
                     }
@@ -376,9 +375,8 @@ class Blender
                 $this->out($seed_key.' has been blended ');
 
             } elseif ($blendContext->isExists()) {
-                // @TODO prompt Do you want to blend Y/N/Compare
-                $this->out($seed_key.' chunk already exists', true);
-                if ($this->prompt('Would you like to update?', 'Y') === 'Y') {
+                $this->out($seed_key.' context already exists', true);
+                if ($this->promptConfirm('Would you like to update?')) {
                     if ($blendContext->blendFromSeed($seed_key, true)) {
                         $this->out($seed_key.' has been blended');
                     }
@@ -443,9 +441,8 @@ class Blender
                 $this->out($seed_key.' has been blended into ID: ');
 
             } elseif ($blendMediaSource->isExists()) {
-                // @TODO add Compare as option
                 $this->out($seed_key.' media source already exists', true);
-                if ($this->prompt('Would you like to update?', 'Y') === 'Y') {
+                if ($this->promptConfirm('Would you like to update?')) {
                     if ($blendMediaSource->blendFromSeed($seed_key, true)) {
                         $this->out($seed_key.' has been blended');
                     }
@@ -508,9 +505,8 @@ class Blender
                 $this->out($seed_key.' has been blended into ID: ');
 
             } elseif ($blendPlugin->isExists()) {
-                // @TODO prompt Do you want to blend Y/N/Compare
                 $this->out($seed_key.' plugin already exists', true);
-                if ($this->prompt('Would you like to update?', 'Y') === 'Y') {
+                if ($this->promptConfirm('Would you like to update?')) {
                     if ($blendPlugin->blendFromSeed($seed_key, true)) {
                         $this->out($seed_key.' has been blended');
                     }
@@ -573,9 +569,8 @@ class Blender
                 $this->out($seed_key.' has been blended');
 
             } elseif ($blendSnippet->isExists()) {
-                // @TODO prompt Do you want to blend Y/N/Compare
                 $this->out($seed_key.' snippet already exists', true);
-                if ($this->prompt('Would you like to update?', 'Y') === 'Y') {
+                if ($this->promptConfirm('Would you like to update?')) {
                     if ($blendSnippet->blendFromSeed($seed_key, true)) {
                         $this->out($seed_key.' has been blended');
                     }
@@ -640,7 +635,7 @@ class Blender
 
             } elseif ($blendTemplate->isExists()) {
                 $this->out($seed_key.' template already exists', true);
-                if ($this->prompt('Would you like to update?', 'Y') === 'Y') {
+                if ($this->promptConfirm('Would you like to update?')) {
                     if ($blendTemplate->blendFromSeed($seed_key, true)) {
                         $this->out($seed_key.' has been blended');
                     }
@@ -722,9 +717,8 @@ class Blender
                     $this->out($seed_key.' has been blended into ID: ');
 
                 } elseif ($blendResource->isExists()) {
-                    // @TODO prompt Do you want to blend Y/N/Compare
                     $this->out($seed_key.' already exists', true);
-                    if ($this->prompt('Would you like to update?', 'Y') === 'Y') {
+                    if ($this->promptConfirm('Would you like to update?')) {
                         if ($blendResource->blendFromSeed($seed_key, true)) {
                             $this->out($seed_key.' has been blended into ID: ');
                         }
