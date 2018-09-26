@@ -25,7 +25,8 @@ trait Files
     {
         $destination = rtrim($destination, '\/\\');
         if (!is_dir($destination)) {
-            mkdir($destination, 0700);
+            $created = mkdir($destination, 0700);
+            echo PHP_EOL . ' **** '. __LINE__ . 'Attempted to create: '. $destination. ($created ? 'Y' : 'N').' **** '. PHP_EOL;
         }
 
         /** @var \RecursiveDirectoryIterator $directoryIterator */
@@ -48,7 +49,8 @@ trait Files
                 if (is_dir($destination.DIRECTORY_SEPARATOR.$recursiveIteratorIterator->getSubPathName())) {
                     continue;
                 }
-                mkdir($destination.DIRECTORY_SEPARATOR.$recursiveIteratorIterator->getSubPathName());
+                $created = mkdir($destination.DIRECTORY_SEPARATOR.$recursiveIteratorIterator->getSubPathName());
+                echo PHP_EOL . ' **** '. __LINE__ . 'Attempted to create: '. $destination. ($created ? 'Y' : 'N').' **** '. PHP_EOL;
 
             } else {
                 copy($item, $destination.DIRECTORY_SEPARATOR.$recursiveIteratorIterator->getSubPathName());
