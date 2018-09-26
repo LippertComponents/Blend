@@ -1,5 +1,11 @@
 build:
   nodes:
+    coverage:
+      tests:
+        override:
+          coverage:
+            file: log/coverage.xml
+            format: clover
     tests:
       dependencies:
         before:
