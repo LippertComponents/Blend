@@ -24,8 +24,7 @@ class SimpleCache
         $this->directory = $directory;
 
         if (!file_exists(rtrim($this->directory, '/'))) {
-            echo PHP_EOL.' **** Make DIR: '.$this->directory.' **** '.PHP_EOL;
-            mkdir(rtrim($this->directory, '/'), '0700', true);
+            mkdir(rtrim($this->directory, '/'), $this->getMode(), true);
         }
     }
 

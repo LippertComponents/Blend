@@ -16,6 +16,27 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 trait Files
 {
+    /** @var string  */
+    protected $mode = '0700';
+
+    /**
+     * @return string
+     */
+    public function getMode(): string
+    {
+        return $this->mode;
+    }
+
+    /**
+     * @param string $mode
+     * @return $this
+     */
+    public function setMode(string $mode)
+    {
+        $this->mode = $mode;
+        return $this;
+    }
+
     /**
      * @param string $source ~ full path of source
      * @param string $destination ~ full path of destination
@@ -25,8 +46,7 @@ trait Files
     {
         $destination = rtrim($destination, '\/\\');
         if (!is_dir($destination)) {
-            $created = mkdir($destination, 0700);
-            echo PHP_EOL . ' **** '. __LINE__ . 'Attempted to create: '. $destination. ($created ? 'Y' : 'N').' **** '. PHP_EOL;
+            mkdir($destination, $this->mode);
         }
 
         /** @var \RecursiveDirectoryIterator $directoryIterator */
@@ -49,8 +69,7 @@ trait Files
                 if (is_dir($destination.DIRECTORY_SEPARATOR.$recursiveIteratorIterator->getSubPathName())) {
                     continue;
                 }
-                $created = mkdir($destination.DIRECTORY_SEPARATOR.$recursiveIteratorIterator->getSubPathName());
-                echo PHP_EOL . ' **** '. __LINE__ . 'Attempted to create: '. $destination. ($created ? 'Y' : 'N').' **** '. PHP_EOL;
+                mkdir($destination.DIRECTORY_SEPARATOR.$recursiveIteratorIterator->getSubPathName(), $this->mode);
 
             } else {
                 copy($item, $destination.DIRECTORY_SEPARATOR.$recursiveIteratorIterator->getSubPathName());

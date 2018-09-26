@@ -31,8 +31,10 @@ class BaseBlend extends TestCase
     public static function setUpBeforeClass()
     {
         // copy from database.. to temp/database/...
-        $fileHelper = new SimpleCache(BLEND_TEST_MIGRATION_PATH.'temp/');
-        $fileHelper->copyDirectory(BLEND_TEST_MIGRATION_PATH.'database/', BLEND_TEST_MIGRATION_PATH.'temp/database/');
+        $fileHelper = new SimpleCache(BLEND_TEST_MIGRATION_PATH.'temp/database/');
+        $fileHelper
+            ->setMode('0777')
+            ->copyDirectory(BLEND_TEST_MIGRATION_PATH.'database/', BLEND_TEST_MIGRATION_PATH.'temp/database/');
     }
 
     /**
