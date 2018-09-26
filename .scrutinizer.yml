@@ -1,0 +1,21 @@
+build:
+  nodes:
+    phpunit:
+      dependencies:
+        before:
+        # The following installs the most recent MODX CMS version, you might want
+        # to install a specific release tag or branch instead.
+        - git clone --depth=1 https://github.com/modxcms/revolution
+        # - git checkout tags/v2.6.5-pl
+        - php -r "file_exists('revolution/_build/build.properties.php') || copy('revolution/_build/build.properties.sample.php', 'revolution/_build/build.properties.php');"
+        - php -r "file_exists('revolution/_build/build.config.php') || copy('revolution/_build/build.config.sample.php', 'revolution/_build/build.config.php');"
+        - php revolution/_build/transport.core.php
+        # - php ./index.php --installmode=new
+        - php ./tests/scrutinizer/setup.php
+  # MySQL https://scrutinizer-ci.com/docs/build/mysql_credentials
+
+filter:
+  dependency_paths:
+  - revolution/*
+  excluded_paths:
+  - tests/*
