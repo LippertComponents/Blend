@@ -1,6 +1,6 @@
 build:
   nodes:
-    phpunit:
+    tests:
       dependencies:
         before:
         # The following installs the most recent MODX CMS version, you might want
