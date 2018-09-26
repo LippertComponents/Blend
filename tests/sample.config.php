@@ -20,6 +20,7 @@ if (!file_exists($modx_class)) {
 require_once MODX_CORE_PATH . 'model/modx/modx.class.php';
 
 define('BLEND_TEST_MIGRATION_PATH', dirname(__DIR__).'/tests/');
+define('BLEND_TEST_TEMP_MIGRATION_PATH', dirname(__DIR__).'/temp/');
 define('BLEND_COMPARE_DIRECTORY', dirname(__DIR__).'/tests/compare/');
 define('BLEND_TEST_SEEDS_DIR', '2018_01_10_093000');
 define('BLEND_CLEAN_UP', true);
