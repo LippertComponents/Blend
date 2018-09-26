@@ -23,6 +23,7 @@ trait Files
      */
     public function copyDirectory($source, $destination, $file_count = 4000)
     {
+        $destination = rtrim($destination, '\/\\');
         if (!is_dir($destination)) {
             mkdir($destination, 0700);
         }
@@ -73,6 +74,7 @@ trait Files
      */
     public function deleteDirectory($directory)
     {
+        $directory = rtrim($directory, '\/\\');
         if (!empty($directory) && file_exists($directory)) {
 
             /** @var \RecursiveDirectoryIterator $directoryIterator */
