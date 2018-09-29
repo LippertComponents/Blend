@@ -23,4 +23,5 @@ define('BLEND_TEST_MIGRATION_PATH', dirname(__DIR__).'/tests/');
 define('BLEND_TEST_TEMP_MIGRATION_PATH', dirname(__DIR__).'/temp/');
 define('BLEND_COMPARE_DIRECTORY', dirname(__DIR__).'/tests/compare/');
 define('BLEND_TEST_SEEDS_DIR', '2018_01_10_093000');
+define('BLEND_COPY_TEST_MIGRATION_FILES', false);
 define('BLEND_CLEAN_UP', true);

@@ -31,10 +31,12 @@ class BaseBlend extends TestCase
     public static function setUpBeforeClass()
     {
         // copy from database.. to temp/database/...
-        $fileHelper = new SimpleCache(BLEND_TEST_TEMP_MIGRATION_PATH.'database/');
-        $fileHelper
-            ->setMode('0777')
-            ->copyDirectory(BLEND_TEST_MIGRATION_PATH.'database/', BLEND_TEST_TEMP_MIGRATION_PATH.'database/');
+        if (BLEND_COPY_TEST_MIGRATION_FILES) {
+            $fileHelper = new SimpleCache(BLEND_TEST_TEMP_MIGRATION_PATH . 'database/');
+            $fileHelper
+                ->setMode('0777')
+                ->copyDirectory(BLEND_TEST_MIGRATION_PATH . 'database/', BLEND_TEST_TEMP_MIGRATION_PATH . 'database/');
+        }
     }
 
     /**
@@ -42,7 +44,7 @@ class BaseBlend extends TestCase
      */
     public static function tearDownAfterClass()
     {
-        if (BLEND_CLEAN_UP) {
+        if (BLEND_COPY_TEST_MIGRATION_FILES) {
             // delete files form temp:
             $fileHelper = new SimpleCache(BLEND_TEST_TEMP_MIGRATION_PATH);
             $fileHelper->deleteDirectory(BLEND_TEST_TEMP_MIGRATION_PATH.'database/');

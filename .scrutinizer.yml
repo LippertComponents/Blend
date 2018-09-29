@@ -12,6 +12,9 @@ build:
         - php revolution/_build/transport.core.php
         # - php ./index.php --installmode=new
         - php ./tests/scrutinizer/setup.php
+        - mkdir temp
+        - mkdir temp/database
+        - cp -r tests/database/ temp/database/
   # MySQL https://scrutinizer-ci.com/docs/build/mysql_credentials
 
 filter:
