@@ -1,3 +1,9 @@
+## [1.0.0 beta12] - 2018=09-29
+
+- Add BLEND_COPY_TEST_MIGRATION_FILES in tests/config.php, fix to run tests on scrutinizer 
+- Fix reverting TVs to previous state on a new seeded Template Object that gets reverted
+- Fix #5 seed raw values of TVs  
+
 ## [1.0.0 beta11] - 2018=09-25
 
 - Fix Blender to use promptConfirm method 
