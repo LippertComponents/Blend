@@ -209,6 +209,15 @@ class Template extends Element
      */
     protected function onDeleteRevertRelatedPieces()
     {
+        if (!isset($this->related_data['seeds']) || empty($this->related_data['seeds'])) {
+            // If this is a seed then the TVs are not in the revert file but the seed file
+            $name = $this->getFieldTemplateName();
+            if (empty ($name) && isset($this->current_xpdo_simple_object_data['templatename'])) {
+                $name = $this->current_xpdo_simple_object_data['templatename'];
+            }
+            $this->loadObjectDataFromSeed($this->blender->getSeedKeyFromName($name));
+        }
+
         if (isset($this->related_data['seeds'])) {
 
             foreach ($this->related_data['seeds'] as $tv) {

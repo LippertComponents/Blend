@@ -536,9 +536,10 @@ abstract class Blendable implements BlendableInterface
                 $this->$method_name($value);
                 
             } elseif ($this->isDebug()) {
-                $this->blender->out(__METHOD__.' missing: '.$method_name.' V: '.$value, true);
+                $this->blender->out(__METHOD__.' missing: '.$method_name.' V: '.print_r($value, true), true);
             }
         }
+
         return $this;
     }
 
@@ -589,11 +590,16 @@ abstract class Blendable implements BlendableInterface
      */
     protected function makeStudyCase($name)
     {
+        if ($name == 'templatename') {
+            $name = 'templateName';
+        }
+
         $StudyName = '';
         $parts = explode('_', $name);
         foreach ($parts as $part) {
             $StudyName .= ucfirst($part);
         }
+
         return $StudyName;
     }
 
