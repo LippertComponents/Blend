@@ -1,5 +1,7 @@
 # Blend
 
+[![Build Status](https://scrutinizer-ci.com/g/LippertComponents/Blend/badges/build.png?b=master)](https://scrutinizer-ci.com/g/LippertComponents/Blend/)
+
 This project aims to import/export resources and elements from one MODX instance to another. Working with 
 workflows from local > dev > staging > production(master). Also attempting to be similar to what Migrate is 
 for Laravel. 
@@ -205,14 +207,17 @@ should show up there.
 ## Road map 
 
 - v1.0 
-  - Install MODX (3.x for git is complete)
-  - Update
-  - Add TV convenience methods for building custom migrations 
-  - DONE: Media Sources, seed and migrate
-  - Convert all System Setting to have values that are name key vs int key, templates, resources, ect.
+  - ~~Install MODX (3.x for git is complete)~~
+  [ ] Add TV convenience methods for building custom migrations 
+  [x] Resource seed of TV values
+  [x] DONE: Media Sources, seed and migrate
+  [x] DONE: Convert all System Setting to have values that are name key vs int key, templates, resources, ect.
+  [ ] Create a database/history directory and move all Blend backups to this directory
+  [x] Contexts!!! Similar to resources and system settings
 - v1.1
-  - Extras
-  - List Migrations in Table, newest to oldest
+  [ ] Blendable Namespaces
+  [ ] Extras via Gitify/Teleport
+  [ ] List Migrations in Table, newest to oldest
 - v1.2
   - Resource Groups
   - Seed ACL, user groups & permissions
@@ -233,5 +238,3 @@ From the command line, assuming you have cloned this repo from git and you are i
  - ```vendor\bin\phpunit --bootstrap tests\bootstrap.php tests\SnippetTest.php```
  - ```vendor\bin\phpunit --bootstrap tests\bootstrap.php tests\SystemSettingsTest.php```
  - ```vendor\bin\phpunit --bootstrap tests\bootstrap.php tests\TemplateTest.php```
-
-
