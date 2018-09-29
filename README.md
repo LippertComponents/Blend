@@ -201,16 +201,16 @@ should show up there.
 
 - v1.0 
   - ~~Install MODX (3.x for git is complete)~~
-  [ ] Add TV convenience methods for building custom migrations 
-  [x] Resource seed of TV values
-  [x] DONE: Media Sources, seed and migrate
-  [x] DONE: Convert all System Setting to have values that are name key vs int key, templates, resources, ect.
-  [ ] Create a database/history directory and move all Blend backups to this directory
-  [x] Contexts!!! Similar to resources and system settings
+  - [ ] Add TV convenience methods for building custom migrations 
+  - [x] Resource seed of TV values
+  - [x] DONE: Media Sources, seed and migrate
+  - [x] DONE: Convert all System Setting to have values that are name key vs int key, templates, resources, ect.
+  - [ ] Create a database/history directory and move all Blend backups to this directory
+  - [x] Contexts!!! Similar to resources and system settings
 - v1.1
-  [ ] Blendable Namespaces
-  [ ] Extras via Gitify/Teleport
-  [ ] List Migrations in Table, newest to oldest
+  - [ ] Blendable Namespaces
+  - [ ] Extras via Gitify/Teleport
+  - [ ] List Migrations in Table, newest to oldest
 - v1.2
   - Resource Groups
   - Seed ACL, user groups & permissions
