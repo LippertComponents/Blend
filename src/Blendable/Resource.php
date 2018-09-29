@@ -925,7 +925,15 @@ class Resource extends Blendable
                 $tv = $tvTemplate->getOne('TemplateVar');
                 $tv_name = $tv->get('name');
 
-                $tvs[$tv_name] = $this->makePortableTVData($tv_name, $tv->get('type'), $this->xPDOSimpleObject->getTVValue($tv_name));
+                // Raw TV value:
+                $tvResource = $this->modx->getObject(
+                    'modTemplateVarResource',
+                    ['tmplvarid' => $tv->get('id'), 'contentid' => $this->xPDOSimpleObject->get('id')]
+                );
+
+                if ($tvResource instanceof \modTemplateVarResource) {
+                    $tvs[$tv_name] = $this->makePortableTVData($tv_name, $tv->get('type'), $tvResource->get('value'));
+                }
             }
         }
 
@@ -1212,7 +1220,7 @@ class Resource extends Blendable
     {
         $tagger_groups = [];
 
-        $existing_tags = $this->getResourceTags($resource);
+        $existing_tags = $this->getResourceTags();
         foreach ($existing_tags as $tag_group_alias => $data) {
 
             $tagger_groups[$tag_group_alias] = $data['columns']['id'];
