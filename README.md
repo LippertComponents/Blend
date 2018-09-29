@@ -49,26 +49,19 @@ new MODX install.
 
 ## Install
 
+Recommended install [Orchestrator](https://github.com/LippertComponents/Orchestrator) and it will install Blend. Otherwise
+follow the steps below.
+
 ### Step 1
 
-Via composer, just run: ```composer require lci/blend```
-
-**OR**
-
-Via git
-1. CD into the directory that you want the project to live in. Can be anywhere PHP runs, one place could be outside of 
-your public or www directory. Or if you prefer the traditional MODX extras path then in MODX/core/components/blend/
-2. ```git clone git@github.com:LippertComponents/Blend.git .```
-
-
+Standalone via composer, run: ```composer require lci/blend```
 
 ### Step 2
-Go the bin directory, you may need to copy the sample.config.php file to just config.php and then set the correct path to MODX.
+
+Blend should be able to find MODX, but if not create a .env file and set the MODX_CONFIG_PATH="path/to/modx"
 
 ### Step 3
-CD to the bin directory and try 
-
-If you used git: ```php console.php``` or ```php console.php --help```
+CD to the vendor/bin directory and try 
 
 If you used composer ```php blend``` or ```php blend --help```
 
@@ -93,9 +86,9 @@ Same as above, but with short options
 ### Create a custom migration file
 
 1. Generate an empty migration file:  
- ```php blend blend:migrate --generate --name MyChunks```  
+ ```php blend blend:generate --name MyChunks```  
  Same as above but with short options
- ```php blend blend:migrate -g -n MyChunks```
+ ```php blend blend:generate -n MyChunks```
 2. There will now be a file: ```MODX~core/components/blend/database/migrations/MyChunks.php``` open in your IDE
 3. You will want to something like the below example for the up method. The up method creates or updates:  
 ```php
