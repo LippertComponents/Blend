@@ -22,3 +22,5 @@ filter:
   - revolution/*
   excluded_paths:
   - tests/*
+  # this file just has every MODX setting as a method, maybe at a future point it could be refactored
+  - src/Blendable/SystemSetting.php
