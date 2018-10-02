@@ -20,10 +20,13 @@ use LCI\Blend\Blendable\Template;
 use LCI\Blend\Blendable\TemplateVariable;
 use LCI\MODX\Console\Helpers\UserInteractionHandler;
 
+/**
+ * Class BlendableLoader
+ *  Simple class to help init blendable objects and blend/revert many
+ * @package LCI\Blend\Helpers
+ */
 class BlendableLoader
 {
-    // Simple class to help init blendable objects and blend/revert many
-
     /** @var \modX */
     protected $modx;
 
@@ -45,20 +48,6 @@ class BlendableLoader
         $this->blender = $blender;
         $this->userInteractionHandler = $userInteractionHandler;
     }
-
-    /** @TODO
-     *
-     * 1. Move SeedMaker into Migrations
-     * 2. Extract runMigrations to Migrator and blender just extends
-     * 3. Add package to log DB
-     * 4. Redo install/update
-     * 5. History directory
-     *
-     * ?? LCI\Console -> LCI\ExtendableConsole - to allow xPDO to use it and then LCI\Console just has MODX specifics
-     *
-     *
-     */
-
 
     /**
      * Use this method with your IDE to help manually build a Chunk with PHP
