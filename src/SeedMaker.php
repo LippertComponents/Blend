@@ -301,9 +301,10 @@ class SeedMaker
         $collection = $this->modx->getCollection('modSystemSetting', $criteria);
 
         $setting_data = [];
+        /** @var \modSystemSetting $setting */
         foreach ($collection as $setting) {
             /** @var \LCI\Blend\Blendable\SystemSetting $blendableSetting */
-            $blendableSetting = $this->blender->getBlendableSystemSetting($setting->get('key'));
+            $blendableSetting = $this->blender->getBlendableLoader()->getBlendableSystemSetting($setting->get('key'));
             $setting_data[] = $blendableSetting->seedToArray();
         }
 

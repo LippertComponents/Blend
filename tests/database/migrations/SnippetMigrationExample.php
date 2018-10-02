@@ -17,7 +17,7 @@ class SnippetMigrationExample extends Migrations
     public function up()
     {
         /** @var \LCI\Blend\Blendable\Snippet $testSnippet3 */
-        $testSnippet3 = $this->blender->getBlendableSnippet('testSnippet3');
+        $testSnippet3 = $this->blender->getBlendableLoader()->getBlendableSnippet('testSnippet3');
         $testSnippet3
             ->setSeedsDir($this->getSeedsDir())
             ->setFieldDescription('This is my 3rd test snippet, note this is limited to 255 or something and no HTML')
@@ -46,7 +46,7 @@ class SnippetMigrationExample extends Migrations
         $name = 'testSnippet3';
 
         /** @var \LCI\Blend\Blendable\Snippet $blendSnippet */
-        $blendSnippet = $this->blender->getBlendableSnippet($name);
+        $blendSnippet = $this->blender->getBlendableLoader()->getBlendableSnippet($name);
         $blendSnippet->setSeedsDir($this->getSeedsDir());
 
         if ( $blendSnippet->revertBlend() ) {

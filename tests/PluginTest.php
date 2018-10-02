@@ -14,7 +14,7 @@ final class PluginTest extends BaseBlend
         $plugin_event = 'OnUserActivate';
 
         /** @var \LCI\Blend\Blendable\Plugin $testPlugin1 */
-        $testPlugin1 = $this->blender->getBlendablePlugin($plugin_name);
+        $testPlugin1 = $this->blender->getBlendableLoader()->getBlendablePlugin($plugin_name);
         $testPlugin1
             ->setSeedsDir($plugin_name)
             ->setFieldDescription($plugin_description)

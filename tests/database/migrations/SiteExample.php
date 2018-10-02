@@ -28,7 +28,7 @@ class SiteExample extends Migrations
          */
 
         /** @var \LCI\Blend\Blendable\MediaSource $mediaSource */
-        $mediaSource = $this->blender->getBlendableMediaSource('mediaSourceSiteExample');
+        $mediaSource = $this->blender->getBlendableLoader()->getBlendableMediaSource('mediaSourceSiteExample');
         $mediaSource
             ->setSeedsDir($this->getSeedsDir())
             ->setFieldDescription('Site Example media source test')
@@ -45,7 +45,7 @@ class SiteExample extends Migrations
 
 
         /** @var \LCI\Blend\Blendable\Context $contextSiteExample */
-        $contextSiteExample = $this->blender->getBlendableContext('site');
+        $contextSiteExample = $this->blender->getBlendableLoader()->getBlendableContext('site');
         $contextSiteExample
             ->setSeedsDir($this->getSeedsDir())
             ->setFieldName('Site Example')
@@ -65,7 +65,7 @@ class SiteExample extends Migrations
         }
 
         /** @var \LCI\Blend\Blendable\Template $templateSiteExample */
-        $templateSiteExample = $this->blender->getBlendableTemplate('templateSiteExample');
+        $templateSiteExample = $this->blender->getBlendableLoader()->getBlendableTemplate('templateSiteExample');
         $templateSiteExample
             ->setSeedsDir($this->getSeedsDir())
             ->setFieldDescription('Site Example template test')
@@ -88,7 +88,7 @@ class SiteExample extends Migrations
         $long_title = 'Site Example, Long title';
         $page_title = 'Site Example, Page Title';
         /** @var \LCI\Blend\Blendable\Resource $resourceSiteExample */
-        $resourceSiteExample = $this->blender->getBlendableResource($alias);
+        $resourceSiteExample = $this->blender->getBlendableLoader()->getBlendableResource($alias);
         $resourceSiteExample
             ->setSeedsDir(BLEND_TEST_SEEDS_DIR)
             ->setFieldContent($content)
@@ -106,7 +106,7 @@ class SiteExample extends Migrations
         }
 
         /** @var \LCI\Blend\Blendable\Chunk $chunk */
-        $chunkSiteExample = $this->blender->getBlendableChunk('chunkSiteExample');
+        $chunkSiteExample = $this->blender->getBlendableLoader()->getBlendableChunk('chunkSiteExample');
         $chunkSiteExample
             ->setSeedsDir($this->getSeedsDir())
             ->setFieldDescription('Site Example chunk test')
@@ -128,7 +128,7 @@ class SiteExample extends Migrations
         $plugin_event = 'OnUserActivate';
 
         /** @var \LCI\Blend\Blendable\Plugin $pluginSiteExample */
-        $pluginSiteExample = $this->blender->getBlendablePlugin($plugin_name);
+        $pluginSiteExample = $this->blender->getBlendableLoader()->getBlendablePlugin($plugin_name);
         $pluginSiteExample
             ->setSeedsDir($plugin_name)
             ->setFieldDescription($plugin_description)
@@ -148,7 +148,7 @@ class SiteExample extends Migrations
 
 
         /** @var \LCI\Blend\Blendable\Snippet $snippetSiteExample */
-        $snippetSiteExample = $this->blender->getBlendableSnippet('snippetSiteExample');
+        $snippetSiteExample = $this->blender->getBlendableLoader()->getBlendableSnippet('snippetSiteExample');
         $snippetSiteExample
             ->setSeedsDir($this->getSeedsDir())
             ->setFieldDescription('Site Example snippet test')
@@ -165,7 +165,7 @@ class SiteExample extends Migrations
         }
 
         /** @var \LCI\Blend\Blendable\SystemSetting $systemSettingSiteExample */
-        $systemSettingSiteExample = $this->blender->getBlendableSystemSetting('systemSettingSiteExample');
+        $systemSettingSiteExample = $this->blender->getBlendableLoader()->getBlendableSystemSetting('systemSettingSiteExample');
         // Can use lots of helper methods for core system settings, see all setCore* methods
         $systemSettingSiteExample
             ->setSeedsDir($this->getSeedsDir())
@@ -189,7 +189,7 @@ class SiteExample extends Migrations
     public function down()
     {
         /** @var \LCI\Blend\Blendable\MediaSource $mediaSource */
-        $mediaSource = $this->blender->getBlendableMediaSource('mediaSourceSiteExample');
+        $mediaSource = $this->blender->getBlendableLoader()->getBlendableMediaSource('mediaSourceSiteExample');
         if ( $mediaSource->setSeedsDir($this->getSeedsDir())->revertBlend() ) {
             $this->blender->out($mediaSource->getFieldName().' setting has been reverted to '.$this->getSeedsDir());
 
@@ -197,7 +197,7 @@ class SiteExample extends Migrations
             $this->blender->out($mediaSource->getFieldName().' setting was not reverted', true);
         }
 
-        $contextSiteExample = $this->blender->getBlendableContext('site');
+        $contextSiteExample = $this->blender->getBlendableLoader()->getBlendableContext('site');
         $contextSiteExample->setSeedsDir($this->getSeedsDir());
         if ( $contextSiteExample->revertBlend() ) {
             $this->blender->out($contextSiteExample->getFieldKey().' setting has been reverted to '.$this->getSeedsDir());
@@ -206,7 +206,7 @@ class SiteExample extends Migrations
             $this->blender->out($contextSiteExample->getFieldKey().' setting was not reverted', true);
         }
 
-        $blendTemplate = $this->blender->getBlendableTemplate('templateSiteExample');
+        $blendTemplate = $this->blender->getBlendableLoader()->getBlendableTemplate('templateSiteExample');
         $blendTemplate->setSeedsDir($this->getSeedsDir());
         if ( $blendTemplate->revertBlend() ) {
             $this->blender->out($blendTemplate->getFieldName().' template has been reverted to '.$this->getSeedsDir());
@@ -215,7 +215,7 @@ class SiteExample extends Migrations
             $this->blender->out($blendTemplate->getFieldName().' template was not reverted', true);
         }
 
-        $resourceSiteExample = $this->blender->getBlendableResource('site-example-resource');
+        $resourceSiteExample = $this->blender->getBlendableLoader()->getBlendableResource('site-example-resource');
         $resourceSiteExample->setSeedsDir($this->getSeedsDir());
         if ( $resourceSiteExample->revertBlend() ) {
             $this->blender->out($resourceSiteExample->getFieldAlias().' resource has been reverted to '.$this->getSeedsDir());
@@ -225,7 +225,7 @@ class SiteExample extends Migrations
         }
 
 
-        $blendChunk = $this->blender->getBlendableChunk('chunkSiteExample');
+        $blendChunk = $this->blender->getBlendableLoader()->getBlendableChunk('chunkSiteExample');
         $blendChunk->setSeedsDir($this->getSeedsDir());
         if ( $blendChunk->revertBlend() ) {
             $this->blender->out($blendChunk->getFieldName().' setting has been reverted to '.$this->getSeedsDir());
@@ -235,7 +235,7 @@ class SiteExample extends Migrations
         }
 
         /** @var \LCI\Blend\Blendable\Plugin $pluginSiteExample */
-        $pluginSiteExample = $this->blender->getBlendablePlugin('pluginSiteExample');
+        $pluginSiteExample = $this->blender->getBlendableLoader()->getBlendablePlugin('pluginSiteExample');
         $pluginSiteExample->setSeedsDir($this->getSeedsDir());
 
         if ( $pluginSiteExample->revertBlend() ) {
@@ -246,7 +246,7 @@ class SiteExample extends Migrations
         }
 
         /** @var \LCI\Blend\Blendable\Snippet $snippetSiteExample */
-        $snippetSiteExample = $this->blender->getBlendableSnippet('snippetSiteExample');
+        $snippetSiteExample = $this->blender->getBlendableLoader()->getBlendableSnippet('snippetSiteExample');
         $snippetSiteExample->setSeedsDir($this->getSeedsDir());
 
         if ( $snippetSiteExample->revertBlend() ) {
@@ -258,7 +258,7 @@ class SiteExample extends Migrations
 
 
         /** @var \LCI\Blend\Blendable\SystemSetting $systemSettingSiteExample */
-        $systemSettingSiteExample = $this->blender->getBlendableSystemSetting('systemSettingSiteExample');
+        $systemSettingSiteExample = $this->blender->getBlendableLoader()->getBlendableSystemSetting('systemSettingSiteExample');
         // Can use lots of helper methods for core system settings, see all setCore* methods
         $systemSettingSiteExample
             ->setSeedsDir($this->getSeedsDir())

@@ -95,7 +95,7 @@ Same as above, but with short options
 <?php
 // Manual set up of a chunk:
 /** @var \LCI\Blend\Blendable\Chunk $myChunk */
-$myChunk = $this->blender->getBlendableChunk('myChunk');
+$myChunk = $this->blender->getBlendableLoader()->getBlendableChunk('myChunk');
 $myChunk
     ->setSeedsDir($this->getSeedsDir())// This is needed to set the down() data
     ->setFieldDescription('This is my test chunk, note this is limited to 255 or something')
@@ -122,7 +122,7 @@ The down method is for remove or downgrade.
 $name = 'myChunk';
 
 /** @var \LCI\Blend\Blendable\Chunk $blendChunk */
-$blendChunk = $this->blender->getBlendableChunk('myChunk');
+$blendChunk = $this->blender->getBlendableLoader()->getBlendableChunk('myChunk');
 $blendChunk->setSeedsDir($this->getSeedsDir());// This is needed to retrieve the down data
 
 if ( $blendChunk->revertBlend() ) {

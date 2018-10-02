@@ -21,7 +21,7 @@ class TVsLoadFromSeedsExample extends Migrations
      */
     public function up()
     {
-        $this->blender->blendManyTemplates($this->templates, $this->getSeedsDir(), true);
+        $this->blender->getBlendableLoader()->blendManyTemplates($this->templates, $this->getSeedsDir(), true);
     }
 
     /**
@@ -31,7 +31,8 @@ class TVsLoadFromSeedsExample extends Migrations
      */
     public function down()
     {
-        $this->blender->revertBlendManyTemplates($this->templates, $this->getSeedsDir());
+        echo PHP_EOL. ' DIR: '.$this->getSeedsDir().PHP_EOL;
+        $this->blender->getBlendableLoader()->revertBlendManyTemplates($this->templates, $this->getSeedsDir());
     }
 
     /**

@@ -14,7 +14,7 @@ final class MediaSourceTest extends BaseBlend
         $ms_description = 'This is my test media source, note this is limited to 255 or something and no HTML';
 
         /** @var \LCI\Blend\Blendable\MediaSource $testMediaSource1 */
-        $testMediaSource1 = $this->blender->getBlendableMediaSource($media_source_name);
+        $testMediaSource1 = $this->blender->getBlendableLoader()->getBlendableMediaSource($media_source_name);
         $testMediaSource1
             ->setSeedsDir($media_source_name)
             ->setFieldDescription($ms_description);
@@ -108,7 +108,7 @@ final class MediaSourceTest extends BaseBlend
         $media_source_name = 'testMediaSource1';
 
         /** @var \LCI\Blend\Blendable\MediaSource $testMediaSource1 */
-        $blendMediaSource = $this->blender->getBlendableMediaSource($media_source_name);
+        $blendMediaSource = $this->blender->getBlendableLoader()->getBlendableMediaSource($media_source_name);
         $blendMediaSource
             ->setSeedsDir($media_source_name);
 

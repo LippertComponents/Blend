@@ -12,7 +12,7 @@ final class ContextTest extends BaseBlend
         $description = 'Spanish Context';
 
         /** @var \LCI\Blend\Blendable\Context $testContext1 */
-        $testContext1 = $this->blender->getBlendableContext($context_key);
+        $testContext1 = $this->blender->getBlendableLoader()->getBlendableContext($context_key);
         $testContext1
             ->setSeedsDir(BLEND_TEST_SEEDS_DIR)
             ->setFieldDescription($description)
@@ -94,7 +94,7 @@ final class ContextTest extends BaseBlend
         $context_key = 'es';
 
         /** @var \LCI\Blend\Blendable\Context $blendableContext */
-        $blendableContext = $this->blender->getBlendableContext($context_key);
+        $blendableContext = $this->blender->getBlendableLoader()->getBlendableContext($context_key);
         $blendableContext
             ->setSeedsDir(BLEND_TEST_SEEDS_DIR);
 
@@ -114,7 +114,7 @@ final class ContextTest extends BaseBlend
         $description = 'French Context';
 
         /** @var \LCI\Blend\Blendable\Context $testContext2 */
-        $testContext2 = $this->blender->getBlendableContext($context_key);
+        $testContext2 = $this->blender->getBlendableLoader()->getBlendableContext($context_key);
         $testContext2
             ->setSeedsDir(BLEND_TEST_SEEDS_DIR)
             ->setFieldDescription($description)
@@ -172,7 +172,7 @@ final class ContextTest extends BaseBlend
 
         if (BLEND_CLEAN_UP) {
             // Remove created test context:
-            $this->blender->revertBlendManyContexts(['key' => $context_key]);
+            $this->blender->getBlendableLoader()->revertBlendManyContexts(['key' => $context_key]);
 
             $this->assertEquals(
                 false,

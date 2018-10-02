@@ -105,6 +105,7 @@ final class TemplateTVTest extends BaseBlend
         // get all related TVs:
         $created_tvs = [];
         $tvTemplates = $testTVTemplate->getMany('TemplateVarTemplates');
+        /** @var modTemplateVarTemplate $tvTemplate */
         foreach ($tvTemplates as $tvTemplate) {
             $tv = $tvTemplate->getOne('TemplateVar');
             $tv_name = $tv->get('name');

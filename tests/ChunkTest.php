@@ -12,7 +12,7 @@ final class ChunkTest extends BaseBlend
         $chunk_description = 'This is my test chunk, note this is limited to 255 or something and no HTML';
         $chunk_code = 'Hi [[+testPlaceholder]]!';
         /** @var \LCI\Blend\Blendable\Chunk $chunk */
-        $testChunk1 = $this->blender->getBlendableChunk($chunk_name);
+        $testChunk1 = $this->blender->getBlendableLoader()->getBlendableChunk($chunk_name);
         $testChunk1
             ->setSeedsDir($chunk_name)
             ->setFieldDescription($chunk_description)
@@ -57,6 +57,7 @@ final class ChunkTest extends BaseBlend
                 );
 
                 $modChunk = $this->modx->getObject('modChunk', ['name' => $chunk_name]);
+                /** @var \modCategory $modCategory */
                 $modCategory = $modChunk->getOne('Category');
 
                 $this->assertEquals(

@@ -18,7 +18,7 @@ final class ResourceTest extends BaseBlend
 
 
         /** @var \LCI\Blend\Blendable\Resource $blendableResource */
-        $blendableResource = $this->blender->getBlendableResource($alias);
+        $blendableResource = $this->blender->getBlendableLoader()->getBlendableResource($alias);
         $blendableResource
             ->setSeedsDir(BLEND_TEST_SEEDS_DIR)
             ->setFieldContent($content)
@@ -36,7 +36,7 @@ final class ResourceTest extends BaseBlend
         // Validate data/convenience methods:
         if ($blended) {
             /** @var \LCI\Blend\Blendable\Resource $blendResource */
-            $blendResource = $this->blender->getBlendableResource($alias);
+            $blendResource = $this->blender->getBlendableLoader()->getBlendableResource($alias);
             $this->assertInstanceOf(
                 '\LCI\Blend\Blendable\Resource',
                 $blendResource,
@@ -87,7 +87,7 @@ final class ResourceTest extends BaseBlend
         $alias = 'blendable-resource';
 
         /** @var \LCI\Blend\Blendable\Resource $blendableResource */
-        $blendableResource = $this->blender->getBlendableResource($alias);
+        $blendableResource = $this->blender->getBlendableLoader()->getBlendableResource($alias);
         $blendableResource->setSeedsDir(BLEND_TEST_SEEDS_DIR);
 
         $this->assertEquals(
@@ -109,7 +109,7 @@ final class ResourceTest extends BaseBlend
 
         $this->assertEquals(
             true,
-            $this->blender->blendManyResources($resource_seeds, BLEND_TEST_SEEDS_DIR, true),
+            $this->blender->getBlendableLoader()->blendManyResources($resource_seeds, BLEND_TEST_SEEDS_DIR, true),
             'testBlendManyResources() blend attempted'
         );
 
@@ -148,7 +148,7 @@ final class ResourceTest extends BaseBlend
 
         $this->assertEquals(
             true,
-            $this->blender->revertBlendManyResources($resource_seeds, BLEND_TEST_SEEDS_DIR),
+            $this->blender->getBlendableLoader()->revertBlendManyResources($resource_seeds, BLEND_TEST_SEEDS_DIR),
             'testBlendManyResources() blend attempted'
         );
 
@@ -251,6 +251,7 @@ final class ResourceTest extends BaseBlend
         if (BLEND_CLEAN_UP) {
             // Remove created test resources:
             $testResources = $this->modx->getCollection('modResource', ['alias:IN' => $aliases]);
+            /** @var modResource $testResource */
             foreach ($testResources as $testResource) {
                 $testResource->remove();
             }

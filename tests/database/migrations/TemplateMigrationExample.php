@@ -17,7 +17,7 @@ class TemplateMigrationExample extends Migrations
     public function up()
     {
         /** @var \LCI\Blend\Blendable\Template $testTemplate3 */
-        $testTemplate3 = $this->blender->getBlendableTemplate('testTemplate3');
+        $testTemplate3 = $this->blender->getBlendableLoader()->getBlendableTemplate('testTemplate3');
         $testTemplate3
             ->setSeedsDir($this->getSeedsDir())
             ->setFieldDescription('This is my 3rd test template, note this is limited to 255 or something and no HTML')
@@ -45,7 +45,7 @@ class TemplateMigrationExample extends Migrations
         // set back to previous version of the template
         $name = 'testTemplate3';
 
-        $blendTemplate = $this->blender->getBlendableTemplate($name);
+        $blendTemplate = $this->blender->getBlendableLoader()->getBlendableTemplate($name);
         $blendTemplate->setSeedsDir($this->getSeedsDir());
 
         if ( $blendTemplate->revertBlend() ) {

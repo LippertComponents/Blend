@@ -12,7 +12,7 @@ final class SnippetTest extends BaseBlend
         $snippet_description = 'This is my first test  snippet, note this is limited to 255 or something and no HTML';
         $snippet_code = '<?php return \'This is a test Snippet!\'; ';
         /** @var \LCI\Blend\Blendable\Snippet $testSnippet1 */
-        $testSnippet1 = $this->blender->getBlendableSnippet($snippet_name);
+        $testSnippet1 = $this->blender->getBlendableLoader()->getBlendableSnippet($snippet_name);
         $testSnippet1
             ->setSeedsDir($snippet_name)
             ->setFieldDescription($snippet_description)

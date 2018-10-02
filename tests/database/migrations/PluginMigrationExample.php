@@ -19,7 +19,7 @@ class PluginMigrationExample extends Migrations
         $plugin_event = 'OnWebPageInit';
 
         /** @var \LCI\Blend\Blendable\Plugin $testPlugin3 */
-        $testPlugin3 = $this->blender->getBlendablePlugin('testPlugin3');
+        $testPlugin3 = $this->blender->getBlendableLoader()->getBlendablePlugin('testPlugin3');
         $testPlugin3
             ->setSeedsDir($this->getSeedsDir())
             ->setFieldDescription('This is my 3rd test plugin, note this is limited to 255 or something and no HTML')
@@ -49,7 +49,7 @@ class PluginMigrationExample extends Migrations
         $name = 'testPlugin3';
 
         /** @var \LCI\Blend\Blendable\Plugin $blendPlugin */
-        $blendPlugin = $this->blender->getBlendablePlugin($name);
+        $blendPlugin = $this->blender->getBlendableLoader()->getBlendablePlugin($name);
         $blendPlugin->setSeedsDir($this->getSeedsDir());
 
         if ( $blendPlugin->revertBlend() ) {

@@ -140,7 +140,7 @@ class Blender
         if (method_exists($this->blendableLoader, $name)) {
 
             $message = get_class($this) . '->'.$name.'() has been deprecated, please use ' . get_class($this) . '->getBlendableLoader()->' . $name;
-            //trigger_error($message, E_USER_WARNING);
+            trigger_error($message, E_USER_WARNING);
             $this->modx->log(\modX::LOG_LEVEL_ERROR, $message);
 
             return call_user_func_array(array($this->blendableLoader, $name), $arguments);

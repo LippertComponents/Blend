@@ -13,7 +13,7 @@ final class TemplateTest extends BaseBlend
         $template_code = '<!DOCTYPE html><html lang="en"><head><title>[[*pagetitle]]</title></head><body>[[*content]]</body></html>';
 
         /** @var \LCI\Blend\Blendable\Template $testTemplate1 */
-        $testTemplate1 = $this->blender->getBlendableTemplate($template_name);
+        $testTemplate1 = $this->blender->getBlendableLoader()->getBlendableTemplate($template_name);
         $testTemplate1
             ->setSeedsDir($template_name)
             ->setFieldDescription($template_description)

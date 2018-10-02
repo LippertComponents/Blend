@@ -17,7 +17,7 @@ class MediaSourceMigrationExample extends Migrations
     public function up()
     {
         /** @var \LCI\Blend\Blendable\MediaSource $testMediaSource3 */
-        $testMediaSource3 = $this->blender->getBlendableMediaSource('testMediaSource3');
+        $testMediaSource3 = $this->blender->getBlendableLoader()->getBlendableMediaSource('testMediaSource3');
         $testMediaSource3
             ->setSeedsDir($this->getSeedsDir())
             ->setFieldDescription('This is my 3rd media source test, note this is limited to 255 or something and no HTML')
@@ -41,7 +41,7 @@ class MediaSourceMigrationExample extends Migrations
     public function down()
     {
         /** @var \LCI\Blend\Blendable\MediaSource $testMediaSource3 */
-        $testMediaSource3 = $this->blender->getBlendableMediaSource('testMediaSource3');
+        $testMediaSource3 = $this->blender->getBlendableLoader()->getBlendableMediaSource('testMediaSource3');
 
         if ( $testMediaSource3->setSeedsDir($this->getSeedsDir())->revertBlend() ) {
             $this->blender->out($testMediaSource3->getFieldName().' setting has been reverted to '.$this->getSeedsDir());

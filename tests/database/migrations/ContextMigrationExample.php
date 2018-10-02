@@ -17,7 +17,7 @@ class ContextMigrationExample extends Migrations
     public function up()
     {
         /** @var \LCI\Blend\Blendable\Context $testContext3 */
-        $testContext3 = $this->blender->getBlendableContext('it');
+        $testContext3 = $this->blender->getBlendableLoader()->getBlendableContext('it');
         $testContext3
             ->setSeedsDir($this->getSeedsDir())
             ->setFieldName('Italian')
@@ -46,7 +46,7 @@ class ContextMigrationExample extends Migrations
     {
         $context_key = 'it';
 
-        $blendContext = $this->blender->getBlendableContext($context_key);
+        $blendContext = $this->blender->getBlendableLoader()->getBlendableContext($context_key);
         $blendContext->setSeedsDir($this->getSeedsDir());
 
         if ( $blendContext->revertBlend() ) {

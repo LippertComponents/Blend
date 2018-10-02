@@ -17,7 +17,7 @@ class ChunkMigrationExample extends Migrations
     public function up()
     {
         /** @var \LCI\Blend\Blendable\Chunk $chunk */
-        $testChunk3 = $this->blender->getBlendableChunk('testChunk3');
+        $testChunk3 = $this->blender->getBlendableLoader()->getBlendableChunk('testChunk3');
         $testChunk3
             ->setSeedsDir($this->getSeedsDir())
             ->setFieldDescription('This is my 3rd test chunk, note this is limited to 255 or something and no HTML')
@@ -43,7 +43,7 @@ class ChunkMigrationExample extends Migrations
     {
         $name = 'testChunk3';
 
-        $blendChunk = $this->blender->getBlendableChunk($name);
+        $blendChunk = $this->blender->getBlendableLoader()->getBlendableChunk($name);
         $blendChunk->setSeedsDir($this->getSeedsDir());
 
         if ( $blendChunk->revertBlend() ) {

@@ -32,7 +32,7 @@ class SystemSettingMigrationExample extends Migrations
     {
         // Existing Core settings:
         /** @var \LCI\Blend\Blendable\SystemSetting $blendExistingSetting */
-        $blendExistingSetting = $this->blender->getBlendableSystemSetting();
+        $blendExistingSetting = $this->blender->getBlendableLoader()->getBlendableSystemSetting();
         // Can use lots of helper methods for core system settings, see all setCore* methods
         $blendExistingSetting
             ->setSeedsDir($this->getSeedsDir())
@@ -40,7 +40,7 @@ class SystemSettingMigrationExample extends Migrations
             ->blend(true);
 
         // From array:
-        $this->blender->blendManySystemSettings($this->settings, $this->getSeedsDir());
+        $this->blender->getBlendableLoader()->blendManySystemSettings($this->settings, $this->getSeedsDir());
     }
 
     /**
@@ -51,14 +51,14 @@ class SystemSettingMigrationExample extends Migrations
     public function down()
     {
         /** @var \LCI\Blend\Blendable\SystemSetting $blendExistingSetting */
-        $my = $this->blender->getBlendableSystemSetting();
+        $my = $this->blender->getBlendableLoader()->getBlendableSystemSetting();
         // Can use lots of helper methods for core system settings, see all setCore* methods
         $my
             ->setSeedsDir($this->getSeedsDir())
             ->setCoreSiteName('Blend SystemSettingMigrationExample')
             ->revertBlend();
 
-        $this->blender->revertBlendManySystemSettings($this->settings, $this->getSeedsDir());
+        $this->blender->getBlendableLoader()->revertBlendManySystemSettings($this->settings, $this->getSeedsDir());
     }
 
     /**

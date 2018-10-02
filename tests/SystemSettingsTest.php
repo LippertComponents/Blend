@@ -46,7 +46,7 @@ final class SystemSettingsTest extends BaseBlend
     {
         $this->assertEquals(
             true,
-            $this->blender->blendManySystemSettings($this->test_system_settings, BLEND_TEST_SEEDS_DIR),
+            $this->blender->getBlendableLoader()->blendManySystemSettings($this->test_system_settings, BLEND_TEST_SEEDS_DIR),
             'blendManySystemSettings attempted '
         );
 
@@ -77,7 +77,7 @@ final class SystemSettingsTest extends BaseBlend
         // @TODO validate the reverted data
         $this->assertEquals(
             true,
-            $this->blender->revertBlendManySystemSettings($this->test_system_settings, BLEND_TEST_SEEDS_DIR),
+            $this->blender->getBlendableLoader()->revertBlendManySystemSettings($this->test_system_settings, BLEND_TEST_SEEDS_DIR),
             'Revert system settings attempted '
         );
     }

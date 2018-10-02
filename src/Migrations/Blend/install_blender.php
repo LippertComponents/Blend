@@ -61,7 +61,7 @@ class install_blender extends Migrations
         }
 
         /** @var \LCI\Blend\Blendable\SystemSetting $systemSetting */
-        $systemSetting = $this->blender->getBlendableSystemSetting('blend.version');
+        $systemSetting = $this->blender->getBlendableLoader()->getBlendableSystemSetting('blend.version');
         $systemSetting
             ->setSeedsDir($this->getSeedsDir())
             ->setFieldValue($this->blender->getVersion())
@@ -71,7 +71,7 @@ class install_blender extends Migrations
         foreach ($this->empty_settings as $key) {
 
             /** @var \LCI\Blend\Blendable\SystemSetting $systemSetting */
-            $systemSetting = $this->blender->getBlendableSystemSetting($key);
+            $systemSetting = $this->blender->getBlendableLoader()->getBlendableSystemSetting($key);
             $systemSetting
                 ->setSeedsDir($this->getSeedsDir())
                 ->setFieldArea('Blend')
@@ -108,14 +108,14 @@ class install_blender extends Migrations
         }
 
         /** @var \LCI\Blend\Blendable\SystemSetting $systemSetting */
-        $systemSetting = $this->blender->getBlendableSystemSetting('blend.version');
+        $systemSetting = $this->blender->getBlendableLoader()->getBlendableSystemSetting('blend.version');
         $systemSetting
             ->setSeedsDir($this->getSeedsDir())
             ->revertBlend();
 
         foreach ($this->empty_settings as $key) {
             /** @var \LCI\Blend\Blendable\SystemSetting $systemSetting */
-            $systemSetting = $this->blender->getBlendableSystemSetting($key);
+            $systemSetting = $this->blender->getBlendableLoader()->getBlendableSystemSetting($key);
             $systemSetting
                 ->setSeedsDir($this->getSeedsDir())
                 ->revertBlend();
