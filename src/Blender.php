@@ -12,16 +12,7 @@ use LCI\Blend\Helpers\Format;
 use LCI\Blend\Migrations\MigrationsCreator;
 use LCI\Blend\Model\xPDO\BlendMigrations;
 use modX;
-use LCI\Blend\Blendable\Chunk;
-use LCI\Blend\Blendable\Context;
-use LCI\Blend\Blendable\MediaSource;
-use LCI\Blend\Blendable\Plugin;
-use LCI\Blend\Blendable\Resource;
-use LCI\Blend\Blendable\Snippet;
-use LCI\Blend\Blendable\SystemSetting;
-use LCI\Blend\Blendable\Template;
-use LCI\Blend\Blendable\TemplateVariable;
-use LCI\Blend\Helpers\SimpleCache;
+use LCI\Blend\Helpers\BlendableLoader;
 use LCI\MODX\Console\Helpers\UserInteractionHandler;
 use Exception;
 
@@ -54,6 +45,9 @@ class Blender
 
     /** @var boolean|array  */
     protected $blendMigrations = false;
+
+    /** @var BlendableLoader */
+    protected $blendableLoader;
 
     /** @var  \Tagger */
     protected $tagger;
@@ -129,6 +123,39 @@ class Blender
         } else {
             $this->modx->addPackage($this->blend_package, $this->config['model_dir']);
         }
+
+        $this->blendableLoader = new BlendableLoader($this, $this->modx, $this->userInteractionHandler);
+    }
+
+    /**
+     * @deprecated
+     * @param $name
+     * @param $arguments
+     * @return mixed
+     * @throws Exception
+     */
+    public function __call($name, $arguments)
+    {
+        // How to mark as deprecated?
+        if (method_exists($this->blendableLoader, $name)) {
+
+            $message = get_class($this) . '->'.$name.'() has been deprecated, please use ' . get_class($this) . '->getBlendableLoader()->' . $name;
+            //trigger_error($message, E_USER_WARNING);
+            $this->modx->log(\modX::LOG_LEVEL_ERROR, $message);
+
+            return call_user_func_array(array($this->blendableLoader, $name), $arguments);
+
+        } else {
+            throw new Exception('Call to undefined Method ' . get_class($this) . '->' . $name);
+        }
+    }
+
+    /**
+     * @return BlendableLoader
+     */
+    public function getBlendableLoader(): BlendableLoader
+    {
+        return $this->blendableLoader;
     }
 
     /**
@@ -284,636 +311,6 @@ class Blender
     }
 
     /**
-     * Use this method with your IDE to help manually build a Chunk with PHP
-     * @param string $name
-     * @return Chunk
-     */
-    public function getBlendableChunk($name)
-    {
-        /** @var \LCI\Blend\Blendable\Chunk $chunk */
-        $chunk = new Chunk($this->modx, $this, $name);
-        return $chunk->setSeedsDir($this->getSeedsDir());
-    }
-    /**
-     * @param array $chunks
-     * @param string $seeds_dir
-     */
-    public function blendManyChunks($chunks = [], $seeds_dir = '')
-    {
-        // will update if element does exist or create new
-        foreach ($chunks as $seed_key) {
-            /** @var \LCI\Blend\Blendable\Chunk $blendChunk */
-            $blendChunk = new Chunk($this->modx, $this, $this->getNameFromSeedKey($seed_key));
-            if (!empty($seeds_dir)) {
-                $blendChunk->setSeedsDir($seeds_dir);
-            }
-            if ($blendChunk->blendFromSeed($seed_key)) {
-                $this->out($seed_key.' has been blended into ID: ');
-
-            } elseif ($blendChunk->isExists()) {
-                $this->out($seed_key.' chunk already exists', true);
-                if ($this->promptConfirm('Would you like to update?')) {
-                    if ($blendChunk->blendFromSeed($seed_key, true)) {
-                        $this->out($seed_key.' has been blended');
-                    }
-                }
-            } else {
-                $this->out('There was an error saving '.$seed_key, true);
-            }
-        }
-    }
-
-    /**
-     * @param array $chunks
-     * @param string $seeds_dir
-     */
-    public function revertBlendManyChunks($chunks = [], $seeds_dir = '')
-    {
-        // will update if system setting does exist or create new
-        foreach ($chunks as $seed_key) {
-            /** @var \LCI\Blend\Blendable\Chunk $blendChunk */
-            $blendChunk = new Chunk($this->modx, $this, $this->getNameFromSeedKey($seed_key));
-            if (!empty($seeds_dir)) {
-                $blendChunk->setSeedsDir($seeds_dir);
-            }
-
-            if ($blendChunk->revertBlend()) {
-                $this->out($blendChunk->getFieldName().' chunk has been reverted to '.$seeds_dir);
-
-            } else {
-                $this->out($blendChunk->getFieldName().' chunk was not reverted', true);
-            }
-        }
-    }
-
-    /**
-     * Use this method with your IDE to help manually build a Chunk with PHP
-     * @param string $key
-     * @return Context
-     */
-    public function getBlendableContext($key)
-    {
-        /** @var \LCI\Blend\Blendable\Context $chunk */
-        $context = new Context($this->modx, $this, $key);
-        return $context->setSeedsDir($this->getSeedsDir());
-    }
-
-    /**
-     * @param array $contexts
-     * @param string $seeds_dir
-     */
-    public function blendManyContexts($contexts = [], $seeds_dir = '')
-    {
-        // will update if element does exist or create new
-        foreach ($contexts as $seed_key) {
-            /** @var \LCI\Blend\Blendable\Context $blendContext */
-            $blendContext = new Context($this->modx, $this, $this->getNameFromSeedKey($seed_key));
-            if (!empty($seeds_dir)) {
-                $blendContext->setSeedsDir($seeds_dir);
-            }
-            if ($blendContext->blendFromSeed($seed_key)) {
-                $this->out($seed_key.' has been blended ');
-
-            } elseif ($blendContext->isExists()) {
-                $this->out($seed_key.' context already exists', true);
-                if ($this->promptConfirm('Would you like to update?')) {
-                    if ($blendContext->blendFromSeed($seed_key, true)) {
-                        $this->out($seed_key.' has been blended');
-                    }
-                }
-            } else {
-                $this->out('There was an error saving '.$seed_key, true);
-            }
-        }
-    }
-
-    /**
-     * @param array $contexts
-     * @param string $seeds_dir
-     */
-    public function revertBlendManyContexts($contexts = [], $seeds_dir = '')
-    {
-        // will update if system setting does exist or create new
-        foreach ($contexts as $seed_key) {
-            /** @var \LCI\Blend\Blendable\Context $blendContext */
-            $blendContext = new Context($this->modx, $this, $this->getNameFromSeedKey($seed_key));
-            if (!empty($seeds_dir)) {
-                $blendContext->setSeedsDir($seeds_dir);
-            }
-
-            if ($blendContext->revertBlend()) {
-                $this->out($blendContext->getFieldKey().' context has been reverted to '.$seeds_dir);
-
-            } else {
-                $this->out($blendContext->getFieldKey().' context was not reverted', true);
-            }
-        }
-    }
-
-
-    /**
-     * @param string $name
-     * @return \LCI\Blend\Blendable\MediaSource
-     */
-    public function getBlendableMediaSource($name)
-    {
-        /** @var \LCI\Blend\Blendable\MediaSource $mediaSource */
-        $mediaSource = new MediaSource($this->modx, $this, $name);
-        return $mediaSource
-            ->setFieldName($name)
-            ->setSeedsDir($this->getSeedsDir());
-    }
-
-    /**
-     * @param array $media_sources
-     * @param string $seeds_dir
-     */
-    public function blendManyMediaSources($media_sources = [], $seeds_dir = '')
-    {
-        // will update if element does exist or create new
-        foreach ($media_sources as $seed_key) {
-            /** @var \LCI\Blend\Blendable\MediaSource $blendMediaSource */
-            $blendMediaSource = new MediaSource($this->modx, $this);
-            if (!empty($seeds_dir)) {
-                $blendMediaSource->setSeedsDir($seeds_dir);
-            }
-            if ($blendMediaSource->blendFromSeed($seed_key)) {
-                $this->out($seed_key.' has been blended into ID: ');
-
-            } elseif ($blendMediaSource->isExists()) {
-                $this->out($seed_key.' media source already exists', true);
-                if ($this->promptConfirm('Would you like to update?')) {
-                    if ($blendMediaSource->blendFromSeed($seed_key, true)) {
-                        $this->out($seed_key.' has been blended');
-                    }
-                }
-            } else {
-                $this->out('There was an error saving '.$seed_key, true);
-            }
-        }
-    }
-
-    /**
-     * @param array $media_sources
-     * @param string $seeds_dir
-     */
-    public function revertBlendManyMediaSources($media_sources = [], $seeds_dir = '')
-    {
-        // will update if system setting does exist or create new
-        foreach ($media_sources as $seed_key) {
-            /** @var \LCI\Blend\Blendable\MediaSource $blendMediaSource */
-            $blendMediaSource = new MediaSource($this->modx, $this, $this->getNameFromSeedKey($seed_key));
-            if (!empty($seeds_dir)) {
-                $blendMediaSource->setSeedsDir($seeds_dir);
-            }
-
-            if ($blendMediaSource->revertBlend()) {
-                $this->out($blendMediaSource->getFieldName().' media source has been reverted to '.$seeds_dir);
-
-            } else {
-                $this->out($blendMediaSource->getFieldName().' media source was not reverted', true);
-            }
-        }
-    }
-
-    /**
-     * Use this method with your IDE to help manually build a Plugin with PHP
-     * @param string $name
-     * @return \LCI\Blend\Blendable\Plugin
-     */
-    public function getBlendablePlugin($name)
-    {
-        /** @var \LCI\Blend\Blendable\Plugin $plugin */
-        $plugin = new Plugin($this->modx, $this, $name);
-        return $plugin->setSeedsDir($this->getSeedsDir());
-    }
-
-    /**
-     * @param array $plugins
-     * @param string $seeds_dir
-     */
-    public function blendManyPlugins($plugins = [], $seeds_dir = '')
-    {
-        // will update if element does exist or create new
-        foreach ($plugins as $seed_key) {
-            /** @var \LCI\Blend\Blendable\Plugin $blendPlugin */
-            $blendPlugin = new Plugin($this->modx, $this, $this->getNameFromSeedKey($seed_key));
-            if (!empty($seeds_dir)) {
-                $blendPlugin->setSeedsDir($seeds_dir);
-            }
-            if ($blendPlugin->blendFromSeed($seed_key)) {
-                $this->out($seed_key.' has been blended into ID: ');
-
-            } elseif ($blendPlugin->isExists()) {
-                $this->out($seed_key.' plugin already exists', true);
-                if ($this->promptConfirm('Would you like to update?')) {
-                    if ($blendPlugin->blendFromSeed($seed_key, true)) {
-                        $this->out($seed_key.' has been blended');
-                    }
-                }
-            } else {
-                $this->out('There was an error saving '.$seed_key, true);
-            }
-        }
-    }
-
-    /**
-     * @param array $plugins
-     * @param string $seeds_dir
-     */
-    public function revertBlendManyPlugins($plugins = [], $seeds_dir = '')
-    {
-        // will update if system setting does exist or create new
-        foreach ($plugins as $seed_key) {
-            /** @var \LCI\Blend\Blendable\Plugin $blendPlugin */
-            $blendPlugin = new Plugin($this->modx, $this);
-            if (!empty($seeds_dir)) {
-                $blendPlugin->setSeedsDir($seeds_dir);
-            }
-
-            if ($blendPlugin->revertBlend()) {
-                $this->out($blendPlugin->getFieldName().' plugin has been reverted to '.$seeds_dir);
-
-            } else {
-                $this->out($blendPlugin->getFieldName().' plugin was not reverted', true);
-            }
-        }
-    }
-
-    /**
-     * Use this method with your IDE to help manually build a Snippet with PHP
-     * @param string $name
-     * @return \LCI\Blend\Blendable\Snippet
-     */
-    public function getBlendableSnippet($name)
-    {
-        /** @var Snippet $snippet */
-        $snippet = new Snippet($this->modx, $this, $name);
-        return $snippet->setSeedsDir($this->getSeedsDir());
-    }
-
-    /**
-     * @param array $snippets
-     * @param string $seeds_dir
-     */
-    public function blendManySnippets($snippets = [], $seeds_dir = '')
-    {
-        // will update if element does exist or create new
-        foreach ($snippets as $seed_key) {
-            /** @var \LCI\Blend\Blendable\Snippet $blendSnippet */
-            $blendSnippet = new Snippet($this->modx, $this, $this->getNameFromSeedKey($seed_key));
-            if (!empty($seeds_dir)) {
-                $blendSnippet->setSeedsDir($seeds_dir);
-            }
-            if ($blendSnippet->blendFromSeed($seed_key)) {
-                $this->out($seed_key.' has been blended');
-
-            } elseif ($blendSnippet->isExists()) {
-                $this->out($seed_key.' snippet already exists', true);
-                if ($this->promptConfirm('Would you like to update?')) {
-                    if ($blendSnippet->blendFromSeed($seed_key, true)) {
-                        $this->out($seed_key.' has been blended');
-                    }
-                }
-            } else {
-                $this->out('There was an error saving '.$seed_key, true);
-            }
-        }
-    }
-    /**
-     * @param array $snippets
-     * @param string $seeds_dir
-     */
-    public function revertBlendManySnippets($snippets = [], $seeds_dir = '')
-    {
-        // will update if system setting does exist or create new
-        foreach ($snippets as $seed_key) {
-            /** @var Snippet $blendSnippet */
-            $blendSnippet = new Snippet($this->modx, $this, $this->getNameFromSeedKey($seed_key));
-            if (!empty($seeds_dir)) {
-                $blendSnippet->setSeedsDir($seeds_dir);
-            }
-
-            if ($blendSnippet->revertBlend()) {
-                $this->out($blendSnippet->getFieldName().' snippet has been reverted to '.$seeds_dir);
-
-            } else {
-                $this->out($blendSnippet->getFieldName().' snippet was not reverted', true);
-            }
-        }
-    }
-
-    /**
-     * Use this method with your IDE to manually build a template
-     * @param string $name
-     * @return \LCI\Blend\Blendable\Template
-     */
-    public function getBlendableTemplate($name)
-    {
-        /** @var \LCI\Blend\Blendable\Template $template */
-        $template = new Template($this->modx, $this, $name);
-        return $template->setSeedsDir($this->seeds_dir);
-    }
-
-    /**
-     * @param array $templates
-     * @param string $seeds_dir
-     * @param bool $overwrite
-     */
-    public function blendManyTemplates($templates = [], $seeds_dir = '', $overwrite = false)
-    {
-        // will update if template does exist or create new
-        foreach ($templates as $seed_key) {
-
-            /** @var \LCI\Blend\Blendable\Template $blendTemplate */
-            $blendTemplate = new Template($this->modx, $this, $this->getNameFromSeedKey($seed_key));
-            if (!empty($seeds_dir)) {
-                $blendTemplate->setSeedsDir($seeds_dir);
-            }
-            if ($blendTemplate->blendFromSeed($seed_key, $overwrite)) {
-                $this->out($seed_key.' has been blended');
-
-            } elseif ($blendTemplate->isExists()) {
-                $this->out($seed_key.' template already exists', true);
-                if ($this->promptConfirm('Would you like to update?')) {
-                    if ($blendTemplate->blendFromSeed($seed_key, true)) {
-                        $this->out($seed_key.' has been blended');
-                    }
-                }
-            } else {
-                $this->out('There was an error saving '.$seed_key, true);
-            }
-        }
-    }
-
-    /**
-     * @param array $templates
-     * @param string $seeds_dir
-     */
-    public function revertBlendManyTemplates($templates = [], $seeds_dir = '')
-    {
-        // will update if system setting does exist or create new
-        foreach ($templates as $seed_key) {
-            /** @var \LCI\Blend\Blendable\Template $blendTemplate */
-            $blendTemplate = new Template($this->modx, $this, $this->getNameFromSeedKey($seed_key));
-            if (!empty($seeds_dir)) {
-                $blendTemplate->setSeedsDir($seeds_dir);
-            }
-
-            if ($blendTemplate->revertBlend()) {
-                $this->out($blendTemplate->getFieldName().' template has been reverted to '.$seeds_dir);
-
-            } else {
-                $this->out($blendTemplate->getFieldName().' template was not reverted', true);
-            }
-        }
-    }
-
-    /**
-     * Use this method with your IDE to manually build a template variable
-     * @param string $name
-     * @return TemplateVariable
-     */
-    public function getBlendableTemplateVariable($name)
-    {
-        /** @var \LCI\Blend\Blendable\TemplateVariable $tv */
-        $tv = new TemplateVariable($this->modx, $this, $name);
-        return $tv->setSeedsDir($this->seeds_dir);
-    }
-
-    /**
-     * @param string $alias
-     * @param  string $context
-     * @return \LCI\Blend\Blendable\Resource
-     */
-    public function getBlendableResource($alias, $context = 'web')
-    {
-        /** @var \LCI\Blend\Blendable\Resource $resource */
-        $resource = new Resource($this->modx, $this, $alias, $context);
-        return $resource
-            ->setSeedsDir($this->getSeedsDir());
-    }
-    /**
-     * @param array $resources
-     * @param string $seeds_dir
-     * @param bool $overwrite
-     *
-     * @return bool
-     */
-    public function blendManyResources($resources = [], $seeds_dir = '', $overwrite = false)
-    {
-        $saved = true;
-        // will update if resource does exist or create new
-        foreach ($resources as $context => $seeds) {
-            foreach ($seeds as $seed_key) {
-                /** @var \LCI\Blend\Blendable\Resource $blendResource */
-                $blendResource = new Resource($this->modx, $this, $this->getAliasFromSeedKey($seed_key), $context);
-
-                if (!empty($seeds_dir)) {
-                    $blendResource->setSeedsDir($seeds_dir);
-                }
-
-                if ($blendResource->blendFromSeed($seed_key, $overwrite)) {
-                    $this->out($seed_key.' has been blended into ID: ');
-
-                } elseif ($blendResource->isExists()) {
-                    $this->out($seed_key.' already exists', true);
-                    if ($this->promptConfirm('Would you like to update?')) {
-                        if ($blendResource->blendFromSeed($seed_key, true)) {
-                            $this->out($seed_key.' has been blended into ID: ');
-                        }
-                    }
-                } else {
-                    $this->out('There was an error saving '.$seed_key, true);
-                    echo 'There was an error saving '.$seed_key; exit();
-                    $saved = false;
-                }
-            }
-        }
-
-        return $saved;
-    }
-
-    /**
-     * @param array $resources
-     * @param string $seeds_dir
-     * @param bool $overwrite
-     *
-     * @return bool
-     */
-    public function revertBlendManyResources($resources = [], $seeds_dir = '', $overwrite = false)
-    {
-        $saved = true;
-        // will update if resource does exist or create new
-        foreach ($resources as $context => $seeds) {
-            foreach ($seeds as $seed_key) {
-                /** @var \LCI\Blend\Blendable\Resource $blendResource */
-                $blendResource = new Resource($this->modx, $this, $this->getAliasFromSeedKey($seed_key), $context);
-
-                if (!empty($seeds_dir)) {
-                    $blendResource->setSeedsDir($seeds_dir);
-                }
-                if ($blendResource->revertBlend()) {
-                    $this->out($seed_key.' has been reverted ');
-
-                } else {
-                    $this->out('There was an error reverting resource '.$seed_key, true);
-                    $saved = false;
-                }
-            }
-        }
-
-        return $saved;
-    }
-
-    /**
-     * @param string $key
-     * @return \LCI\Blend\Blendable\SystemSetting
-     */
-    public function getBlendableSystemSetting($key = '')
-    {
-        /** @var \LCI\Blend\Blendable\SystemSetting $systemSetting */
-        $systemSetting = new SystemSetting($this->modx, $this, $key);
-        return $systemSetting->setSeedsDir($this->getSeedsDir());
-    }
-
-    /**
-     * @param array $settings ~ [ ['name' => 'mySystemSetting', 'value' => 'myValue'], ..]
-     * @param string $seeds_dir
-     *
-     * @return bool
-     */
-    public function blendManySystemSettings($settings = [], $seeds_dir = '')
-    {
-        $success = true;
-        // will update if system setting does exist or create new
-        foreach ($settings as $data) {
-            if (isset($data['columns'])) {
-                $setting = $data['columns'];
-            } else {
-                $setting = $data;
-                $data['columns'] = $data;
-            }
-
-            if (isset($setting['key'])) {
-                $key = $setting['key'];
-
-            } elseif (isset($setting['name'])) {
-                $key = $setting['name'];
-
-            } else {
-                // Error: no name/key
-                $success = false;
-                continue;
-            }
-
-            $systemSetting = $this->getBlendableSystemSetting($key);
-            if (!empty($seeds_dir)) {
-                $systemSetting->setSeedsDir($seeds_dir);
-            }
-
-            if ($systemSetting->blendFromArray($data, true)) {
-                $this->out($systemSetting->getFieldName().' setting has been blended');
-            } else {
-                $success = false;
-            }
-        }
-
-        return $success;
-    }
-
-    /**
-     * @param array $settings ~ [ ['name' => 'mySystemSetting', 'value' => 'myValue'], ..]
-     * @param string $seeds_dir
-     *
-     * @return bool
-     */
-    public function revertBlendManySystemSettings($settings = [], $seeds_dir = '')
-    {
-        $success = true;
-        // will update if system setting does exist or create new
-        foreach ($settings as $data) {
-            if (isset($data['columns'])) {
-                $setting = $data['columns'];
-            } else {
-                $setting = $data;
-                $data['columns'] = $data;
-            }
-
-            if (isset($setting['key'])) {
-                $key = $setting['key'];
-
-            } elseif (isset($setting['name'])) {
-                $key = $setting['name'];
-
-            } else {
-                // Error: no name/key
-                $success = false;
-                continue;
-            }
-
-            $systemSetting = $this->getBlendableSystemSetting($key);
-
-            if (!empty($seeds_dir)) {
-                $systemSetting->setSeedsDir($seeds_dir);
-            }
-
-            if ($systemSetting->revertBlend()) {
-                $this->out($systemSetting->getFieldName().' setting has been reverted to '.$seeds_dir);
-
-            } else {
-                $this->out($systemSetting->getFieldName().' setting was not reverted', true);
-                $success = false;
-            }
-        }
-
-        return $success;
-    }
-
-    /**
-     * @param string $question
-     * @param string $default
-     *
-     * @return mixed
-     */
-    protected function prompt($question, $default = '')
-    {
-        return $this->userInteractionHandler->promptInput($question, $default);
-    }
-
-    /**
-     * @param string $question
-     * @param bool $default
-     * @return bool
-     */
-    protected function promptConfirm($question, $default = true)
-    {
-        return $this->userInteractionHandler->promptConfirm($question, $default);
-    }
-
-    /**
-     * @param string $question
-     * @param string|mixed $default
-     * @param array $options ~ ex: ['Option1' => 'value', 'Option2' => 'value2', ...]
-     * @return mixed ~ selected value
-     */
-    protected function promptSelectOneOption($question, $default, $options = [])
-    {
-        return $this->userInteractionHandler->promptSelectOneOption($question, $default, $options);
-    }
-
-    /**
-     * @param string $question
-     * @param string|mixed $default
-     * @param array $options ~ ex: ['Option1' => 'value', 'Option2' => 'value2', ...]
-     * @return array ~ array of selected values
-     */
-    protected function promptSelectMultipleOptions($question, $default, $options = [])
-    {
-        return $this->userInteractionHandler->promptSelectMultipleOptions($question, $default, $options);
-    }
-
-    /**
      * @param string $message
      * @param bool $error
      */
@@ -1034,11 +431,8 @@ class Blender
                 if (!file_exists($this->getMigrationPath())) {
                     $create = true;
                     if ($prompt) {
-                        $response = $this->prompt('Create the following directory for migration files? (y/n) '.PHP_EOL
-                            .$this->getMigrationPath(), 'y');
-                        if (strtolower(trim($response)) != 'y') {
-                            $create = false;
-                        }
+                        $create = $this->userInteractionHandler->promptConfirm('Create the following directory for migration files?' . PHP_EOL
+                            .$this->getMigrationPath(), true);
                     }
                     if ($create) {
                         mkdir($this->getMigrationPath(), 0700, true);
@@ -1497,6 +891,3 @@ class Blender
         }
     }
 }
-/**
- * id | element_class | name | data | action ??
- */
