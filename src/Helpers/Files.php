@@ -46,7 +46,7 @@ trait Files
     {
         $destination = rtrim($destination, '\/\\');
         if (!is_dir($destination)) {
-            mkdir($destination, $this->mode);
+            $this->makeDirectory($destination);
         }
 
         /** @var \RecursiveDirectoryIterator $directoryIterator */
@@ -69,7 +69,7 @@ trait Files
                 if (is_dir($destination.DIRECTORY_SEPARATOR.$recursiveIteratorIterator->getSubPathName())) {
                     continue;
                 }
-                mkdir($destination.DIRECTORY_SEPARATOR.$recursiveIteratorIterator->getSubPathName(), $this->mode);
+                $this->makeDirectory($destination.DIRECTORY_SEPARATOR.$recursiveIteratorIterator->getSubPathName());
 
             } else {
                 copy($item, $destination.DIRECTORY_SEPARATOR.$recursiveIteratorIterator->getSubPathName());
@@ -113,6 +113,20 @@ trait Files
         }
 
         return false;
+    }
+
+    /**
+     * @param $directory
+     * @return bool
+     */
+    protected function makeDirectory($directory)
+    {
+        $created = file_exists($directory);
+        if (!$created && $created = mkdir($directory)) {
+            chmod($directory, $this->mode);
+        }
+
+        return $created;
     }
 
 }
