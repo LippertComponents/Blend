@@ -6,6 +6,7 @@ $xpdo_meta_map['BlendMigrations']= array (
   'extends' => 'xPDOSimpleObject',
   'fields' => 
   array (
+    'project' => 'local',
     'name' => NULL,
     'version' => NULL,
     'type' => 'master',
@@ -14,9 +15,18 @@ $xpdo_meta_map['BlendMigrations']= array (
     'author' => NULL,
     'created_at' => 'CURRENT_TIMESTAMP',
     'processed_at' => NULL,
+    'ran_sequence' => NULL,
   ),
   'fieldMeta' => 
   array (
+    'project' =>
+    array (
+      'dbtype' => 'varchar',
+      'precision' => '255',
+      'phptype' => 'string',
+      'null' => false,
+      'default' => 'local',
+    ),
     'name' => 
     array (
       'dbtype' => 'varchar',
@@ -73,5 +83,11 @@ $xpdo_meta_map['BlendMigrations']= array (
       'phptype' => 'timestamp',
       'null' => true,
     ),
+    'ran_sequence' =>
+    array(
+      'dbtype' => 'int',
+      'phptype' => 'int',
+      'null' => true
+    )
   ),
 );
