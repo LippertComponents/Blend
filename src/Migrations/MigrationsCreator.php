@@ -2,6 +2,7 @@
 
 namespace LCI\Blend\Migrations;
 
+use LCI\Blend\Blender;
 use LCI\Blend\Helpers\Format;
 use LCI\MODX\Console\Helpers\UserInteractionHandler;
 
@@ -48,6 +49,9 @@ class MigrationsCreator
     /** @var \LCI\MODX\Console\Helpers\UserInteractionHandler */
     protected $userInteractionHandler;
 
+    /** @var int @see https://symfony.com/doc/current/console/verbosity.html */
+    protected $verbose = Blender::VERBOSITY_NORMAL;
+
     /**
      * MigrationsCreator constructor.
      * @param UserInteractionHandler $userInteractionHandler
@@ -64,6 +68,25 @@ class MigrationsCreator
 
         $this->migration_templates_path = __DIR__.'/templates/';
         $this->setBaseMigrationsPath(dirname(__DIR__).DIRECTORY_SEPARATOR);
+    }
+
+    /**
+     * @return int
+     */
+    public function getVerbose(): int
+    {
+        return $this->verbose;
+    }
+
+    /**
+     * @param int $verbose
+     * @see https://symfony.com/doc/current/console/verbosity.html
+     * @return $this
+     */
+    public function setVerbose(int $verbose)
+    {
+        $this->verbose = $verbose;
+        return $this;
     }
 
     /**
@@ -388,7 +411,7 @@ class MigrationsCreator
         if (file_exists($migration_template)) {
             $file_contents = file_get_contents($migration_template);
         } else {
-            $this->out('Migration template file not found: '.$migration_template, true);
+            $this->outError('Migration template file not found: '.$migration_template);
         }
 
         foreach ($placeholders as $name => $value) {
@@ -399,7 +422,7 @@ class MigrationsCreator
 
         $write = false;
         if (file_exists($this->migrations_path.$class_name.'.php')) {
-            $this->out($this->migrations_path.$class_name.'.php migration file already exists', true);
+            $this->outError($this->migrations_path.$class_name.'.php migration file already exists');
 
         }
         /**
@@ -420,12 +443,12 @@ class MigrationsCreator
                     'created_at' => date('Y-m-d H:i:s')
                 ];
             } catch (\Exception $exception) {
-                $this->out($exception->getMessage(), true);
+                $this->outError($exception->getMessage());
             }
 
             if (!$write) {
-                $this->out($this->migrations_path.$class_name.'.php Did not write to file', true);
-                $this->out('Verify that the folders exists and are writable by PHP', true);
+                $this->outError($this->migrations_path.$class_name.'.php Did not write to file');
+                $this->outError('Verify that the folders exists and are writable by PHP');
             }
         }
 
@@ -434,15 +457,28 @@ class MigrationsCreator
 
     /**
      * @param string $message
+     * @param int $verbose
      * @param bool $error
      */
-    public function out($message, $error = false)
+    public function out($message, $verbose=Blender::VERBOSITY_NORMAL, $error = false)
     {
-        if ($error) {
-            $this->userInteractionHandler->tellUser($message, userInteractionHandler::MASSAGE_ERROR);
+        if ($this->getVerbose() >= $verbose) {
+            if ($error) {
+                $this->userInteractionHandler->tellUser($message, userInteractionHandler::MASSAGE_ERROR);
 
-        } else {
-            $this->userInteractionHandler->tellUser($message, userInteractionHandler::MASSAGE_STRING);
+            } else {
+                $this->userInteractionHandler->tellUser($message, userInteractionHandler::MASSAGE_STRING);
+            }
+        }
+    }
+    /**
+     * @param string $message
+     * @param int $verbose
+     */
+    public function outError($message, $verbose=Blender::VERBOSITY_NORMAL)
+    {
+        if ($this->getVerbose() >= $verbose) {
+            $this->userInteractionHandler->tellUser($message, userInteractionHandler::MASSAGE_ERROR);
         }
     }
 

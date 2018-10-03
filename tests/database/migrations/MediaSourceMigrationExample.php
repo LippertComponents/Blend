@@ -28,8 +28,8 @@ class MediaSourceMigrationExample extends Migrations
 
         } else {
             //error
-            $this->blender->out($testMediaSource3->getFieldName().' did not save correctly ', true);
-            $this->blender->out(print_r($testMediaSource3->getErrorMessages(), true), true);
+            $this->blender->outError($testMediaSource3->getFieldName().' did not save correctly ');
+            $this->blender->outError(print_r($testMediaSource3->getErrorMessages(), true), \LCI\Blend\Blender::VERBOSITY_DEBUG);
         }
     }
 
@@ -47,7 +47,7 @@ class MediaSourceMigrationExample extends Migrations
             $this->blender->out($testMediaSource3->getFieldName().' setting has been reverted to '.$this->getSeedsDir());
 
         } else {
-            $this->blender->out($testMediaSource3->getFieldName().' setting was not reverted', true);
+            $this->blender->outError($testMediaSource3->getFieldName().' setting was not reverted');
         }
     }
 

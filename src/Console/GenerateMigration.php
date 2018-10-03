@@ -28,7 +28,7 @@ class GenerateMigration extends BaseCommand
             ->setDescription('Generate a Blend Migration Class')
             ->addOption(
                 'name',
-                'n',
+                'N',
                 InputOption::VALUE_OPTIONAL,
                 'The name of the generated migration file'
             )

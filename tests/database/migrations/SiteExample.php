@@ -39,8 +39,8 @@ class SiteExample extends Migrations
 
         } else {
             //error
-            $this->blender->out($mediaSource->getFieldName().' did not save correctly ', true);
-            $this->blender->out(print_r($mediaSource->getErrorMessages(), true), true);
+            $this->blender->outError($mediaSource->getFieldName().' did not save correctly ');
+            $this->blender->outError(print_r($mediaSource->getErrorMessages(), true), \LCI\Blend\Blender::VERBOSITY_DEBUG);
         }
 
 
@@ -60,8 +60,8 @@ class SiteExample extends Migrations
 
         } else {
             //error
-            $this->blender->out($contextSiteExample->getFieldKey().' did not save correctly ', true);
-            $this->blender->out(print_r($contextSiteExample->getErrorMessages(), true), true);
+            $this->blender->outError($contextSiteExample->getFieldKey().' did not save correctly ');
+            $this->blender->outError(print_r($contextSiteExample->getErrorMessages(), true), \LCI\Blend\Blender::VERBOSITY_DEBUG);
         }
 
         /** @var \LCI\Blend\Blendable\Template $templateSiteExample */
@@ -77,8 +77,8 @@ class SiteExample extends Migrations
 
         } else {
             //error
-            $this->blender->out($templateSiteExample->getFieldName().' did not save correctly ', true);
-            $this->blender->out(print_r($templateSiteExample->getErrorMessages(), true), true);
+            $this->blender->outError($templateSiteExample->getFieldName().' did not save correctly ');
+            $this->blender->outError(print_r($templateSiteExample->getErrorMessages(), true), \LCI\Blend\Blender::VERBOSITY_DEBUG);
         }
 
         $alias = 'index';
@@ -102,8 +102,8 @@ class SiteExample extends Migrations
 
         } else {
             //error
-            $this->blender->out($resourceSiteExample->getFieldAlias().' did not save correctly ', true);
-            $this->blender->out(print_r($templateSiteExample->getErrorMessages(), true), true);
+            $this->blender->outError($resourceSiteExample->getFieldAlias().' did not save correctly ');
+            $this->blender->outError(print_r($templateSiteExample->getErrorMessages(), true), \LCI\Blend\Blender::VERBOSITY_DEBUG);
         }
 
         $alias = 'site-example-resource';
@@ -125,8 +125,8 @@ class SiteExample extends Migrations
 
         } else {
             //error
-            $this->blender->out($resourceSiteExample->getFieldAlias().' did not save correctly ', true);
-            $this->blender->out(print_r($templateSiteExample->getErrorMessages(), true), true);
+            $this->blender->outError($resourceSiteExample->getFieldAlias().' did not save correctly ');
+            $this->blender->outError(print_r($templateSiteExample->getErrorMessages(), true), \LCI\Blend\Blender::VERBOSITY_DEBUG);
         }
 
         /** @var \LCI\Blend\Blendable\Chunk $chunk */
@@ -142,8 +142,8 @@ class SiteExample extends Migrations
 
         } else {
             //error
-            $this->blender->out($chunkSiteExample->getFieldName().' did not save correctly ', true);
-            $this->blender->out(print_r($chunkSiteExample->getErrorMessages(), true), true);
+            $this->blender->outError($chunkSiteExample->getFieldName().' did not save correctly ');
+            $this->blender->outError(print_r($chunkSiteExample->getErrorMessages(), true), \LCI\Blend\Blender::VERBOSITY_DEBUG);
         }
 
         $plugin_name = 'pluginSiteExample';
@@ -166,8 +166,8 @@ class SiteExample extends Migrations
 
         } else {
             //error
-            $this->blender->out($pluginSiteExample->getFieldName().' did not save correctly ', true);
-            $this->blender->out(print_r($pluginSiteExample->getErrorMessages(), true), true);
+            $this->blender->outError($pluginSiteExample->getFieldName().' did not save correctly ');
+            $this->blender->outError(print_r($pluginSiteExample->getErrorMessages(), true), \LCI\Blend\Blender::VERBOSITY_DEBUG);
         }
 
 
@@ -184,8 +184,8 @@ class SiteExample extends Migrations
 
         } else {
             //error
-            $this->blender->out($snippetSiteExample->getFieldName().' did not save correctly ', true);
-            $this->blender->out(print_r($snippetSiteExample->getErrorMessages(), true), true);
+            $this->blender->outError($snippetSiteExample->getFieldName().' did not save correctly ');
+            $this->blender->outError(print_r($snippetSiteExample->getErrorMessages(), true), \LCI\Blend\Blender::VERBOSITY_DEBUG);
         }
 
         /** @var \LCI\Blend\Blendable\SystemSetting $systemSettingSiteExample */
@@ -200,8 +200,8 @@ class SiteExample extends Migrations
 
         } else {
             //error
-            $this->blender->out($systemSettingSiteExample->getFieldName().' did not save correctly ', true);
-            $this->blender->out(print_r($systemSettingSiteExample->getErrorMessages(), true), true);
+            $this->blender->outError($systemSettingSiteExample->getFieldName().' did not save correctly ');
+            $this->blender->outError(print_r($systemSettingSiteExample->getErrorMessages(), true), \LCI\Blend\Blender::VERBOSITY_DEBUG);
         }
     }
 
@@ -218,7 +218,7 @@ class SiteExample extends Migrations
             $this->blender->out($mediaSource->getFieldName().' setting has been reverted to '.$this->getSeedsDir());
 
         } else {
-            $this->blender->out($mediaSource->getFieldName().' setting was not reverted', true);
+            $this->blender->outError($mediaSource->getFieldName().' setting was not reverted');
         }
 
         $contextSiteExample = $this->blender->getBlendableLoader()->getBlendableContext('site');
@@ -227,7 +227,7 @@ class SiteExample extends Migrations
             $this->blender->out($contextSiteExample->getFieldKey().' setting has been reverted to '.$this->getSeedsDir());
 
         } else {
-            $this->blender->out($contextSiteExample->getFieldKey().' setting was not reverted', true);
+            $this->blender->outError($contextSiteExample->getFieldKey().' setting was not reverted');
         }
 
         $blendTemplate = $this->blender->getBlendableLoader()->getBlendableTemplate('templateSiteExample');
@@ -236,7 +236,7 @@ class SiteExample extends Migrations
             $this->blender->out($blendTemplate->getFieldName().' template has been reverted to '.$this->getSeedsDir());
 
         } else {
-            $this->blender->out($blendTemplate->getFieldName().' template was not reverted', true);
+            $this->blender->outError($blendTemplate->getFieldName().' template was not reverted');
         }
 
         $resourceSiteExample = $this->blender->getBlendableLoader()->getBlendableResource('index');
@@ -245,7 +245,7 @@ class SiteExample extends Migrations
             $this->blender->out($resourceSiteExample->getFieldAlias().' resource has been reverted to '.$this->getSeedsDir());
 
         } else {
-            $this->blender->out($resourceSiteExample->getFieldAlias().' resource was not reverted', true);
+            $this->blender->outError($resourceSiteExample->getFieldAlias().' resource was not reverted');
         }
 
         $resourceSiteExample = $this->blender->getBlendableLoader()->getBlendableResource('site-example-resource');
@@ -254,7 +254,7 @@ class SiteExample extends Migrations
             $this->blender->out($resourceSiteExample->getFieldAlias().' resource has been reverted to '.$this->getSeedsDir());
 
         } else {
-            $this->blender->out($resourceSiteExample->getFieldAlias().' resource was not reverted', true);
+            $this->blender->outError($resourceSiteExample->getFieldAlias().' resource was not reverted');
         }
 
 
@@ -264,7 +264,7 @@ class SiteExample extends Migrations
             $this->blender->out($blendChunk->getFieldName().' setting has been reverted to '.$this->getSeedsDir());
 
         } else {
-            $this->blender->out($blendChunk->getFieldName().' setting was not reverted', true);
+            $this->blender->outError($blendChunk->getFieldName().' setting was not reverted');
         }
 
         /** @var \LCI\Blend\Blendable\Plugin $pluginSiteExample */
@@ -275,7 +275,7 @@ class SiteExample extends Migrations
             $this->blender->out($pluginSiteExample->getFieldName().' plugin has been reverted to '.$this->getSeedsDir());
 
         } else {
-            $this->blender->out($pluginSiteExample->getFieldName().' plugin was not reverted', true);
+            $this->blender->outError($pluginSiteExample->getFieldName().' plugin was not reverted');
         }
 
         /** @var \LCI\Blend\Blendable\Snippet $snippetSiteExample */
@@ -286,7 +286,7 @@ class SiteExample extends Migrations
             $this->blender->out($snippetSiteExample->getFieldName().' snippet has been reverted to '.$this->getSeedsDir());
 
         } else {
-            $this->blender->out($snippetSiteExample->getFieldName().' snippet was not reverted', true);
+            $this->blender->outError($snippetSiteExample->getFieldName().' snippet was not reverted');
         }
 
 
@@ -301,7 +301,7 @@ class SiteExample extends Migrations
             $this->blender->out($systemSettingSiteExample->getFieldName().' system setting has been reverted to '.$this->getSeedsDir());
 
         } else {
-            $this->blender->out($systemSettingSiteExample->getFieldName().' system setting was not reverted', true);
+            $this->blender->outError($systemSettingSiteExample->getFieldName().' system setting was not reverted');
         }
     }
 

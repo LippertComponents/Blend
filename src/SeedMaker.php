@@ -71,6 +71,7 @@ class SeedMaker
 
             $migrationCreator
                 ->setPathTimeStamp($this->format->getPathTimeStamp())
+                ->setVerbose($this->blender->getVerbose())
                 ->setName($name)
                 ->setDescription('')
                 ->setServerType($server_type)
@@ -111,6 +112,7 @@ class SeedMaker
 
             $migrationCreator
                 ->setPathTimeStamp($this->format->getPathTimeStamp())
+                ->setVerbose($this->blender->getVerbose())
                 ->setName($name)
                 ->setDescription('')
                 ->setServerType($server_type)
@@ -151,6 +153,7 @@ class SeedMaker
 
             $migrationCreator
                 ->setPathTimeStamp($this->format->getPathTimeStamp())
+                ->setVerbose($this->blender->getVerbose())
                 ->setName($name)
                 ->setDescription('')
                 ->setServerType($server_type)
@@ -191,6 +194,7 @@ class SeedMaker
 
             $migrationCreator
                 ->setPathTimeStamp($this->format->getPathTimeStamp())
+                ->setVerbose($this->blender->getVerbose())
                 ->setName($name)
                 ->setDescription('')
                 ->setServerType($server_type)
@@ -237,6 +241,7 @@ class SeedMaker
 
             $migrationCreator
                 ->setPathTimeStamp($this->format->getPathTimeStamp())
+                ->setVerbose($this->blender->getVerbose())
                 ->setName($name)
                 ->setDescription('')
                 ->setServerType($server_type)
@@ -277,6 +282,7 @@ class SeedMaker
 
             $migrationCreator
                 ->setPathTimeStamp($this->format->getPathTimeStamp())
+                ->setVerbose($this->blender->getVerbose())
                 ->setName($name)
                 ->setDescription('')
                 ->setServerType($server_type)
@@ -323,6 +329,7 @@ class SeedMaker
 
             $migrationCreator
                 ->setPathTimeStamp($this->format->getPathTimeStamp())
+                ->setVerbose($this->blender->getVerbose())
                 ->setName($name)
                 ->setDescription('')
                 ->setServerType($server_type)
@@ -364,6 +371,7 @@ class SeedMaker
 
             $migrationCreator
                 ->setPathTimeStamp($this->format->getPathTimeStamp())
+                ->setVerbose($this->blender->getVerbose())
                 ->setName($name)
                 ->setDescription('')
                 ->setServerType($server_type)
@@ -397,6 +405,7 @@ class SeedMaker
 
         $migrationCreator
             ->setPathTimeStamp($this->format->getPathTimeStamp())
+            ->setVerbose($this->blender->getVerbose())
             ->setName($name)
             ->setDescription('')
             ->setServerType($server_type)

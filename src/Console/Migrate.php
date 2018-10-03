@@ -25,7 +25,7 @@ class Migrate extends BaseCommand
             ->setDescription('Run Blend Data migrations')
             ->addOption(
                 'name',
-                'n',
+                'N',
                 InputOption::VALUE_OPTIONAL,
                 'The name of the migration file to run. Or when used with the -g option, name the generated migration file'
             )
@@ -61,6 +61,7 @@ class Migrate extends BaseCommand
      * @param InputInterface $input
      * @param OutputInterface $output
      * @return int|null|void
+     * @throws \LCI\Blend\Exception\MigratorException
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {

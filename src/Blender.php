@@ -8,6 +8,7 @@
 
 namespace LCI\Blend;
 
+use LCI\Blend\Console\Blend;
 use LCI\Blend\Exception\MigratorException;
 use LCI\Blend\Helpers\Format;
 use LCI\Blend\Helpers\BlendableLoader;
@@ -15,11 +16,12 @@ use LCI\Blend\Migrations\MigrationsCreator;
 use LCI\Blend\Migrations\Migrator;
 use LCI\MODX\Console\Helpers\UserInteractionHandler;
 use modX;
+use Symfony\Component\Console\Output\OutputInterface;
 
 class Blender
 {
     /** @var string ~ version number of the project */
-    private $version = '1.0.0 beta';
+    private $version = '1.0.0 beta13';
 
     /** @var  \modx */
     protected $modx;
@@ -61,6 +63,12 @@ class Blender
 
     protected $blend_package = 'blend';
 
+    const VERBOSITY_QUIET = OutputInterface::VERBOSITY_QUIET;
+    const VERBOSITY_NORMAL = OutputInterface::VERBOSITY_NORMAL;
+    const VERBOSITY_VERBOSE = OutputInterface::VERBOSITY_VERBOSE;
+    const VERBOSITY_VERY_VERBOSE = OutputInterface::VERBOSITY_VERY_VERBOSE;
+    const VERBOSITY_DEBUG = OutputInterface::VERBOSITY_DEBUG;
+
     /**
      * Blender constructor.
      *
@@ -99,6 +107,9 @@ class Blender
                 'tagger' => false
             ]
         ];
+
+        $this->setVerbose();
+
         $this->config = array_merge($this->config, $config);
 
         $this->seeds_dir = date('Y_m_d_His');
@@ -165,6 +176,25 @@ class Blender
     public function getConfig(): array
     {
         return $this->config;
+    }
+
+    /**
+     * @return int
+     */
+    public function getVerbose(): int
+    {
+        return $this->config['verbose'];
+    }
+
+    /**
+     * @param int $verbose
+     * @see https://symfony.com/doc/current/console/verbosity.html
+     * @return $this
+     */
+    public function setVerbose(int $verbose=self::VERBOSITY_NORMAL)
+    {
+        $this->config['verbose'] = $verbose;
+        return $this;
     }
 
     /**
@@ -274,24 +304,41 @@ class Blender
 
     /**
      * @param string $message
+     * @param int $verbose
      * @param bool $error
      */
-    public function out($message, $error = false)
+    public function out($message, $verbose=Blender::VERBOSITY_NORMAL, $error = false)
     {
-        if ($error) {
-            $this->userInteractionHandler->tellUser($message, userInteractionHandler::MASSAGE_ERROR);
+        if ($this->getVerbose() >= $verbose) {
+            if ($error) {
+                $this->userInteractionHandler->tellUser($message, userInteractionHandler::MASSAGE_ERROR);
 
-        } else {
-            $this->userInteractionHandler->tellUser($message, userInteractionHandler::MASSAGE_STRING);
+            } else {
+                $this->userInteractionHandler->tellUser($message, userInteractionHandler::MASSAGE_STRING);
+            }
         }
     }
 
     /**
      * @param string $message
+     * @param int $verbose
      */
-    public function outSuccess($message)
+    public function outError($message, $verbose=Blender::VERBOSITY_NORMAL)
     {
-        $this->userInteractionHandler->tellUser($message, userInteractionHandler::MASSAGE_SUCCESS);
+        if ($this->getVerbose() >= $verbose) {
+            $this->userInteractionHandler->tellUser($message, userInteractionHandler::MASSAGE_ERROR);
+        }
+    }
+
+    /**
+     * @param string $message
+     * @param int $verbose
+     */
+    public function outSuccess($message, $verbose=Blender::VERBOSITY_NORMAL)
+    {
+        if ($this->getVerbose() >= $verbose) {
+            $this->userInteractionHandler->tellUser($message, userInteractionHandler::MASSAGE_SUCCESS);
+        }
     }
 
     /**
@@ -351,6 +398,21 @@ class Blender
         $migrator = new Migrator($blender, $this->modx, 'lci\blend');
         $migrator->runMigration($method);
 
+        // does the migration directory exist?
+        if (!file_exists($this->getMigrationPath())) {
+            $this->out('MKDIR', 0);
+            $create = true;
+            if ($this->getVerbose() >= Blender::VERBOSITY_NORMAL) {
+                $create = $this->getUserInteractionHandler()->promptConfirm('Create the following directory for migration files?'.PHP_EOL
+                    .$this->getMigrationPath(), true);
+            }
+
+            if ($create) {
+                mkdir($this->getMigrationPath(), 0700, true);
+                $this->outSuccess('Created migration directory: '.$this->getMigrationPath());
+            }
+        }
+
         /** @var \LCI\Blend\Blendable\SystemSetting $systemSetting */
         $systemSetting = $this->getBlendableLoader()->getBlendableSystemSetting('blend.version');
         $systemSetting
@@ -358,6 +420,8 @@ class Blender
             ->setFieldValue($this->getVersion())
             ->setFieldArea('Blend')
             ->blend(true);
+
+        $this->modx->cacheManager->refresh();
     }
 
     /**
@@ -385,9 +449,10 @@ class Blender
     {
         $upgrade = false;
 
-        $current_vesion = $this->modx->getOption('blend.version');
+        $current_version = $this->modx->getOption('blend.version');
         //                                      FILE version,        DB Version
-        if ($this->isBlendInstalledInModx() && (!$current_vesion || version_compare($this->getVersion(), $current_vesion))) {
+        if ($this->isBlendInstalledInModx() && (!$current_version || version_compare($this->getVersion(), $current_version) === 1)) {
+            $this->outError('MODX System Setting Version: '. $current_version.' Code version: '.$this->getVersion(), Blender::VERBOSITY_DEBUG);
             $upgrade = true;
         }
 
@@ -471,15 +536,15 @@ class Blender
                 $removed = true;
                 $migration = $this->modx->getObject($this->blend_class_object, ['name' => $class_name]);
                 if (is_object($migration) && $migration->remove()) {
-                    $this->out($class_name.' migration has been removed from the blend_migrations table');
+                    $this->out($class_name.' migration has been removed from the blend_migrations table', Blender::VERBOSITY_VERY_VERBOSE);
 
                 }
             } else {
-                $this->out($class_name.' migration has not been removed from the blend_migrations table', true);
+                $this->outError($class_name.' migration has not been removed from the blend_migrations table');
             }
 
         } else {
-            $this->out($this->getMigrationPath().$class_name.'.php migration could not be found to remove', true);
+            $this->outError($this->getMigrationPath().$class_name.'.php migration could not be found to remove');
         }
 
         return $removed;

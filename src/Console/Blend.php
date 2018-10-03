@@ -56,10 +56,10 @@ class Blend extends BaseCommand
      * @param InputInterface $input
      * @param OutputInterface $output
      * @return int|null|void
+     * @throws \LCI\Blend\Exception\MigratorException
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $output->writeln(__METHOD__);
         switch ($this->exe_type) {
             case 'install':
                 $this->blender->install('up', true);

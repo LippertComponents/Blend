@@ -137,7 +137,6 @@ final class ContextTest extends BaseBlend
 
         $this->blender->getSeedMaker()->makeContextSeeds(['key' => $context_key]);
 
-        $this->blender->out('DIR: '.BLEND_COMPARE_DIRECTORY.$context_key.'.php', true);
         $this->assertEquals(
             $this->removeStringLineEndings($this->getStringAfterFirstComment(file_get_contents(BLEND_COMPARE_DIRECTORY.'testContextFR.migration.php'))),
             $this->removeStringLineEndings($this->getStringAfterFirstComment(file_get_contents($this->blender->getMigrationPath().'m2018_01_10_093000_Context.php'))),

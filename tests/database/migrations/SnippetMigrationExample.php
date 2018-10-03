@@ -30,8 +30,8 @@ class SnippetMigrationExample extends Migrations
 
         } else {
             //error
-            $this->blender->out($testSnippet3->getFieldName().' did not save correctly ', true);
-            $this->blender->out(print_r($testSnippet3->getErrorMessages(), true), true);
+            $this->blender->outError($testSnippet3->getFieldName().' did not save correctly ');
+            $this->blender->outError(print_r($testSnippet3->getErrorMessages(), true), \LCI\Blend\Blender::VERBOSITY_DEBUG);
         }
     }
 
@@ -53,7 +53,7 @@ class SnippetMigrationExample extends Migrations
             $this->blender->out($blendSnippet->getFieldName().' snippet has been reverted to '.$this->getSeedsDir());
 
         } else {
-            $this->blender->out($blendSnippet->getFieldName().' snippet was not reverted', true);
+            $this->blender->outError($blendSnippet->getFieldName().' snippet was not reverted', \LCI\Blend\Blender::VERBOSITY_DEBUG);
         }
     }
 

@@ -32,8 +32,8 @@ class ContextMigrationExample extends Migrations
 
         } else {
             //error
-            $this->blender->out($testContext3->getFieldKey().' did not save correctly ', true);
-            $this->blender->out(print_r($testContext3->getErrorMessages(), true), true);
+            $this->blender->outError($testContext3->getFieldKey().' did not save correctly ');
+            $this->blender->outError(print_r($testContext3->getErrorMessages(), true), \LCI\Blend\Blender::VERBOSITY_DEBUG);
         }
     }
 
@@ -53,7 +53,7 @@ class ContextMigrationExample extends Migrations
             $this->blender->out($blendContext->getFieldKey().' setting has been reverted to '.$this->getSeedsDir());
 
         } else {
-            $this->blender->out($blendContext->getFieldKey().' setting was not reverted', true);
+            $this->blender->outError($blendContext->getFieldKey().' setting was not reverted');
         }
     }
 

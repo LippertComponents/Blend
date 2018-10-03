@@ -31,7 +31,6 @@ class TVsLoadFromSeedsExample extends Migrations
      */
     public function down()
     {
-        echo PHP_EOL. ' DIR: '.$this->getSeedsDir().PHP_EOL;
         $this->blender->getBlendableLoader()->revertBlendManyTemplates($this->templates, $this->getSeedsDir());
     }
 

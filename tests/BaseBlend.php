@@ -86,6 +86,8 @@ class BaseBlend extends TestCase
 
         $this->blender = new Blender($this->modx, $this->consoleUserInteractionHandler, ['blend_modx_migration_dir' => BLEND_TEST_TEMP_MIGRATION_PATH]);
 
+        $this->blender->setVerbose(BLEND_VERBOSE);
+
         if ($this->install_blend) {
             $this->blender->install();
         }

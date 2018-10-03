@@ -57,6 +57,8 @@ abstract class BaseCommand extends Command
                     'blend_modx_migration_dir' => $local_migration_path,
                 ]
             );
+
+            $this->blender->setVerbose($output->getVerbosity());
         }
     }
 }

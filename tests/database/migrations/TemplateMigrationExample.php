@@ -30,8 +30,8 @@ class TemplateMigrationExample extends Migrations
 
         } else {
             //error
-            $this->blender->out($testTemplate3->getFieldName().' did not save correctly ', true);
-            $this->blender->out(print_r($testTemplate3->getErrorMessages(), true), true);
+            $this->blender->outError($testTemplate3->getFieldName().' did not save correctly ');
+            $this->blender->outError(print_r($testTemplate3->getErrorMessages(), true), \LCI\Blend\Blender::VERBOSITY_DEBUG);
         }
     }
 
@@ -52,7 +52,7 @@ class TemplateMigrationExample extends Migrations
             $this->blender->out($blendTemplate->getFieldName().' setting has been reverted to '.$this->getSeedsDir());
 
         } else {
-            $this->blender->out($blendTemplate->getFieldName().' setting was not reverted', true);
+            $this->blender->outError($blendTemplate->getFieldName().' setting was not reverted');
         }
     }
 

@@ -29,8 +29,8 @@ class ChunkMigrationExample extends Migrations
 
         } else {
             //error
-            $this->blender->out($testChunk3->getFieldName().' did not save correctly ', true);
-            $this->blender->out(print_r($testChunk3->getErrorMessages(), true), true);
+            $this->blender->outError($testChunk3->getFieldName().' did not save correctly ');
+            $this->blender->outError(print_r($testChunk3->getErrorMessages(), true), \LCI\Blend\Blender::VERBOSITY_DEBUG);
         }
     }
 
@@ -50,7 +50,7 @@ class ChunkMigrationExample extends Migrations
             $this->blender->out($blendChunk->getFieldName().' setting has been reverted to '.$this->getSeedsDir());
 
         } else {
-            $this->blender->out($blendChunk->getFieldName().' setting was not reverted', true);
+            $this->blender->outError($blendChunk->getFieldName().' setting was not reverted');
         }
     }
 

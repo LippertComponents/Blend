@@ -26,7 +26,7 @@ class Seed extends BaseCommand
             ->setDescription('Export Blend seeds, data migrations')
             ->addOption(
                 'name',
-                'n',
+                'N',
                 InputOption::VALUE_OPTIONAL,
                 'Append this value to current timestamp for the generated migration file and seeds directory'
             )

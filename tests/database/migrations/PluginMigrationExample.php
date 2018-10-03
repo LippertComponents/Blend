@@ -33,8 +33,8 @@ class PluginMigrationExample extends Migrations
 
         } else {
             //error
-            $this->blender->out($testPlugin3->getFieldName().' did not save correctly ', true);
-            $this->blender->out(print_r($testPlugin3->getErrorMessages(), true), true);
+            $this->blender->outError($testPlugin3->getFieldName().' did not save correctly ');
+            $this->blender->outError(print_r($testPlugin3->getErrorMessages(), true), \LCI\Blend\Blender::VERBOSITY_DEBUG);
         }
     }
 
@@ -56,7 +56,7 @@ class PluginMigrationExample extends Migrations
             $this->blender->out($blendPlugin->getFieldName().' plugin has been reverted to '.$this->getSeedsDir());
 
         } else {
-            $this->blender->out($blendPlugin->getFieldName().' plugin was not reverted', true);
+            $this->blender->outError($blendPlugin->getFieldName().' plugin was not reverted');
         }
     }
 
