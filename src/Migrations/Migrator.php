@@ -9,6 +9,7 @@
 namespace LCI\Blend\Migrations;
 
 use LCI\Blend\Blender;
+use LCI\Blend\Exception\MigratorException;
 use LCI\Blend\Migrations;
 use modX;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -90,7 +91,7 @@ class Migrator
                     $migration->fromArray($data);
                     $migration->save();
                 }
-            } catch (\Exception $exception) {
+            } catch (MigratorException $exception) {
                 $this->outError($exception->getMessage());
             }
         }
@@ -102,7 +103,7 @@ class Migrator
      * @param int $count
      * @param int $id
      * @param null|string $name
-     * @throws \Exception
+     * @throws MigratorException
      */
     public function runMigration($method = 'up', $type = 'master', $count = 0, $id = 0, $name = null)
     {
@@ -186,7 +187,7 @@ class Migrator
     }
 
     /**
-     * @throws \Exception
+     * @throws MigratorException
      */
     protected function runExistingDBMigrations()
     {
@@ -216,7 +217,7 @@ class Migrator
 
             } else {
                 // error
-                throw new \Exception('Class: ' . $name .' is not an instance of LCI\BLend\Migrations');
+                throw new MigratorException('Class: ' . $name .' is not an instance of LCI\BLend\Migrations');
             }
         }
     }

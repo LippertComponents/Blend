@@ -8,13 +8,13 @@
 
 namespace LCI\Blend;
 
+use LCI\Blend\Exception\MigratorException;
 use LCI\Blend\Helpers\Format;
+use LCI\Blend\Helpers\BlendableLoader;
 use LCI\Blend\Migrations\MigrationsCreator;
 use LCI\Blend\Migrations\Migrator;
-use modX;
-use LCI\Blend\Helpers\BlendableLoader;
 use LCI\MODX\Console\Helpers\UserInteractionHandler;
-use Exception;
+use modX;
 
 class Blender
 {
@@ -62,7 +62,7 @@ class Blender
     protected $blend_package = 'blend';
 
     /**
-     * Stockpile constructor.
+     * Blender constructor.
      *
      * @param \modX $modx
      * @param UserInteractionHandler $userInteractionHandler
@@ -125,7 +125,7 @@ class Blender
      * @param $name
      * @param $arguments
      * @return mixed
-     * @throws Exception
+     * @throws MigratorException
      */
     public function __call($name, $arguments)
     {
@@ -139,7 +139,7 @@ class Blender
             return call_user_func_array(array($this->blendableLoader, $name), $arguments);
 
         } else {
-            throw new Exception('Call to undefined Method ' . get_class($this) . '->' . $name);
+            throw new MigratorException('Call to undefined Method ' . get_class($this) . '->' . $name);
         }
     }
 
@@ -332,7 +332,12 @@ class Blender
     /**
      * @param string $method
      * @param bool $prompt
-     * @throws Exception
+     * @throws MigratorException
+     */
+    /**
+     * @param string $method
+     * @param bool $prompt
+     * @throws MigratorException
      */
     public function install($method = 'up', $prompt = false)
     {
@@ -356,7 +361,7 @@ class Blender
     }
 
     /**
-     * @throws Exception
+     * @throws MigratorException
      */
     public function uninstall()
     {
@@ -365,7 +370,7 @@ class Blender
 
     /**
      * @param string $method
-     * @throws Exception
+     * @throws MigratorException
      */
     public function update($method = 'up')
     {
@@ -429,7 +434,7 @@ class Blender
      * @param int $count
      * @param int $id
      * @param null|string $name
-     * @throws Exception
+     * @throws MigratorException
      */
     public function runMigration($method = 'up', $type = 'master', $count = 0, $id = 0, $name = null)
     {
