@@ -11,12 +11,12 @@ final class TemplateTVTest extends BaseBlend
         'AutoTagTV',
         'CheckboxTV',
         'DateTV',
-        'ListboxSingleSelectTV',
-        'ListboxMultiSelectTV',
         'EmailTV',
         'FileTV',
         'HiddenTV',
         'ImageTV',
+        'ListboxMultiSelectTV',
+        'ListboxSingleSelectTV',
         'NumberTV',
         'RadioOptionsTV',
         'ResourceListTV',
@@ -95,6 +95,7 @@ final class TemplateTVTest extends BaseBlend
     public function testCreatedTVs()
     {
         $template_name = 'TVAllTestTypes';
+        /** @var modTemplate $testTVTemplate */
         $testTVTemplate = $this->modx->getObject('modTemplate', ['templatename' => $template_name]);
 
         $cacheOptions = [
@@ -128,6 +129,9 @@ final class TemplateTVTest extends BaseBlend
             );
 
         }
+
+        sort($created_tvs);
+        sort($this->seeded_tvs);
 
         $this->assertEquals(
             $this->seeded_tvs,
@@ -163,7 +167,12 @@ final class TemplateTVTest extends BaseBlend
         );
 
         // now verify that that TVs were also removed:
-        $remainingTVs = $this->modx->getCollection('modTemplateVar', ['name:IN' => $this->seeded_tvs]);
+        $query = $this->modx->newQuery('modTemplateVar');
+        $query
+            ->where(['name:IN' => $this->seeded_tvs])
+            ->sortby('name');
+
+        $remainingTVs = $this->modx->getCollection('modTemplateVar', $query);
 
         $this->assertEquals(
             0,

@@ -137,16 +137,18 @@ final class SiteTest extends BaseBlend
             $generated_data = require_once $seed_path;
         }
         if (is_array($fixed_data)) {
-            unset($fixed_data['columns']['createdon'], $fixed_data['columns']['editedon'], $fixed_data['columns']['id']);
+            unset($fixed_data['columns']['createdon'], $fixed_data['columns']['editedon'], $fixed_data['columns']['id'],
+                $fixed_data['columns']['createdby'],$fixed_data['columns']['properties']['visibility']);
         }
         if (is_array($generated_data)  ) {
-            unset($generated_data['columns']['createdon'], $generated_data['columns']['editedon'], $generated_data['columns']['id']);
+            unset($generated_data['columns']['createdon'], $generated_data['columns']['editedon'], $generated_data['columns']['id'],
+                $generated_data['columns']['createdby'], $generated_data['columns']['properties']['visibility']);
         }
 
         $this->assertEquals(
             $fixed_data,
             $generated_data,
-            'Comparing existing testSnippet2 seed file with generated seed file'
+            $comment
         );
     }
 

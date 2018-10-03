@@ -9,7 +9,8 @@ final class BlendTest extends BaseBlend
 
         $this->assertEquals(
             true,
-            $this->blender->isBlendInstalledInModx()
+            $this->blender->isBlendInstalledInModx(),
+            'Blend did not install'
         );
     }
 
@@ -56,7 +57,7 @@ final class BlendTest extends BaseBlend
     public function testCanBeUninstalledBlend()
     {
         if (BLEND_CLEAN_UP) {
-            $this->blender->install('down');
+            $this->blender->uninstall();
 
             $this->assertEquals(
                 false,

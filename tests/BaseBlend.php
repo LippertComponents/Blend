@@ -44,7 +44,7 @@ class BaseBlend extends TestCase
      */
     public static function tearDownAfterClass()
     {
-        if (BLEND_COPY_TEST_MIGRATION_FILES) {
+        if (BLEND_COPY_TEST_MIGRATION_FILES && BLEND_CLEAN_UP) {
             // delete files form temp:
             $fileHelper = new SimpleCache(BLEND_TEST_TEMP_MIGRATION_PATH);
             $fileHelper->deleteDirectory(BLEND_TEST_TEMP_MIGRATION_PATH.'database/');

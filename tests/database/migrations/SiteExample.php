@@ -81,6 +81,30 @@ class SiteExample extends Migrations
             $this->blender->out(print_r($templateSiteExample->getErrorMessages(), true), true);
         }
 
+        $alias = 'index';
+        $content = 'Index page code...';
+        $description = 'Site Example...';
+        $long_title = 'Site Index Example, Long title';
+        $page_title = 'Site Index Example, Page Title';
+        /** @var \LCI\Blend\Blendable\Resource $resourceSiteExample */
+        $resourceSiteExample = $this->blender->getBlendableLoader()->getBlendableResource($alias);
+        $resourceSiteExample
+            ->setSeedsDir(BLEND_TEST_SEEDS_DIR)
+            ->setFieldTemplate('templateSiteExample')
+            ->setFieldContent($content)
+            ->setFieldDescription($description)
+            ->setFieldLongtitle($long_title)
+            ->setFieldPagetitle($page_title)
+            ->setFieldPublished(true);
+
+        if ($resourceSiteExample->blend(true)) {
+            $this->blender->out($resourceSiteExample->getFieldAlias().' was saved correctly');
+
+        } else {
+            //error
+            $this->blender->out($resourceSiteExample->getFieldAlias().' did not save correctly ', true);
+            $this->blender->out(print_r($templateSiteExample->getErrorMessages(), true), true);
+        }
 
         $alias = 'site-example-resource';
         $content = 'Site Example content, can put in HTML here';
@@ -213,6 +237,15 @@ class SiteExample extends Migrations
 
         } else {
             $this->blender->out($blendTemplate->getFieldName().' template was not reverted', true);
+        }
+
+        $resourceSiteExample = $this->blender->getBlendableLoader()->getBlendableResource('index');
+        $resourceSiteExample->setSeedsDir($this->getSeedsDir());
+        if ( $resourceSiteExample->revertBlend() ) {
+            $this->blender->out($resourceSiteExample->getFieldAlias().' resource has been reverted to '.$this->getSeedsDir());
+
+        } else {
+            $this->blender->out($resourceSiteExample->getFieldAlias().' resource was not reverted', true);
         }
 
         $resourceSiteExample = $this->blender->getBlendableLoader()->getBlendableResource('site-example-resource');

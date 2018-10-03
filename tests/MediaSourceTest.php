@@ -59,16 +59,6 @@ final class MediaSourceTest extends BaseBlend
     {
         $media_source_name = 'testMediaSource1';
 
-        // Make test chunk:
-        $testMediaSource = $this->modx->getObject('modMediaSource', ['name' => $media_source_name]);
-        if($testMediaSource) {
-            echo __METHOD__;
-            //print_r($testMediaSource->toArray()); exit();
-        } else {
-            echo 'FAILED to get: '.$media_source_name;
-        }
-        //print_r($testMediaSource->toArray()); exit();
-
         $actual_timestamp = $this->blender->getSeedsDir();
         $this->blender->setSeedsDir(BLEND_TEST_SEEDS_DIR);
 
@@ -76,7 +66,7 @@ final class MediaSourceTest extends BaseBlend
 
         $this->blender->getSeedMaker()->makeMediaSourceSeeds(['name' => $media_source_name]);
 
-        $this->blender->out('DIR: '.BLEND_COMPARE_DIRECTORY.$media_source_name.'.php', true);
+        //$this->blender->out('DIR: '.BLEND_COMPARE_DIRECTORY.$media_source_name.'.php', true);
         $this->assertEquals(
             $this->removeStringLineEndings($this->getStringAfterFirstComment(file_get_contents(BLEND_COMPARE_DIRECTORY.$media_source_name.'.php'))),
             $this->removeStringLineEndings($this->getStringAfterFirstComment(file_get_contents($this->blender->getMigrationPath().'m2018_01_10_093000_MediaSource.php'))),
@@ -84,17 +74,19 @@ final class MediaSourceTest extends BaseBlend
         );
 
         $fixed_data = require_once BLEND_COMPARE_DIRECTORY.'testMediaSource1.seed.php';
+
         $generated_data = false;
         $seed_file = $this->blender->getSeedsPath($seeds_directory).DIRECTORY_SEPARATOR.'media-sources'.DIRECTORY_SEPARATOR.$media_source_name.'.cache.php';
         if (file_exists($seed_file)) {
             $generated_data = require_once $seed_file;
         }
-        unset($generated_data['columns']['id']);
+
+        unset($generated_data['columns']['id'], $generated_data['columns']['properties']['visibility'], $fixed_data['columns']['properties']['visibility']);
 
         $this->assertEquals(
             $fixed_data,
             $generated_data,
-            'Comparing existing testMediaSource seed file with generated seed file'
+            'Comparing existing testMediaSource seed file with generated seed file: '.PHP_EOL.$seed_file
         );
 
         $this->blender->setSeedsDir($actual_timestamp);
