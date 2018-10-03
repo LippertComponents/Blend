@@ -30,7 +30,7 @@ class v1_0_0_beta_update extends Migrations
         // only thing to change is the version number
 
         /** @var \LCI\Blend\Blendable\SystemSetting $systemSetting */
-        $systemSetting = $this->blender->getBlendableSystemSetting('blend.version');
+        $systemSetting = $this->blender->getBlendableLoader()->getBlendableSystemSetting('blend.version');
         $systemSetting
             ->setSeedsDir($this->getSeedsDir())
             ->setFieldValue('1.0.0 beta')
@@ -40,7 +40,7 @@ class v1_0_0_beta_update extends Migrations
         foreach ($this->empty_settings as $key) {
 
             /** @var \LCI\Blend\Blendable\SystemSetting $systemSetting */
-            $systemSetting = $this->blender->getBlendableSystemSetting($key);
+            $systemSetting = $this->blender->getBlendableLoader()->getBlendableSystemSetting($key);
             $systemSetting
                 ->setSeedsDir($this->getSeedsDir())
                 ->setFieldArea('Blend')
@@ -58,7 +58,7 @@ class v1_0_0_beta_update extends Migrations
     public function down()
     {
         /** @var \LCI\Blend\Blendable\SystemSetting $systemSetting */
-        $systemSetting = $this->blender->getBlendableSystemSetting('blend.version');
+        $systemSetting = $this->blender->getBlendableLoader()->getBlendableSystemSetting('blend.version');
         $systemSetting
             ->setSeedsDir($this->getSeedsDir())
             ->revertBlend();
@@ -66,7 +66,7 @@ class v1_0_0_beta_update extends Migrations
         foreach ($this->empty_settings as $key) {
 
             /** @var \LCI\Blend\Blendable\SystemSetting $systemSetting */
-            $systemSetting = $this->blender->getBlendableSystemSetting($key);
+            $systemSetting = $this->blender->getBlendableLoader()->getBlendableSystemSetting($key);
             $systemSetting
                 ->setSeedsDir($this->getSeedsDir())
                 ->revertBlend();

@@ -7,7 +7,7 @@
 
 use \LCI\Blend\Migrations;
 
-class v0_9_7_update extends Migrations
+class v1_0_0_beta_update_013 extends Migrations
 {
     /**
      * Run the migrations.
@@ -19,16 +19,29 @@ class v0_9_7_update extends Migrations
         /** @var \xPDOManager $manager */
         $manager = $this->modx->getManager();
 
-        // the class table object name
         $columns = $this->getCurrentColumns();
 
-        if (!in_array('author', $columns)) {
-            if ($manager->addField('BlendMigrations', 'author', ['after' => 'status'])) {
-                $this->blender->outSuccess('The author column was add to the BlendMigrations class (' .
+        if (!in_array('project', $columns)) {
+            // the class table object name
+            if ($manager->addField('BlendMigrations', 'project', ['after' => 'id'])) {
+                $this->blender->outSuccess('The project column was add to the BlendMigrations class (' .
                     $this->modx->getTableName('BlendMigrations') . ') successfully');
 
             } else {
-                $this->blender->out('The author column was not added to the BlendMigrations class (' .
+                $this->blender->out('The project column was not added to the BlendMigrations class (' .
+                    $this->modx->getTableName('BlendMigrations') . ') successfully', true);
+            }
+        }
+
+
+        if (!in_array('ran_sequence', $columns)) {
+            // the class table object name
+            if ($manager->addField('BlendMigrations', 'ran_sequence', ['after' => 'processed_at'])) {
+                $this->blender->outSuccess('The ran_sequence column was add to the BlendMigrations class (' .
+                    $this->modx->getTableName('BlendMigrations') . ') successfully');
+
+            } else {
+                $this->blender->out('The author ran_sequence was not added to the BlendMigrations class (' .
                     $this->modx->getTableName('BlendMigrations') . ') successfully', true);
             }
         }
@@ -38,7 +51,7 @@ class v0_9_7_update extends Migrations
         $systemSetting = $this->blender->getBlendableLoader()->getBlendableSystemSetting('blend.version');
         $systemSetting
             ->setSeedsDir($this->getSeedsDir())
-            ->setFieldValue('0.9.7')
+            ->setFieldValue('1.0.0-beta13')
             ->setFieldArea('Blend')
             ->blend(true);
 
@@ -67,12 +80,12 @@ class v0_9_7_update extends Migrations
             $manager = $this->modx->getManager();
 
             // the class table object name
-            if ($manager->removeField('BlendMigrations', 'author', ['after' => 'status'])) {
-                $this->blender->outSuccess('The author column was removed from the BlendMigrations class ('.
+            if ($manager->removeField('BlendMigrations', 'project', ['after' => 'status'])) {
+                $this->blender->outSuccess('The project column was removed from the BlendMigrations class ('.
                     $this->modx->getTableName('BlendMigrations').') successfully');
 
             } else {
-                $this->blender->out('The author column was not removed from the BlendMigrations class ('.
+                $this->blender->out('The project column was not removed from the BlendMigrations class ('.
                     $this->modx->getTableName('BlendMigrations').') successfully', true);
             }
         }
@@ -96,7 +109,7 @@ class v0_9_7_update extends Migrations
      */
     protected function assignDescription()
     {
-        $this->description = 'Update Blend to v0.9.7 from v0.9.6 and below';
+        $this->description = 'Update Blend to v1.0.0 beta13 from v1.0.0 beta and below';
     }
 
     /**
@@ -104,7 +117,7 @@ class v0_9_7_update extends Migrations
      */
     protected function assignVersion()
     {
-        $this->version = '0.9.7';
+        $this->version = '1.0.0 beta13';
     }
 
     /**
@@ -120,6 +133,6 @@ class v0_9_7_update extends Migrations
      */
     protected function assignSeedsDir()
     {
-        $this->seeds_dir = '2018_02_07_070707';
+        $this->seeds_dir = '2018_10_03_070707';
     }
 }
