@@ -6,6 +6,7 @@
  */
 
 use \LCI\Blend\Migrations;
+use LCI\MODX\Console\Console;
 
 class v1_0_0_beta_update_013 extends Migrations
 {
@@ -46,6 +47,9 @@ class v1_0_0_beta_update_013 extends Migrations
             }
         }
 
+        /** @var \LCI\MODX\Console\Console $console */
+        $console = new Console();
+        $console->registerPackageCommands('LCI\Blend\Console\ActivePackageCommands');
 
         /** @var \LCI\Blend\Blendable\SystemSetting $systemSetting */
         $systemSetting = $this->blender->getBlendableLoader()->getBlendableSystemSetting('blend.version');
@@ -65,6 +69,10 @@ class v1_0_0_beta_update_013 extends Migrations
      */
     public function down()
     {
+        /** @var \LCI\MODX\Console\Console $console */
+        $console = new Console();
+        $console->cancelRegistrationPackageCommands('LCI\Blend\Console\ActivePackageCommands');
+
         /** @var \LCI\Blend\Blendable\SystemSetting $systemSetting */
         $systemSetting = $this->blender->getBlendableLoader()->getBlendableSystemSetting('blend.version');
         $systemSetting
