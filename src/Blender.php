@@ -358,6 +358,7 @@ class Blender
 
         $success = $migrationCreator
             ->setPathTimeStamp($this->getSeedsDir())
+            ->setVerbose($this->getVerbose())
             ->setName($name)
             ->setDescription('')
             ->setServerType($server_type)

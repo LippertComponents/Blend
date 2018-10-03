@@ -87,6 +87,7 @@ class GenerateMigration extends BaseCommand
         }
 
         $success = $migrationCreator
+            ->setVerbose($output->getVerbosity())
             ->setName($name)
             ->setDescription('')
             ->setServerType($type)
