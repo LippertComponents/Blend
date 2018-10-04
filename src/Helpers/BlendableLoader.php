@@ -8,6 +8,7 @@
 
 namespace LCI\Blend\Helpers;
 
+use LCI\Blend\Blendable\Blendable;
 use LCI\Blend\Blender;
 use LCI\Blend\Blendable\Context;
 use LCI\Blend\Blendable\Chunk;
@@ -70,22 +71,8 @@ class BlendableLoader
         foreach ($chunks as $seed_key) {
             /** @var \LCI\Blend\Blendable\Chunk $blendChunk */
             $blendChunk = new Chunk($this->modx, $this->blender, $this->blender->getNameFromSeedKey($seed_key));
-            if (!empty($seeds_dir)) {
-                $blendChunk->setSeedsDir($seeds_dir);
-            }
-            if ($blendChunk->blendFromSeed($seed_key)) {
-                $this->blender->out($seed_key.' has been blended into ID: ');
 
-            } elseif ($blendChunk->isExists()) {
-                $this->blender->out($seed_key.' chunk already exists', true);
-                if ($this->userInteractionHandler->promptConfirm('Would you like to update?', true)) {
-                    if ($blendChunk->blendFromSeed($seed_key, true)) {
-                        $this->blender->out($seed_key.' has been blended');
-                    }
-                }
-            } else {
-                $this->blender->out('There was an error saving '.$seed_key, true);
-            }
+            $this->blendOneFromMany($blendChunk, $seed_key, 'Chunk', $seeds_dir);
         }
     }
 
@@ -99,16 +86,8 @@ class BlendableLoader
         foreach ($chunks as $seed_key) {
             /** @var \LCI\Blend\Blendable\Chunk $blendChunk */
             $blendChunk = new Chunk($this->modx, $this->blender, $this->blender->getNameFromSeedKey($seed_key));
-            if (!empty($seeds_dir)) {
-                $blendChunk->setSeedsDir($seeds_dir);
-            }
 
-            if ($blendChunk->revertBlend()) {
-                $this->blender->out($blendChunk->getFieldName().' chunk has been reverted to '.$seeds_dir);
-
-            } else {
-                $this->blender->out($blendChunk->getFieldName().' chunk was not reverted', true);
-            }
+            $this->revertOneFromMany($blendChunk, $seed_key, 'Chunk', $seeds_dir);
         }
     }
 
@@ -134,22 +113,8 @@ class BlendableLoader
         foreach ($contexts as $seed_key) {
             /** @var \LCI\Blend\Blendable\Context $blendContext */
             $blendContext = new Context($this->modx, $this->blender, $this->blender->getNameFromSeedKey($seed_key));
-            if (!empty($seeds_dir)) {
-                $blendContext->setSeedsDir($seeds_dir);
-            }
-            if ($blendContext->blendFromSeed($seed_key)) {
-                $this->blender->out($seed_key.' has been blended ');
 
-            } elseif ($blendContext->isExists()) {
-                $this->blender->out($seed_key.' context already exists', true);
-                if ($this->userInteractionHandler->promptConfirm('Would you like to update?', true)) {
-                    if ($blendContext->blendFromSeed($seed_key, true)) {
-                        $this->blender->out($seed_key.' has been blended');
-                    }
-                }
-            } else {
-                $this->blender->out('There was an error saving '.$seed_key, true);
-            }
+            $this->blendOneFromMany($blendContext, $seed_key, 'Context', $seeds_dir);
         }
     }
 
@@ -163,19 +128,10 @@ class BlendableLoader
         foreach ($contexts as $seed_key) {
             /** @var \LCI\Blend\Blendable\Context $blendContext */
             $blendContext = new Context($this->modx, $this->blender, $this->blender->getNameFromSeedKey($seed_key));
-            if (!empty($seeds_dir)) {
-                $blendContext->setSeedsDir($seeds_dir);
-            }
 
-            if ($blendContext->revertBlend()) {
-                $this->blender->out($blendContext->getFieldKey().' context has been reverted to '.$seeds_dir);
-
-            } else {
-                $this->blender->out($blendContext->getFieldKey().' context was not reverted', true);
-            }
+            $this->revertOneFromMany($blendContext, $seed_key, 'Context', $seeds_dir);
         }
     }
-
 
     /**
      * @param string $name
@@ -200,22 +156,8 @@ class BlendableLoader
         foreach ($media_sources as $seed_key) {
             /** @var \LCI\Blend\Blendable\MediaSource $blendMediaSource */
             $blendMediaSource = new MediaSource($this->modx, $this->blender);
-            if (!empty($seeds_dir)) {
-                $blendMediaSource->setSeedsDir($seeds_dir);
-            }
-            if ($blendMediaSource->blendFromSeed($seed_key)) {
-                $this->blender->out($seed_key.' has been blended into ID: ');
 
-            } elseif ($blendMediaSource->isExists()) {
-                $this->blender->out($seed_key.' media source already exists', true);
-                if ($this->userInteractionHandler->promptConfirm('Would you like to update?', true)) {
-                    if ($blendMediaSource->blendFromSeed($seed_key, true)) {
-                        $this->blender->out($seed_key.' has been blended');
-                    }
-                }
-            } else {
-                $this->blender->out('There was an error saving '.$seed_key, true);
-            }
+            $this->blendOneFromMany($blendMediaSource, $seed_key, 'MediaSource', $seeds_dir);
         }
     }
 
@@ -229,16 +171,8 @@ class BlendableLoader
         foreach ($media_sources as $seed_key) {
             /** @var \LCI\Blend\Blendable\MediaSource $blendMediaSource */
             $blendMediaSource = new MediaSource($this->modx, $this->blender, $this->blender->getNameFromSeedKey($seed_key));
-            if (!empty($seeds_dir)) {
-                $blendMediaSource->setSeedsDir($seeds_dir);
-            }
 
-            if ($blendMediaSource->revertBlend()) {
-                $this->blender->out($blendMediaSource->getFieldName().' media source has been reverted to '.$seeds_dir);
-
-            } else {
-                $this->blender->out($blendMediaSource->getFieldName().' media source was not reverted', true);
-            }
+            $this->revertOneFromMany($blendMediaSource, $seed_key, 'MediaSource', $seeds_dir);
         }
     }
 
@@ -264,22 +198,8 @@ class BlendableLoader
         foreach ($plugins as $seed_key) {
             /** @var \LCI\Blend\Blendable\Plugin $blendPlugin */
             $blendPlugin = new Plugin($this->modx, $this->blender, $this->blender->getNameFromSeedKey($seed_key));
-            if (!empty($seeds_dir)) {
-                $blendPlugin->setSeedsDir($seeds_dir);
-            }
-            if ($blendPlugin->blendFromSeed($seed_key)) {
-                $this->blender->out($seed_key.' has been blended into ID: ');
 
-            } elseif ($blendPlugin->isExists()) {
-                $this->blender->out($seed_key.' plugin already exists', true);
-                if ($this->userInteractionHandler->promptConfirm('Would you like to update?', true)) {
-                    if ($blendPlugin->blendFromSeed($seed_key, true)) {
-                        $this->blender->out($seed_key.' has been blended');
-                    }
-                }
-            } else {
-                $this->blender->out('There was an error saving '.$seed_key, true);
-            }
+            $this->blendOneFromMany($blendPlugin, $seed_key, 'Plugin', $seeds_dir);
         }
     }
 
@@ -293,16 +213,8 @@ class BlendableLoader
         foreach ($plugins as $seed_key) {
             /** @var \LCI\Blend\Blendable\Plugin $blendPlugin */
             $blendPlugin = new Plugin($this->modx, $this->blender, $this->blender->getNameFromSeedKey($seed_key));
-            if (!empty($seeds_dir)) {
-                $blendPlugin->setSeedsDir($seeds_dir);
-            }
 
-            if ($blendPlugin->revertBlend()) {
-                $this->blender->out($blendPlugin->getFieldName().' plugin has been reverted to '.$seeds_dir);
-
-            } else {
-                $this->blender->out($blendPlugin->getFieldName().' plugin was not reverted', true);
-            }
+            $this->revertOneFromMany($blendPlugin, $seed_key, 'Plugin', $seeds_dir);
         }
     }
 
@@ -328,22 +240,8 @@ class BlendableLoader
         foreach ($snippets as $seed_key) {
             /** @var \LCI\Blend\Blendable\Snippet $blendSnippet */
             $blendSnippet = new Snippet($this->modx, $this->blender, $this->blender->getNameFromSeedKey($seed_key));
-            if (!empty($seeds_dir)) {
-                $blendSnippet->setSeedsDir($seeds_dir);
-            }
-            if ($blendSnippet->blendFromSeed($seed_key)) {
-                $this->blender->out($seed_key.' has been blended');
 
-            } elseif ($blendSnippet->isExists()) {
-                $this->blender->out($seed_key.' snippet already exists', true);
-                if ($this->userInteractionHandler->promptConfirm('Would you like to update?', true)) {
-                    if ($blendSnippet->blendFromSeed($seed_key, true)) {
-                        $this->blender->out($seed_key.' has been blended');
-                    }
-                }
-            } else {
-                $this->blender->out('There was an error saving '.$seed_key, true);
-            }
+            $this->blendOneFromMany($blendSnippet, $seed_key, 'Snippet', $seeds_dir);
         }
     }
     /**
@@ -356,16 +254,8 @@ class BlendableLoader
         foreach ($snippets as $seed_key) {
             /** @var Snippet $blendSnippet */
             $blendSnippet = new Snippet($this->modx, $this->blender, $this->blender->getNameFromSeedKey($seed_key));
-            if (!empty($seeds_dir)) {
-                $blendSnippet->setSeedsDir($seeds_dir);
-            }
 
-            if ($blendSnippet->revertBlend()) {
-                $this->blender->out($blendSnippet->getFieldName().' snippet has been reverted to '.$seeds_dir);
-
-            } else {
-                $this->blender->out($blendSnippet->getFieldName().' snippet was not reverted', true);
-            }
+            $this->revertOneFromMany($blendSnippet, $seed_key, 'Snippet', $seeds_dir);
         }
     }
 
@@ -393,22 +283,8 @@ class BlendableLoader
 
             /** @var \LCI\Blend\Blendable\Template $blendTemplate */
             $blendTemplate = new Template($this->modx, $this->blender, $this->blender->getNameFromSeedKey($seed_key));
-            if (!empty($seeds_dir)) {
-                $blendTemplate->setSeedsDir($seeds_dir);
-            }
-            if ($blendTemplate->blendFromSeed($seed_key, $overwrite)) {
-                $this->blender->out($seed_key.' has been blended');
 
-            } elseif ($blendTemplate->isExists()) {
-                $this->blender->out($seed_key.' template already exists', true);
-                if ($this->userInteractionHandler->promptConfirm('Would you like to update?', true)) {
-                    if ($blendTemplate->blendFromSeed($seed_key, true)) {
-                        $this->blender->out($seed_key.' has been blended');
-                    }
-                }
-            } else {
-                $this->blender->out('There was an error saving '.$seed_key, true);
-            }
+            $this->blendOneFromMany($blendTemplate, $seed_key, 'Template', $seeds_dir, $overwrite);
         }
     }
 
@@ -422,16 +298,8 @@ class BlendableLoader
         foreach ($templates as $seed_key) {
             /** @var \LCI\Blend\Blendable\Template $blendTemplate */
             $blendTemplate = new Template($this->modx, $this->blender, $this->blender->getNameFromSeedKey($seed_key));
-            if (!empty($seeds_dir)) {
-                $blendTemplate->setSeedsDir($seeds_dir);
-            }
 
-            if ($blendTemplate->revertBlend()) {
-                $this->blender->out($blendTemplate->getFieldName().' template has been reverted to '.$seeds_dir);
-
-            } else {
-                $this->blender->out($blendTemplate->getFieldName().' template was not reverted', true);
-            }
+            $this->revertOneFromMany($blendTemplate, $seed_key, 'Template', $seeds_dir);
         }
     }
 
@@ -471,30 +339,14 @@ class BlendableLoader
         $saved = true;
         // will update if resource does exist or create new
         foreach ($resources as $context => $seeds) {
+
             foreach ($seeds as $seed_key) {
                 /** @var \LCI\Blend\Blendable\Resource $blendResource */
                 $blendResource = new Resource($this->modx, $this->blender, $this->blender->getAliasFromSeedKey($seed_key), $context);
 
-                if (!empty($seeds_dir)) {
-                    $blendResource->setSeedsDir($seeds_dir);
-                }
-
-                if ($blendResource->blendFromSeed($seed_key, $overwrite)) {
-                    $this->blender->out($seed_key.' has been blended into ID: ');
-
-                } elseif ($blendResource->isExists()) {
-                    $this->blender->out($seed_key.' already exists', true);
-                    if ($this->userInteractionHandler->promptConfirm('Would you like to update?', true)) {
-                        if ($blendResource->blendFromSeed($seed_key, true)) {
-                            $this->blender->out($seed_key.' has been blended into ID: ');
-                        }
-                    }
-                } else {
-                    $this->blender->out('There was an error saving '.$seed_key, true);
-                    echo 'There was an error saving '.$seed_key; exit();
-                    $saved = false;
-                }
+                $this->blendOneFromMany($blendResource, $seed_key, 'Resource', $seeds_dir, $overwrite);
             }
+
         }
 
         return $saved;
@@ -503,30 +355,24 @@ class BlendableLoader
     /**
      * @param array $resources
      * @param string $seeds_dir
-     * @param bool $overwrite
      *
      * @return bool
      */
-    public function revertBlendManyResources($resources = [], $seeds_dir = '', $overwrite = false)
+    public function revertBlendManyResources($resources = [], $seeds_dir = '')
     {
         $saved = true;
         // will update if resource does exist or create new
         foreach ($resources as $context => $seeds) {
+
             foreach ($seeds as $seed_key) {
                 /** @var \LCI\Blend\Blendable\Resource $blendResource */
                 $blendResource = new Resource($this->modx, $this->blender, $this->blender->getAliasFromSeedKey($seed_key), $context);
 
-                if (!empty($seeds_dir)) {
-                    $blendResource->setSeedsDir($seeds_dir);
-                }
-                if ($blendResource->revertBlend()) {
-                    $this->blender->out($seed_key.' has been reverted ');
-
-                } else {
-                    $this->blender->out('There was an error reverting resource '.$seed_key, true);
+                if(!$this->revertOneFromMany($blendResource, $seed_key, 'Resource', $seeds_dir)) {
                     $saved = false;
                 }
             }
+
         }
 
         return $saved;
@@ -628,9 +474,67 @@ class BlendableLoader
                 $this->blender->out($systemSetting->getFieldName().' setting has been reverted to '.$seeds_dir);
 
             } else {
-                $this->blender->out($systemSetting->getFieldName().' setting was not reverted', true);
+                $this->blender->outError($systemSetting->getFieldName().' setting was not reverted');
                 $success = false;
             }
+        }
+
+        return $success;
+    }
+
+    /**
+     * @param Blendable $blendable
+     * @param string $seed_key
+     * @param string $object_type
+     * @param string $seeds_dir
+     * @param bool $overwrite
+     *
+     * @return bool
+     */
+    protected function blendOneFromMany($blendable, $seed_key, $object_type, $seeds_dir, $overwrite = false)
+    {
+        if (!empty($seeds_dir)) {
+            $blendable->setSeedsDir($seeds_dir);
+        }
+
+        if ($success = $blendable->blendFromSeed($seed_key, $overwrite)) {
+            $this->blender->outSuccess($seed_key.' ' . $object_type . ' has been blended into primary key: ' .
+                $blendable->getXPDOSimpleObject()->getPrimaryKey());
+
+        } elseif ($blendable->isExists()) {
+            $this->blender->outError($seed_key.' ' . $object_type .' already exists');
+            if ($this->userInteractionHandler->promptConfirm('Would you like to update?', true)) {
+                if ($success = $blendable->blendFromSeed($seed_key, true)) {
+                    $this->blender->out($seed_key.' has been blended');
+                }
+            }
+
+        } else {
+            $this->blender->outError('There was an error saving the ' . $object_type . ' for seed key '. $seed_key);
+        }
+
+        return $success;
+    }
+
+    /**
+     * @param Blendable $blendable
+     * @param string $seed_key
+     * @param string $object_type
+     * @param string $seeds_dir
+     *
+     * @return bool
+     */
+    protected function revertOneFromMany($blendable, $seed_key, $object_type, $seeds_dir)
+    {
+        if (!empty($seeds_dir)) {
+            $blendable->setSeedsDir($seeds_dir);
+        }
+
+        if ($success = $blendable->revertBlend()) {
+            $this->blender->outSuccess($seed_key.' ' . $object_type . ' has been reverted to '.$seeds_dir);
+
+        } else {
+            $this->blender->outError($seed_key.' chunk was not reverted');
         }
 
         return $success;
