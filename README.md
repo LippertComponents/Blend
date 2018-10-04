@@ -81,14 +81,14 @@ Create a Migration and seeds for all elements, resources and system settings:
 ```php blend blend:seed --object site --name InitSite```
 
 Same as above, but with short options  
-```php blend blend:seed -o a -n InitSite```
+```php blend blend:seed -o a -N InitSite```
 
 ### Create a custom migration file
 
 1. Generate an empty migration file:  
  ```php blend blend:generate --name MyChunks```  
  Same as above but with short options
- ```php blend blend:generate -n MyChunks```
+ ```php blend blend:generate -N MyChunks```
 2. There will now be a file: ```MODX~core/components/blend/database/migrations/MyChunks.php``` open in your IDE
 3. You will want to something like the below example for the up method. The up method creates or updates:  
 ```php
@@ -110,8 +110,8 @@ if ($myChunk->blend(true)) {
 
 } else {
     //error
-    $this->blender->out($myChunk->getFieldName().' did not save correctly ', true);
-    $this->blender->out(print_r($myChunk->getErrorMessages(), true), true);
+    $this->blender->outError($myChunk->getFieldName().' did not save correctly ');
+    $this->blender->outError(print_r($myChunk->getErrorMessages(), true), \LCI\Blend\Blender::VERBOSITY_DEBUG);
 }
 ```
 4. To allow for a rollback you will need to code the exact opposite in the down method. 
@@ -129,7 +129,7 @@ if ( $blendChunk->revertBlend() ) {
     $this->blender->out($blendChunk->getFieldName().' setting has been reverted to '.$this->getSeedsDir());
 
 } else {
-    $this->blender->out($blendChunk->getFieldName().' setting was not reverted', true);
+    $this->blender->outError($blendChunk->getFieldName().' setting was not reverted');
 }
 ```
 5. Now save your file and you can test it out by running all migrations:  

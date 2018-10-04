@@ -1,3 +1,46 @@
+
+## [1.0.0 beta13] - 2018=10-03
+
+- Command option -n has changed to -N for -name
+- Fix #7 add -v for verbose, can now use $this->blender->out('Message', \LCI\Blend\Blender::VERBOSITY_DEBUG); in your migrations.
+- Add MigrationException class
+- Refactored BlendableLoader to reduce complexity
+- Update tests to reflect Migrator changes plus a few test fixes
+- Refactor Blend, extract runMigration code to new class Migrator
+- Add columns project and ran_sequence to the blend_migrations table + Remove old blend update migrations 
+- Add register Console commands migration file
+- Created Helper/BlendableLoader, from extracted related methods that where in Blender.  
+Example: $blender->getBlendableChunk() should now be $blender->getBlendableLoader()->getBlendableChunk()
+- Deprecated many methods in Blender
+
+ Deprecated | Updated use
+ --- | ----
+ Blender->blendManyChunks() | Blender->getBlendableLoader->blendManyChunks() 
+ Blender->blendManyContexts() | Blender->getBlendableLoader->blendManyContexts() 
+ Blender->blendManyMediaSources() | Blender->getBlendableLoader->blendManyMediaSources() 
+ Blender->blendManyPlugins() | Blender->getBlendableLoader->blendManyPlugins() 
+ Blender->blendManyResources() | Blender->getBlendableLoader->blendManyResources() 
+ Blender->blendManySnippets() | Blender->getBlendableLoader->blendManySnippets() 
+ Blender->blendManySystemSettings() | Blender->getBlendableLoader->blendManySystemSettings() 
+ Blender->blendManyTemplates() | Blender->getBlendableLoader->blendManyTemplates() 
+ Blender->getBlendableChunk() | Blender->getBlendableLoader->getBlendableChunk() 
+ Blender->getBlendableContext() | Blender->getBlendableLoader->getBlendableContext() 
+ Blender->getBlendableMediaSource() | Blender->getBlendableLoader->getBlendableMediaSource() 
+ Blender->getBlendablePlugin() | Blender->getBlendableLoader->getBlendablePlugin() 
+ Blender->getBlendableResource() | Blender->getBlendableLoader->getBlendableResource() 
+ Blender->getBlendableSnippet() | Blender->getBlendableLoader->getBlendableSnippet() 
+ Blender->getBlendableSystemSetting() | Blender->getBlendableLoader->getBlendableSystemSetting() 
+ Blender->getBlendableTemplate() | Blender->getBlendableLoader->getBlendableTemplate() 
+ Blender->getBlendableTemplateVariable() | Blender->getBlendableLoader->getBlendableTemplateVariable() 
+ Blender->revertBlendManyChunks() | Blender->getBlendableLoader->revertBlendManyChunks() 
+ Blender->revertBlendManyContexts() | Blender->getBlendableLoader->revertBlendManyContexts() 
+ Blender->revertBlendManyMediaSources() | Blender->getBlendableLoader->revertBlendManyMediaSources() 
+ Blender->revertBlendManyPlugins() | Blender->getBlendableLoader->revertBlendManyPlugins() 
+ Blender->revertBlendManyResources() | Blender->getBlendableLoader->revertBlendManyResources() 
+ Blender->revertBlendManySnippets() | Blender->getBlendableLoader->revertBlendManySnippets() 
+ Blender->revertBlendManySystemSettings() | Blender->getBlendableLoader->revertBlendManySystemSettings() 
+ Blender->revertBlendManyTemplates() | Blender->getBlendableLoader->revertBlendManyTemplates() 
+
 ## [1.0.0 beta12] - 2018=09-29
 
 - Add BLEND_COPY_TEST_MIGRATION_FILES in tests/config.php, fix to run tests on scrutinizer 
