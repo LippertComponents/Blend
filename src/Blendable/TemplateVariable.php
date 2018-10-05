@@ -192,7 +192,10 @@ class TemplateVariable extends Element
     }
 
     /**
-     * @param string $value  max characters: 20
+     * @param string $value  max characters: 20, default options:
+     *      autotag, checkbox, date, listbox, listbox-multiple, email, file,
+     *      hidden, image, number, option, resourcelist, richtext, tag, text, textarea, url
+     * @see https://docs.modx.com/revolution/2.x/making-sites-with-modx/customizing-content/template-variables/template-variable-input-types
      * @return $this
      */
     public function setFieldType($value)

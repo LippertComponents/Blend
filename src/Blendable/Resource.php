@@ -622,12 +622,27 @@ class Resource extends Blendable
     }
 
     /**
+     * @deprecated will be removed, use setFieldParentFromAlias
      * @param int $value
      * @return $this
      */
     public function setFieldParent($value)
     {
         $this->blendable_xpdo_simple_object_data['parent'] = $value;
+        return $this;
+    }
+
+    /**
+     * @param string $alias
+     * @param string $context
+     * @return $this
+     */
+    public function setFieldParentFromAlias($alias, $context='web')
+    {
+        $this->blendable_xpdo_simple_object_data['parent'] = [
+            'seed_key' => $this->blender->getSeedKeyFromAlias($alias),
+            'context' => $context
+        ];
         return $this;
     }
 
@@ -739,6 +754,67 @@ class Resource extends Blendable
     {
         $this->blendable_xpdo_simple_object_data['template'] = $value;
         return $this;
+    }
+
+    /**
+     * @param string $name
+     * @param string|array $value
+     * @return $this
+     */
+    public function setTVValue($name, $value)
+    {
+        if (!isset($this->related_data['tvs'])) {
+            $this->related_data['tvs'] = [];
+        }
+
+        $this->related_data['tvs'][$name] = $value;
+
+        return $this;
+    }
+
+    /**
+     * @param string $tv_name
+     * @param string $alias
+     * @param string $context
+     * @return $this
+     */
+    public function setTVValueResourceIDFromAlias($tv_name, $alias, $context='web')
+    {
+        $value = $this->blender->getResourceIDFromLocalAlias($alias, $context);
+
+        return $this->setTVValue($tv_name, $value);
+    }
+
+    /**
+     * @param string $tv_name
+     * @param string $media_source_name
+     * @return $this
+     */
+    public function setTVValueMediaSourceIDFromName($tv_name, $media_source_name)
+    {
+        $portable = [
+            'value' => $media_source_name,
+            'portable_type' => 'media_source',
+            'portable_value' => $media_source_name
+        ];
+
+        return $this->setTVValue($tv_name, $portable);
+    }
+
+    /**
+     * @param string $tv_name
+     * @param string $template_name
+     * @return $this
+     */
+    public function setTVValueTemplateIDFromName($tv_name, $template_name)
+    {
+        $portable = [
+            'value' => $template_name,
+            'portable_type' => 'template',
+            'portable_value' => $template_name
+        ];
+
+        return $this->setTVValue($tv_name, $portable);
     }
 
     /**

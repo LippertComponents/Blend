@@ -578,6 +578,17 @@ class Blender
     }
 
     /**
+     * @param string $alias
+     * @param string $context
+     * @return bool|int
+     */
+    public function getResourceIDFromLocalAlias($alias, $context='web')
+    {
+        $seed_key = $this->getSeedKeyFromAlias($alias);
+        return $this->getResourceIDFromSeedKey($seed_key, $context);
+    }
+
+    /**
      * @param string $seed_key
      * @param string $context
      *
