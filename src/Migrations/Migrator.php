@@ -46,6 +46,15 @@ class Migrator
     /** @var string  */
     protected $migration_name = '';
 
+    /** @var bool */
+    protected $delay_logging = false;
+
+    /** @var array  */
+    protected $delayed_logs = [];
+
+    /** @var bool  */
+    protected $check_install_log = true;
+
     /**
      * Migrator constructor.
      * @param Blender $blender
@@ -79,20 +88,47 @@ class Migrator
     }
 
     /**
-     * @param $data
+     * @param bool $delay_logging ~ if true will log after all Migrations are complete, only for new migrations
+     * @return $this
      */
-    public function logMigration($data)
+    public function setDelayLogging(bool $delay_logging): Migrator
     {
-        if ($this->blender->isBlendInstalledInModx()) {
-            try {
-                /** @var \BlendMigrations $migration */
-                $migration = $this->modx->newObject($this->blender->getBlendClassObject());
-                if ($migration) {
-                    $migration->fromArray($data);
-                    $migration->save();
+        $this->delay_logging = $delay_logging;
+        return $this;
+    }
+
+    /**
+     * @param bool $check_install_log
+     * @return Migrator
+     */
+    public function setCheckInstallLog(bool $check_install_log): Migrator
+    {
+        $this->check_install_log = $check_install_log;
+        return $this;
+    }
+
+    /**
+     * @param array $data
+     * @param bool $force_save_attempt
+     */
+    public function logMigration($data, $force_save_attempt=false)
+    {
+        if ($this->delay_logging && !$force_save_attempt) {// attempt
+            $key = $data['project'] . $data['name'];
+            $this->delayed_logs[$key] = $data;
+
+        } else {
+            if ($this->blender->isBlendInstalledInModx($this->check_install_log)) {
+                try {
+                    /** @var \BlendMigrations $migration */
+                    $migration = $this->modx->newObject($this->blender->getBlendClassObject());
+                    if ($migration) {
+                        $migration->fromArray($data);
+                        $migration->save();
+                    }
+                } catch (\Exception $exception) {
+                    $this->outError($exception->getMessage());
                 }
-            } catch (MigratorException $exception) {
-                $this->outError($exception->getMessage());
             }
         }
     }
@@ -113,6 +149,7 @@ class Migrator
         $this->migration_id = $id;
         $this->migration_name = $name;
 
+        $run_existing = true;
         // 1. Get all migrations currently in DB:
         $this->getBlendMigrationCollection(false);
 
@@ -120,13 +157,26 @@ class Migrator
         if ($this->migration_method == 'up') {
             $loaded_migrations = $this->retrieveMigrationFiles();
 
-            if (!$this->blender->isBlendInstalledInModx()) {
+            if (!$this->blender->isBlendInstalledInModx($this->check_install_log) || ($this->delay_logging && count($loaded_migrations) > 0)) {
                 $this->runLoadedFileMigrations($loaded_migrations);
-                return;
+
+                $run_existing = false;
             }
         }
 
-        $this->runExistingDBMigrations();
+        if ($run_existing) {
+            $this->runExistingDBMigrations();
+        }
+
+        if ($this->delay_logging) {
+            foreach ($this->delayed_logs as $key => $log) {
+                if (is_object($log)) {
+                    $log->save();
+                } else {
+                    $this->logMigration($log, true);
+                }
+            }
+        }
     }
 
     /**
@@ -191,6 +241,7 @@ class Migrator
      */
     protected function runExistingDBMigrations()
     {
+        $this->out(__METHOD__ . ' Start', Blender::VERBOSITY_DEBUG);
         /** @var \BlendMigrations $migrationLog */
         foreach ($this->blendMigrations as $name => $migrationLog) {
             if (!$this->canRunMigrationVerifyLog($migrationLog)) {
@@ -206,14 +257,21 @@ class Migrator
             $migration = $this->loadMigrationClass($name, $blender);
 
             if ($migration instanceof Migrations) {
-                $this->out('Load Class: '.$name.' M: '.$this->migration_method, OutputInterface::VERBOSITY_DEBUG);
+                $this->out('Load Class: '.$name.' and call method: '.$this->migration_method, OutputInterface::VERBOSITY_VERBOSE);
 
                 $migration->{$this->migration_method}();
 
                 $migrationLog->set('ran_sequence', $this->getRanSequence((int)$migrationLog->get('ran_sequence')));
                 $migrationLog->set('status', $this->migration_method . '_complete');
                 $migrationLog->set('processed_at', date('Y-m-d H:i:s'));
-                $migrationLog->save();
+
+                if ($this->delay_logging) {
+                    $this->out(__METHOD__.' Delay logging', OutputInterface::VERBOSITY_DEBUG);
+                    $this->delayed_logs[$migrationLog->get('project').$migrationLog->get('name')] = $migrationLog;
+
+                } else {
+                    $migrationLog->save();
+                }
 
             } else {
                 // error
@@ -227,8 +285,10 @@ class Migrator
      */
     protected function runLoadedFileMigrations($loaded_migrations)
     {
+        $this->out(__METHOD__ . ' Start', Blender::VERBOSITY_DEBUG);
         $logged_migrations = $this->getBlendMigrationCollection();
 
+        $count = 0;
         /** @var Migrations $migration */
         foreach ($loaded_migrations as $name => $migration) {
             if (
@@ -238,6 +298,8 @@ class Migrator
                 continue;
             }
 
+            $this->out('Load Class: '.$name.' and call method: '.$this->migration_method, OutputInterface::VERBOSITY_VERBOSE);
+
             $migration->{$this->migration_method}();
 
             if (isset($logged_migrations[$name])) {
@@ -246,7 +308,13 @@ class Migrator
                 $migrationLog->set('ran_sequence', $this->getRanSequence($migrationLog->get('ran_sequence')));
                 $migrationLog->set('status', $this->migration_method . '_complete');
                 $migrationLog->set('processed_at', date('Y-m-d H:i:s'));
-                $migrationLog->save();
+
+                if ($this->delay_logging) {
+                    $this->delayed_logs[$this->project . $name] = $migrationLog;
+
+                } else {
+                    $migrationLog->save();
+                }
 
             } else {
                 $this->logMigration([
@@ -257,7 +325,7 @@ class Migrator
                     'type' => $migration->getType(),
                     'version' => $migration->getVersion(),
                     'status' => $this->migration_method . '_complete',
-                    'ran_sequence' => $this->getRanSequence(),
+                    'ran_sequence' => $this->getRanSequence($count++),
                     'processed_at' => date('Y-m-d H:i:s')
                     ]);
 
@@ -330,7 +398,7 @@ class Migrator
     protected function getBlendMigrationCollection($reload = false)
     {
         if (
-            $this->blender->isBlendInstalledInModx() &&
+            $this->blender->isBlendInstalledInModx($this->check_install_log) &&
             (!$this->blendMigrations || $reload)
         ) {
             $blendMigrations = [];
@@ -433,9 +501,9 @@ class Migrator
      * @param string $message
      * @param int $verbose
      */
-    protected function outError($message)
+    protected function outError($message, $verbose=OutputInterface::VERBOSITY_NORMAL)
     {
-        $this->blender->out($message, true);
+        $this->blender->outError($message, $verbose);
     }
 
     /**
@@ -444,8 +512,6 @@ class Migrator
      */
     protected function out($message, $verbose=OutputInterface::VERBOSITY_NORMAL)
     {
-        if ($this->verbose >= $verbose) {
-            $this->blender->out($message);
-        }
+        $this->blender->out($message, $verbose);
     }
 }

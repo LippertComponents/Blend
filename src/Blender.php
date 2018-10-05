@@ -397,13 +397,15 @@ class Blender
         $blender->setProject('lci\blend');
 
         $migrator = new Migrator($blender, $this->modx, 'lci\blend');
-        $migrator->runMigration($method);
+        $migrator
+            ->setDelayLogging(true)
+            ->setCheckInstallLog($method == 'up' ? false : true)
+            ->runMigration($method);
 
         // does the migration directory exist?
         if (!file_exists($this->getMigrationPath())) {
-            $this->out('MKDIR', 0);
             $create = true;
-            if ($this->getVerbose() >= Blender::VERBOSITY_NORMAL) {
+            if ($this->getVerbose() >= Blender::VERBOSITY_NORMAL || $prompt) {
                 $create = $this->getUserInteractionHandler()->promptConfirm('Create the following directory for migration files?'.PHP_EOL
                     .$this->getMigrationPath(), true);
             }
@@ -461,37 +463,46 @@ class Blender
     }
 
     /**
+     * @param bool $check_install_log
      * @return bool
      */
-    public function isBlendInstalledInModx()
+    public function isBlendInstalledInModx($check_install_log=true)
     {
+        $installed = false;
         try {
             $table = $this->modx->getTableName($this->blend_class_object);
-            if ($this->modx->query("SELECT 1 FROM {$table} LIMIT 0") === false) {
+            if ($rs = $this->modx->query("SELECT 1 FROM {$table} LIMIT 0") === false) {
+                $this->out(__METHOD__.' table not found ', Blender::VERBOSITY_DEBUG);
                 return false;
             }
-        } catch (Exception $exception) {
+            $installed = true;
+
+        } catch (\Exception $exception) {
+            $this->out(__METHOD__ . ' Exception: '. $exception->getMessage(), Blender::VERBOSITY_DEBUG);
             // We got an exception == table not found
             return false;
         }
 
-        return true;
+        if ($check_install_log) {
+            $installed = false;
+            /** @var \xPDOQuery $query */
+            $query = $this->modx->newQuery($this->blend_class_object);
+            $query->select('id');
+            $query->where([
+                'name' => 'install_blender',
+                'status' => 'up_complete'
+            ]);
+            $query->sortBy('name');
 
-        /** @var \xPDOQuery $query */
-        $query = $this->modx->newQuery($this->blend_class_object);
-        $query->select('id');
-        $query->where([
-            'name' => 'install_blender',
-            'status' => 'up_complete'
-        ]);
-        $query->sortBy('name');
-
-        $installMigration = $this->modx->getObject($this->blend_class_object, $query);
-        if ($installMigration instanceof \BlendMigrations || $installMigration instanceof \LCI\Blend\Model\xPDO\BlendMigrations) {
-            return true;
+            $installMigration = $this->modx->getObject($this->blend_class_object, $query);
+            if ($installMigration instanceof \BlendMigrations || $installMigration instanceof \LCI\Blend\Model\xPDO\BlendMigrations) {
+                $this->out(print_r($installMigration->toArray(), true), Blender::VERBOSITY_DEBUG);
+                $installed = true;
+            }
+            $this->out(__METHOD__ . ' Blend install log not found', Blender::VERBOSITY_DEBUG);
         }
 
-        return false;
+        return $installed;
     }
 
     /**

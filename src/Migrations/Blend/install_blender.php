@@ -178,7 +178,7 @@ class install_blender extends Migrations
      */
     protected function assignVersion()
     {
-        $this->version = $this->blender->getVersion();
+        $this->version = '0.9.0';
     }
 
     /**

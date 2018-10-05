@@ -14,6 +14,9 @@ final class BlendTest extends BaseBlend
         );
     }
 
+    /**
+     * @depends testCanBeInstalledBlend
+     */
     public function testCreateBlankMigrationClassFile()
     {
         $migration_class_name = 'BlankMigration';
@@ -36,6 +39,9 @@ final class BlendTest extends BaseBlend
         $this->blender->setSeedsDir($actual_timestamp);
     }
 
+    /**
+     * @depends testCreateBlankMigrationClassFile
+     */
     public function testCleanUpCreateBlankMigrationClassFile()
     {
         $migration_class_name = 'BlankMigration';
@@ -54,6 +60,9 @@ final class BlendTest extends BaseBlend
         $this->blender->setSeedsDir($actual_timestamp);
     }
 
+    /**
+     * @depends testCanBeInstalledBlend
+     */
     public function testCanBeUninstalledBlend()
     {
         if (BLEND_CLEAN_UP) {
