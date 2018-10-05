@@ -1,3 +1,12 @@
+## [1.0.0 beta14] - 2018=10-05
+
+- Fix #8 update to beta13 from previous versions, delay logging until after DB table has been updated to the correct version
+- Added Blender->getResourceIDFromLocalAlias() 
+- Added Blendable/Resource->setFieldParentFromAlias()
+- Added Blendable/Resource->setTVValue()
+- Added Blendable/Resource->setTVValueResourceIDFromAlias()
+- Added Blendable/Resource->setTVValueMediaSourceIDFromName()
+- Added Blendable/Resource->setTVValueTemplateIDFromName()
 
 ## [1.0.0 beta13] - 2018=10-03
 
