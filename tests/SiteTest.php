@@ -6,23 +6,6 @@ final class SiteTest extends BaseBlend
     /** @var bool  */
     protected $install_blend = true;
 
-    public function testSiteRevertMigrationPrevious()
-    {
-        // Clean up any previous tests if there was a fatal error
-        $migration = 'SiteExample';
-        $snippet_name = 'snippetSiteExample';
-
-        $this->blender->runMigration('down', 'master', 0, 0, $migration);
-
-        $snippetSiteExample = $this->modx->getObject('modSnippet', ['name' => $snippet_name]);
-
-        $this->assertEquals(
-            false,
-            $snippetSiteExample,
-            'Compare snippetSiteExample, should be empty/false'
-        );
-    }
-
     // 1 run migration to load complete example data:
     public function testSiteMigration()
     {

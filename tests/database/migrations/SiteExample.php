@@ -148,7 +148,7 @@ class SiteExample extends Migrations
 
         $plugin_name = 'pluginSiteExample';
         $plugin_description = 'Site Example plugin test';
-        $plugin_code = '<?php $eventName = $modx->event->name; // Site Example ';
+        $plugin_code = '<?php $eventName = $modx->event->name; // Site Example';
         $plugin_event = 'OnUserActivate';
 
         /** @var \LCI\Blend\Blendable\Plugin $pluginSiteExample */
