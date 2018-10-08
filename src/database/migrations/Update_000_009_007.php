@@ -6,9 +6,8 @@
  */
 
 use \LCI\Blend\Migrations;
-use LCI\MODX\Console\Console;
 
-class v1_0_0_beta_update_013 extends Migrations
+class Update_000_009_007 extends Migrations
 {
     /**
      * Run the migrations.
@@ -20,42 +19,26 @@ class v1_0_0_beta_update_013 extends Migrations
         /** @var \xPDOManager $manager */
         $manager = $this->modx->getManager();
 
+        // the class table object name
         $columns = $this->getCurrentColumns();
 
-        if (!in_array('project', $columns)) {
-            // the class table object name
-            if ($manager->addField('BlendMigrations', 'project', ['after' => 'id'])) {
-                $this->blender->outSuccess('The project column was add to the BlendMigrations class (' .
+        if (!in_array('author', $columns)) {
+            if ($manager->addField('BlendMigrations', 'author', ['after' => 'status'])) {
+                $this->blender->outSuccess('The author column was add to the BlendMigrations class (' .
                     $this->modx->getTableName('BlendMigrations') . ') successfully');
 
             } else {
-                $this->blender->out('The project column was not added to the BlendMigrations class (' .
+                $this->blender->out('The author column was not added to the BlendMigrations class (' .
                     $this->modx->getTableName('BlendMigrations') . ') successfully', true);
             }
         }
 
-
-        if (!in_array('ran_sequence', $columns)) {
-            // the class table object name
-            if ($manager->addField('BlendMigrations', 'ran_sequence', ['after' => 'processed_at'])) {
-                $this->blender->outSuccess('The ran_sequence column was add to the BlendMigrations class (' .
-                    $this->modx->getTableName('BlendMigrations') . ') successfully');
-
-            } else {
-                $this->blender->out('The author ran_sequence was not added to the BlendMigrations class (' .
-                    $this->modx->getTableName('BlendMigrations') . ') successfully', true);
-            }
-        }
-
-        /** @var \LCI\MODX\Console\Console $console */
-        $console = new Console();
-        $console->registerPackageCommands('LCI\Blend\Console\ActivePackageCommands');
 
         /** @var \LCI\Blend\Blendable\SystemSetting $systemSetting */
         $systemSetting = $this->blender->getBlendableLoader()->getBlendableSystemSetting('blend.version');
         $systemSetting
             ->setSeedsDir($this->getSeedsDir())
-            ->setFieldValue('1.0.0-beta13')
+            ->setFieldValue('0.9.7')
             ->setFieldArea('Blend')
             ->blend(true);
 
@@ -69,10 +52,6 @@ class v1_0_0_beta_update_013 extends Migrations
      */
     public function down()
     {
-        /** @var \LCI\MODX\Console\Console $console */
-        $console = new Console();
-        $console->cancelRegistrationPackageCommands('LCI\Blend\Console\ActivePackageCommands');
-
         /** @var \LCI\Blend\Blendable\SystemSetting $systemSetting */
         $systemSetting = $this->blender->getBlendableLoader()->getBlendableSystemSetting('blend.version');
         $systemSetting
@@ -88,12 +67,12 @@ class v1_0_0_beta_update_013 extends Migrations
             $manager = $this->modx->getManager();
 
             // the class table object name
-            if ($manager->removeField('BlendMigrations', 'project', ['after' => 'status'])) {
-                $this->blender->outSuccess('The project column was removed from the BlendMigrations class ('.
+            if ($manager->removeField('BlendMigrations', 'author', ['after' => 'status'])) {
+                $this->blender->outSuccess('The author column was removed from the BlendMigrations class ('.
                     $this->modx->getTableName('BlendMigrations').') successfully');
 
             } else {
-                $this->blender->out('The project column was not removed from the BlendMigrations class ('.
+                $this->blender->out('The author column was not removed from the BlendMigrations class ('.
                     $this->modx->getTableName('BlendMigrations').') successfully', true);
             }
         }
@@ -117,7 +96,7 @@ class v1_0_0_beta_update_013 extends Migrations
      */
     protected function assignDescription()
     {
-        $this->description = 'Update Blend to v1.0.0 beta13 from v1.0.0 beta and below';
+        $this->description = 'Update Blend to v0.9.7 from v0.9.6 and below';
     }
 
     /**
@@ -125,7 +104,7 @@ class v1_0_0_beta_update_013 extends Migrations
      */
     protected function assignVersion()
     {
-        $this->version = '1.0.0 beta13';
+        $this->version = '0.9.7';
     }
 
     /**
@@ -141,6 +120,6 @@ class v1_0_0_beta_update_013 extends Migrations
      */
     protected function assignSeedsDir()
     {
-        $this->seeds_dir = '2018_10_03_070707';
+        $this->seeds_dir = 'Update_000_009_007';
     }
 }

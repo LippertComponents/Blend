@@ -7,7 +7,7 @@
 
 use \LCI\Blend\Migrations;
 
-class install_blender extends Migrations
+class InstallBlender extends Migrations
 {
     /** @var array  */
     protected $blender_table_classes = [
@@ -194,6 +194,6 @@ class install_blender extends Migrations
      */
     protected function assignSeedsDir()
     {
-        $this->seeds_dir = '2018_02_02_020202';
+        $this->seeds_dir = 'InstallBlender';
     }
 }

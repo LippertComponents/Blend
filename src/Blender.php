@@ -391,7 +391,7 @@ class Blender
     {
         $config = $this->config;
 
-        $config['migrations_path'] = __DIR__.'/Migrations/Blend/';
+        $config['migrations_path'] = __DIR__.'/database/migrations/';
 
         $blender = new Blender($this->modx, $this->getUserInteractionHandler(), $config);
         $blender->setProject('lci\blend');
@@ -489,7 +489,7 @@ class Blender
             $query = $this->modx->newQuery($this->blend_class_object);
             $query->select('id');
             $query->where([
-                'name' => 'install_blender',
+                'name:IN' => ['InstallBlender', 'install_blender'],
                 'status' => 'up_complete'
             ]);
             $query->sortBy('name');

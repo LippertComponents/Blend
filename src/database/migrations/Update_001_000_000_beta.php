@@ -7,7 +7,7 @@
 
 use \LCI\Blend\Migrations;
 
-class v1_0_0_beta_update extends Migrations
+class Update_001_000_000_beta extends Migrations
 {
 
     protected $empty_settings = [
@@ -104,6 +104,6 @@ class v1_0_0_beta_update extends Migrations
      */
     protected function assignSeedsDir()
     {
-        $this->seeds_dir = '2018_03_20_101010';
+        $this->seeds_dir = 'Update_001_000_000_beta';
     }
 }
