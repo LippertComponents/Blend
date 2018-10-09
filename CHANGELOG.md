@@ -1,3 +1,8 @@
+## [1.0.0 beta15] - 2018=10-09
+
+- Fix Resource->setTVValue to properly function when a string is passed
+- Add test and asserts to better check Resource setTVValue method and setFieldParentFromAlias
+
 ## [1.0.0 beta14] - 2018=10-05
 
 - Fix #8 update to beta13 from previous versions, delay logging until after DB table has been updated to the correct version
