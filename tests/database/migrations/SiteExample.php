@@ -154,11 +154,11 @@ class SiteExample extends Migrations
         /** @var \LCI\Blend\Blendable\Plugin $pluginSiteExample */
         $pluginSiteExample = $this->blender->getBlendableLoader()->getBlendablePlugin($plugin_name);
         $pluginSiteExample
-            ->setSeedsDir($plugin_name)
+            ->setSeedsDir(BLEND_TEST_SEEDS_DIR)
             ->setFieldDescription($plugin_description)
             ->setFieldCategory('Parent Plugin Cat=>Child Plugin Cat')
             ->setFieldCode($plugin_code, true)
-            ->setAsStatic('core/components/mysite/elements/plugins/myPlugin.tpl')
+            ->setAsStatic('core/components/mysite/elements/plugins/pluginSiteExample.tpl')
             ->attachOnEvent($plugin_event);
 
         if ($pluginSiteExample->blend(true)) {

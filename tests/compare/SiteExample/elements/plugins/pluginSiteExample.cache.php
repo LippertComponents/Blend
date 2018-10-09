@@ -12,7 +12,7 @@
     ),
     'source' => 'Filesystem',
     'static' => true,
-    'static_file' => 'core/components/mysite/elements/plugins/myPlugin.tpl',
+    'static_file' => 'core/components/mysite/elements/plugins/pluginSiteExample.tpl',
     'content' => '$eventName = $modx->event->name; // Site Example',
     'cache_type' => 0,
     'plugincode' => '$eventName = $modx->event->name; // Site Example',

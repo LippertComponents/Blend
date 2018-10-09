@@ -42,6 +42,9 @@ final class PluginTest extends BaseBlend
                 'Validate instance was created \LCI\Blend\Blendable\Plugin'
             );
 
+            /** @var modPlugin $modPlugin */
+            $modPlugin = $this->modx->getObject('modPlugin', ['name' => $plugin_name]);
+
             if ($blendPlugin instanceof \LCI\Blend\Blendable\Plugin) {
                 $this->assertEquals(
                     $plugin_name,
@@ -53,6 +56,12 @@ final class PluginTest extends BaseBlend
                     $plugin_description,
                     $blendPlugin->getFieldDescription(),
                     'Compare plugin description'
+                );
+
+                $this->assertEquals(
+                    $this->removePHPtags($plugin_code),
+                    $modPlugin->get('content'),
+                    'Compare plugin code'
                 );
 
                 $this->assertEquals(
