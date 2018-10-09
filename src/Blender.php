@@ -394,9 +394,9 @@ class Blender
         $config['migrations_path'] = __DIR__.'/database/migrations/';
 
         $blender = new Blender($this->modx, $this->getUserInteractionHandler(), $config);
-        $blender->setProject('lci\blend');
+        $blender->setProject('lci/blend');
 
-        $migrator = new Migrator($blender, $this->modx, 'lci\blend');
+        $migrator = new Migrator($blender, $this->modx, 'lci/blend');
         $migrator
             ->setDelayLogging(true)
             ->setCheckInstallLog($method == 'up' ? false : true)
