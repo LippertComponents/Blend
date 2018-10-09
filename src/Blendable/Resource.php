@@ -1144,26 +1144,30 @@ class Resource extends Blendable
      */
     protected function convertToLocalTVData($tv_data)
     {
-        $value = $tv_data['value'];
-        if (is_array($tv_data) && isset($tv_data['portable_type']) && isset($tv_data['portable_value'])) {
-            switch ($tv_data['portable_type']) {
-                case 'media_source':
-                    $mediaSource = $this->modx->getObject('modMediaSource', ['name' => $tv_data['portable_value']]);
-                    if (is_object($mediaSource)) {
-                        $value = $mediaSource->get('id');
-                    }
-                    break;
+        $value = $tv_data;
 
-                case 'resource':
-                    $value = $this->blender->getResourceIDFromSeedKey($tv_data['portable_value']['seed_key'], $tv_data['portable_value']['context']);
-                    break;
+        if (is_array($tv_data)) {
+            $value = $tv_data['value'];
+            if (is_array($tv_data) && isset($tv_data['portable_type']) && isset($tv_data['portable_value'])) {
+                switch ($tv_data['portable_type']) {
+                    case 'media_source':
+                        $mediaSource = $this->modx->getObject('modMediaSource', ['name' => $tv_data['portable_value']]);
+                        if (is_object($mediaSource)) {
+                            $value = $mediaSource->get('id');
+                        }
+                        break;
 
-                case 'template':
-                    $template = $this->modx->getObject('modTemplate', ['templatename' => $tv_data['portable_value']]);
-                    if (is_object($template)) {
-                        $value = $template->get('id');
-                    }
-                    break;
+                    case 'resource':
+                        $value = $this->blender->getResourceIDFromSeedKey($tv_data['portable_value']['seed_key'], $tv_data['portable_value']['context']);
+                        break;
+
+                    case 'template':
+                        $template = $this->modx->getObject('modTemplate', ['templatename' => $tv_data['portable_value']]);
+                        if (is_object($template)) {
+                            $value = $template->get('id');
+                        }
+                        break;
+                }
             }
         }
 
@@ -1214,6 +1218,7 @@ class Resource extends Blendable
             $tvs = $this->related_data['tvs'];
             if (is_array($tvs) && count($tvs) > 0) {
                 foreach ($tvs as $tv_name => $tv_data) {
+                    //echo PHP_EOL;print_r($tv_data);echo PHP_EOL;
                     $value = $this->convertToLocalTVData($tv_data);
 
                     $this->xPDOSimpleObject->setTVValue($tv_name, $value);
