@@ -141,13 +141,23 @@ class Template extends Element
      * @param $tv_name
      * @return $this
      */
-    public function detachTV($tv_name)
+    public function detachTemplateVariable($tv_name)
     {
         if (!isset($this->related_data['detach'])) {
             $this->related_data['detach'] = [];
         }
         $this->related_data['detach'][] = $tv_name;
         return $this;
+    }
+
+    /**
+     * @deprecated use detachTemplateVariable
+     * @param $tv_name
+     * @return $this
+     */
+    public function detachTV($tv_name)
+    {
+        return $this->detachTemplateVariable($tv_name);
     }
 
     protected function attachRelatedPieces()
@@ -243,7 +253,9 @@ class Template extends Element
         $tv_keys = [];
         if (is_object($this->xPDOSimpleObject)) {
             $tvTemplates = $this->xPDOSimpleObject->getMany('TemplateVarTemplates');
+            /** @var \modTemplateVarTemplate $tvTemplate */
             foreach ($tvTemplates as $tvTemplate) {
+                /** @var \modTemplateVar $tv */
                 $tv = $tvTemplate->getOne('TemplateVar');
                 $tv_name = $tv->get('name');
 

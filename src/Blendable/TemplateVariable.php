@@ -204,17 +204,6 @@ class TemplateVariable extends Element
         return $this;
     }
 
-    /**
-     * @param string $event_name
-     *
-     * @return mixed
-     */
-    public function removeOnEvent($event_name)
-    {
-        $this->remove_on_event_names = $event_name;
-        return $event_name;
-    }
-
     protected function attachRelatedPieces()
     {
         if (count($this->template_names) > 0) {
