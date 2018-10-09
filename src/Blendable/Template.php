@@ -170,7 +170,11 @@ class Template extends Element
                 // get the TV:
                 $tv = $this->modx->getObject('modTemplateVar', ['name' => $tv_name_data['name']]);
                 if ($tv) {
-                    $tvt = $this->modx->newObject('modTemplateVarTemplate');
+                    $tvt = $this->modx->getObject('modTemplateVarTemplate', ['tmplvarid' => $tv->get('id'), 'templateid' => $this->xPDOSimpleObject->getPrimaryKey()]);
+
+                    if (!$tvt) {
+                        $tvt = $this->modx->newObject('modTemplateVarTemplate');
+                    }
                     $tvt->set('tmplvarid', $tv->get('id'));
                     $tvt->set('rand', $tv_name_data['rank']);
 

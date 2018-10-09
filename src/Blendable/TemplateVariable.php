@@ -223,7 +223,11 @@ class TemplateVariable extends Element
                 // get the TV:
                 $template = $this->modx->getObject('modTemplateVar', ['templatename' => $template_name_data['name']]);
                 if ($template) {
-                    $tvt = $this->modx->newObject('modTemplateVarTemplate');
+                    $tvt = $this->modx->getObject('modTemplateVarTemplate', ['tmplvarid' => $this->xPDOSimpleObject->getPrimaryKey(), 'templateid' => $template->getPrimaryKey()]);
+
+                    if (!$tvt) {
+                        $tvt = $this->modx->newObject('modTemplateVarTemplate');
+                    }
                     $tvt->set('templateid', $template->get('id'));
                     $tvt->set('rand', $template_name_data['rank']);
 
