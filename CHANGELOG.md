@@ -1,3 +1,8 @@
+## [1.0.0 beta16] - 2018=10-09
+
+- Fix Blendable/Template->attachTemplateVariable() + Blendable/TemplateVariable->attachToTemplate() to first check if already attached
+- Minor code clean up on Blendable/Template added detachTemplateVariable() to replace detachTV() + clean up Blendable/TemplateVariable
+
 ## [1.0.0 beta15] - 2018=10-09
 
 - Fix Resource->setTVValue to properly function when a string is passed
