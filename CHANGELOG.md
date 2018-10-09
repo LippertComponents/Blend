@@ -2,6 +2,7 @@
 
 - Fix Resource->setTVValue to properly function when a string is passed
 - Add test and asserts to better check Resource setTVValue method and setFieldParentFromAlias
+- Move Blend Install/Update to src/database/migrations to match Orchestrator guidelines
 
 ## [1.0.0 beta14] - 2018=10-05
 
