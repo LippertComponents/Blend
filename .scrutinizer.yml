@@ -1,12 +1,5 @@
 build:
   nodes:
-    coverage:
-      tests:
-        override:
-        - command: 'vendor/bin/phpunit --coverage-clover=./log/coverage.xml'
-          coverage:
-            file: './log/coverage.xml'
-            format: 'clover'
     tests:
       dependencies:
         before:
@@ -22,7 +15,12 @@ build:
         - mkdir temp
         - mkdir temp/database
         - cp -r tests/database/ temp/database/
-  # MySQL https://scrutinizer-ci.com/docs/build/mysql_credentials
+        # MySQL https://scrutinizer-ci.com/docs/build/mysql_credentials
+      override:
+        - command: 'vendor/bin/phpunit --coverage-clover=./log/coverage.xml'
+        coverage:
+          file: './log/coverage.xml'
+          format: 'clover'
 
 filter:
   dependency_paths:
