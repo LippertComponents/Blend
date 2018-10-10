@@ -1,5 +1,12 @@
 build:
   nodes:
+    coverage:
+      tests:
+        override:
+        - command: 'vendor/bin/phpunit --coverage-clover=./log/coverage.xml'
+          coverage:
+            file: './log/coverage.xml'
+            format: 'clover'
     tests:
       dependencies:
         before:
