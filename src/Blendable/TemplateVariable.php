@@ -9,6 +9,8 @@
 namespace LCI\Blend\Blendable;
 
 
+use LCI\Blend\Helpers\TemplateVariableInput;
+
 class TemplateVariable extends Element
 {
     protected $template_names = [];
@@ -86,6 +88,14 @@ class TemplateVariable extends Element
     public function getFieldElements()
     {
         return $this->blendable_xpdo_simple_object_data['elements'];
+    }
+
+    /**
+     * @return TemplateVariableInput
+     */
+    public function getInputPropertyHelper()
+    {
+        return new TemplateVariableInput($this->getFieldType());
     }
 
     /**
@@ -194,7 +204,7 @@ class TemplateVariable extends Element
     /**
      * @param string $value  max characters: 20, default options:
      *      autotag, checkbox, date, listbox, listbox-multiple, email, file,
-     *      hidden, image, number, option, resourcelist, richtext, tag, text, textarea, url
+     *      hidden, image, number, option [radio], resourcelist, richtext, tag, text, textarea, url
      * @see https://docs.modx.com/revolution/2.x/making-sites-with-modx/customizing-content/template-variables/template-variable-input-types
      * @return $this
      */
