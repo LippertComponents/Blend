@@ -1,3 +1,7 @@
+## [1.0.0 beta17] - 2018=10-11
+
+- Added Blendable/TemplateVariable->getInputPropertyHelper() which returns class Helpers/TemplateVariableInput
+
 ## [1.0.0 beta16] - 2018=10-09
 
 - Fix Blendable/Template->attachTemplateVariable() + Blendable/TemplateVariable->attachToTemplate() to first check if already attached
