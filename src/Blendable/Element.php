@@ -8,10 +8,10 @@
 
 namespace LCI\Blend\Blendable;
 
+use LCI\Blend\Helpers\ElementProperty;
 
 abstract class Element extends Blendable
 {
-    use BlendableProperties;
     use DescriptionGetterAndSetter;
 
     /** @var string  */
@@ -181,6 +181,46 @@ abstract class Element extends Blendable
         $this->blendable_xpdo_simple_object_data['source'] = $media_source;
         $this->blendable_xpdo_simple_object_data['static'] = true;
         $this->blendable_xpdo_simple_object_data['static_file'] = $file;
+        return $this;
+    }
+
+    /**
+     * @param ElementProperty $elementProperty
+     */
+    public function setElementProperty(ElementProperty $elementProperty)
+    {
+        $this->blendable_xpdo_simple_object_data['properties'][$elementProperty->getName()] = $elementProperty->toArray();
+    }
+
+    /**
+     * @param string $name
+     * @param string $value
+     * @param string $description
+     * @param string $type
+     *
+     * @return $this
+     */
+    public function setProperty($name, $value, $description, $type='textfield')
+    {
+        $property = new ElementProperty($name);
+        $property
+            ->setValue($value)
+            ->setDescription($description)
+            ->setType($type);
+
+        $this->properties[$name] = $property->toArray();
+        return $this;
+    }
+
+    /**
+     * @param array $data
+     *
+     * @return $this
+     */
+    public function setProperties(array $data)
+    {
+        $this->blendable_xpdo_simple_object_data['properties'] = $data;
+
         return $this;
     }
 
