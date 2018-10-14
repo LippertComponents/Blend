@@ -22,7 +22,19 @@ class ChunkMigrationExample extends Migrations
             ->setSeedsDir($this->getSeedsDir())
             ->setFieldDescription('This is my 3rd test chunk, note this is limited to 255 or something and no HTML')
             ->setFieldCategory('Parent Cat=>Child Cat')
-            ->setFieldCode('Hi [[+testPlaceholder3]], ...');
+            ->setFieldCode('Hi [[+testPlaceholder3]], ...')
+            ->setProperty('someProperty', '123', 'Description goes here', 'number')
+            ->setElementProperty(
+                (new \LCI\Blend\Helpers\ElementProperty('2ndProperty'))
+                ->setValue(321)
+                ->setDescription('This allow you to define object better')
+                ->setType('list')
+                ->addOption('Option 1', 1)
+                ->addOption('Option 2', 2)
+                ->setArea('Lists')
+                ->setLexicon('tests')
+            )
+        ;
 
         if ($testChunk3->blend(true)) {
             $this->blender->out($testChunk3->getFieldName().' was saved correctly');

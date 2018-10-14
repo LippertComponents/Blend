@@ -173,27 +173,78 @@ final class ChunkTest extends BaseBlend
             'Validate testChunkMigration that chunk was created '.$chunk_name
         );
 
-        if ($testChunk3 instanceof \modChunk) {
-            $this->assertEquals(
-                $chunk_name,
-                $testChunk3->get('name'),
-                'Compare chunk name'
-            );
+        $this->assertEquals(
+            $chunk_name,
+            $testChunk3->get('name'),
+            'Compare chunk name'
+        );
 
-            $this->assertEquals(
-                $chunk_description,
-                $testChunk3->get('description'),
-                'Compare chunk description'
-            );
+        $this->assertEquals(
+            $chunk_description,
+            $testChunk3->get('description'),
+            'Compare chunk description'
+        );
 
-            $this->assertEquals(
-                $chunk_code,
-                $testChunk3->getContent(),
-                'Compare chunk code'
-            );
-        }
+        $this->assertEquals(
+            $chunk_code,
+            $testChunk3->getContent(),
+            'Compare chunk code'
+        );
+
+        $this->assertEquals(
+            [
+                'someProperty' => [
+                    'name' => 'someProperty',
+                    'desc' => 'Description goes here',
+                    'type' => 'number',
+                    'options' => [],
+                    'value' => 123,
+                    'lexicon' => '',
+                    'area' => '',
+                    'desc_trans' => 'Description goes here',
+                    'area_trans' => ''
+                ],
+                '2ndProperty' => [
+                    'name' => '2ndProperty',
+                    'desc' => 'This allow you to define object better',
+                    'type' => 'list',
+                    'options' => [
+                        [
+                            'text' => 'Option 1',
+                            'value' => 1,
+                            'name' => 'Option 1'
+                        ],
+                        [
+                            'text' => 'Option 2',
+                            'value' => 2,
+                            'name' => 'Option 2'
+                        ]
+                    ],
+                    'value' => 321,
+                    'lexicon' => 'tests',
+                    'area' => 'Lists',
+                    'desc_trans' => 'This allow you to define object better',
+                    'area_trans' => 'Lists'
+                ]
+            ],
+            $testChunk3->get('properties'),
+            'Compare chunk semi-raw properties'
+        );
+
+        $this->assertEquals(
+            [
+                'someProperty' => '123',
+                '2ndProperty' => 321
+            ],
+            $testChunk3->getProperties(),
+            'Compare chunk->getProperties()'
+        );
     }
 
+    /**
+     * @depends testChunkMigration
+     * @throws \LCI\Blend\Exception\MigratorException
+     */
     public function testChunkRevertMigration()
     {
         $migration = 'ChunkMigrationExample';
@@ -218,10 +269,13 @@ final class ChunkTest extends BaseBlend
         );
     }
 
+    /**
+     * @throws \LCI\Blend\Exception\MigratorException
+     */
     public function testRemoveBlend()
     {
         if (BLEND_CLEAN_UP) {
-            $this->blender->install('down');
+            $this->blender->uninstall();
 
             $this->assertEquals(
                 false,

@@ -181,10 +181,94 @@ final class TemplateTVTest extends BaseBlend
         );
     }
 
+    public function testTemplateVariableMigration()
+    {
+        $migration = 'TemplateVariableMigrationExample';
+        $tv_name = 'tvTextExample';
+        $tv_description = 'This is text TV, note this is limited to 255 or something and no HTML';
+
+        $this->blender->runMigration('up', 'master', 0, 0, $migration);
+
+        $tvTextExample = $this->modx->getObject('modTemplateVar', ['name' => $tv_name]);
+        $this->assertInstanceOf(
+            '\modTemplateVar',
+            $tvTextExample,
+            'Validate testTemplateVariableMigration created '.$tv_name
+        );
+
+        $this->assertEquals(
+            $tv_name,
+            $tvTextExample->get('name'),
+            'Compare TV name'
+        );
+
+        $this->assertEquals(
+            $tv_description,
+            $tvTextExample->get('description'),
+            'Compare TV description'
+        );
+
+        $this->assertEquals(
+            'This is the caption',
+            $tvTextExample->get('caption'),
+            'Compare TV caption'
+        );
+
+        $this->assertEquals(
+            'text',
+            $tvTextExample->get('type'),
+            'Compare TV type'
+        );
+
+        $this->assertEquals(
+            [
+                'minLength' => 10,
+                'maxLength' => 255,
+                'regex' => '',
+                'regexText' => '',
+                'allowBlank' => true
+            ],
+            $tvTextExample->get('input_properties'),
+            'Compare TV semi-raw input properties'
+        );
+    }
+
+    /**
+     * @depends testTemplateVariableMigration
+     * @throws \LCI\Blend\Exception\MigratorException
+     */
+    public function testTemplateVariableRevertMigration()
+    {
+        $migration = 'TemplateVariableMigrationExample';
+        $tv_name = 'tvTextExample';
+
+        $tvTextExample = $this->modx->getObject('modTemplateVar', ['name' => $tv_name]);
+
+        $this->assertInstanceOf(
+            '\modTemplateVar',
+            $tvTextExample,
+            'Validate tvTextExample was created '.$tv_name
+        );
+
+        $this->blender->runMigration('down', 'master', 0, 0, $migration);
+
+        $tvTextExampleRemoved = $this->modx->getObject('modTemplateVar', ['name' => $tv_name]);
+
+        $this->assertEquals(
+            false,
+            $tvTextExampleRemoved,
+            'Compare reverted tvTextExample, should be empty/false'
+        );
+    }
+
+
+    /**
+     * @throws \LCI\Blend\Exception\MigratorException
+     */
     public function testRemoveBlend()
     {
         if (BLEND_CLEAN_UP) {
-            $this->blender->install('down');
+            $this->blender->uninstall();
 
             $this->assertEquals(
                 false,
