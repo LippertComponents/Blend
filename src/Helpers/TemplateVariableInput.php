@@ -267,7 +267,8 @@ class TemplateVariableInput
     }
 
     /**
-     * @param string $regex
+     * @param string $regex ~ Regular Expression Validator
+     * @see https://regex101.com/#javascript
      * For types: email, file, hidden, image, text, richtext, tag, textarea, url
      * @return TemplateVariableInput
      */
@@ -278,7 +279,7 @@ class TemplateVariableInput
     }
 
     /**
-     * @param string $regexText
+     * @param string $regexText ~ Regular Expression Error
      * For types: email, file, hidden, image, text, richtext, tag, textarea, url
      * @return TemplateVariableInput
      */

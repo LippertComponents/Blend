@@ -172,7 +172,7 @@ class TemplateVariable extends Element
     }
 
     /**
-     * @param string $value
+     * @param array $value
      * @return $this
      */
     public function setFieldInputProperties($value)

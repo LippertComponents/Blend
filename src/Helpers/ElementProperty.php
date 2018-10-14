@@ -90,7 +90,35 @@ class ElementProperty
     }
 
     /**
+     * @param string $text
+     * @param $value
+     * @return $this
+     */
+    public function addOption(string $text, $value)
+    {
+        $this->options[] = [
+            'text' => $text,
+            'value' => $value
+        ];
+
+        return $this;
+    }
+
+    /**
      * @param array $options
+     * @return $this
+     */
+    public function addOptions(array $options)
+    {
+        foreach ($options as $option) {
+            $this->options[] = $option;
+        }
+
+        return $this;
+    }
+
+    /**
+     * @param array $options ~ [['text' => 'Option', 'value' => 'opt'], ... ]
      *  only valid for color and list
      * @return ElementProperty
      */

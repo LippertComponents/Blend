@@ -33,7 +33,7 @@ abstract class Element extends Blendable
         'locked' => 0, // bool
         'name' => '',
         'property_preprocess' => 0, // bool
-        'properties' => '', //??
+        'properties' => [],
         'source' => 1,
         'static' =>  0,
         'static_file' => ''
@@ -186,10 +186,14 @@ abstract class Element extends Blendable
 
     /**
      * @param ElementProperty $elementProperty
+     *
+     * @return $this
      */
     public function setElementProperty(ElementProperty $elementProperty)
     {
         $this->blendable_xpdo_simple_object_data['properties'][$elementProperty->getName()] = $elementProperty->toArray();
+
+        return $this;
     }
 
     /**
@@ -208,7 +212,7 @@ abstract class Element extends Blendable
             ->setDescription($description)
             ->setType($type);
 
-        $this->properties[$name] = $property->toArray();
+        $this->blendable_xpdo_simple_object_data['properties'][$name] = $property->toArray();
         return $this;
     }
 
