@@ -1,6 +1,6 @@
 build:
   nodes:
-    tests:
+    prepare:
       dependencies:
         before:
         # The following installs the most recent MODX CMS version, you might want
@@ -13,9 +13,8 @@ build:
         # - php ./index.php --installmode=new
         - php ./tests/scrutinizer/setup.php
         - mkdir temp
-        - mkdir temp/database
-        - cp -r tests/database/ temp/database/
-        # MySQL https://scrutinizer-ci.com/docs/build/mysql_credentials
+        - cp -r tests/database/ temp/
+      # MySQL https://scrutinizer-ci.com/docs/build/mysql_credentials
 
 filter:
   dependency_paths:
