@@ -160,6 +160,28 @@ should now show there.
  - OnBlendLoadRelatedData
 
 ---
+### Resource Migration
+
+An example within a the up method of a migration file.
+```php
+<?php
+/** @var \LCI\Blend\Blendable\Resource $blendableResource */
+$blendableResource = $this->blender->getBlendableLoader()->getBlendableResource('some-resource-alias');
+$blendableResource
+    ->setSeedsDir($this->getSeedsDir())
+    ->setFieldContent('Content, can put in HTML here')
+    ->setFieldDescription('This is the description field, it is short like 191 char')
+    ->setFieldLongtitle('Really long title goes here... ')
+    ->setFieldPagetitle('Page Title')
+    ->setFieldTemplate('Some Template')
+    ->setFieldParentFromAlias('parent-alias', 'web')
+    ->setTVValueResourceIDFromAlias('resourceListTV', $this->parent_alias, 'web')
+    ->setTVValue('richTextTV', '<h2>Children, this is only a test</h2>')
+    ->setTVValue('textTV', 'A single line value goes here')
+    ->setTVValue('textAreaTV', 'Lots of lines can go here ' . PHP_EOL . 'Line 2');
+
+$blended = $blendableResource->blend(true);
+```
 
 ### Resource seeds
 
@@ -201,13 +223,14 @@ should show up there.
 
 - v1.0 
   - ~~Install MODX (3.x for git is complete)~~
-  - [ ] Add TV convenience methods for building custom migrations 
+  - [x] Add TV convenience methods for input properties when building custom migrations 
   - [x] Resource seed of TV values
   - [x] DONE: Media Sources, seed and migrate
   - [x] DONE: Convert all System Setting to have values that are name key vs int key, templates, resources, ect.
-  - [ ] Create a database/history directory and move all Blend backups to this directory
+  - [x] Create a database/history directory and move all Blend backups to this directory
   - [x] Contexts!!! Similar to resources and system settings
 - v1.1
+  - [ ] Add TV convenience methods for output properties when building custom migrations 
   - [ ] Blendable Namespaces
   - [ ] Extras via Gitify/Teleport
   - [ ] List Migrations in Table, newest to oldest
