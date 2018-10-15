@@ -102,6 +102,7 @@ class Blender
             'migration_templates_path' => __DIR__.'/Migrations/templates/',
             'migrations_path' => $blend_modx_migration_dir.'database/migrations/',
             'seeds_path' => $blend_modx_migration_dir.'database/seeds/',
+            'history_path' => $blend_modx_migration_dir.'database/history/',
             'model_dir' => __DIR__.($this->xpdo_version >= 3 ? '/' : '/xpdo2/'),
             'extras' => [
                 'tagger' => false
@@ -233,12 +234,25 @@ class Blender
     }
 
     /**
-     * @param null $directory_key
+     * @param string|null $directory_key
      * @return string
      */
     public function getSeedsPath($directory_key = null)
     {
         $seed_path = $this->config['seeds_path'];
+        if (!empty($directory_key)) {
+            $seed_path .= trim($directory_key, '/').DIRECTORY_SEPARATOR;
+        }
+        return $seed_path;
+    }
+
+    /**
+     * @param string|null $directory_key
+     * @return string
+     */
+    public function getHistoryPath($directory_key = null)
+    {
+        $seed_path = $this->config['history_path'];
         if (!empty($directory_key)) {
             $seed_path .= trim($directory_key, '/').DIRECTORY_SEPARATOR;
         }

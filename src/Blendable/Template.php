@@ -260,9 +260,17 @@ class Template extends Element
                 $tv_name = $tv->get('name');
 
                 $tvSeed = new TemplateVariable($this->modx, $this->blender, $tv_name);
-                $seed_key = $tvSeed
-                    ->setSeedsDir($this->getSeedsDir())
-                    ->seed($this->type == 'revert' ? 'revert' : 'seed');
+
+                if ($this->type == 'revert') {
+                    $seed_key = $tvSeed
+                        ->setSeedsDir($this->getSeedsDir())
+                        ->makeHistory();
+
+                } else {
+                    $seed_key = $tvSeed
+                        ->setSeedsDir($this->getSeedsDir())
+                        ->seed();
+                }
 
                 $tv_keys[] = [
                     'seed_key' => $seed_key,

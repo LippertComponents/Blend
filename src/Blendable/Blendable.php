@@ -9,6 +9,7 @@
 namespace LCI\Blend\Blendable;
 
 use LCI\Blend\Blender;
+use LCI\Blend\Exception\BlendableException;
 
 abstract class Blendable implements BlendableInterface
 {
@@ -25,7 +26,10 @@ abstract class Blendable implements BlendableInterface
     protected $opt_cache_key = '';
 
     /** @var array  */
-    protected $cacheOptions = [];
+    protected $seedCacheOptions = [];
+
+    /** @var array  */
+    protected $historyCacheOptions = [];
 
     /** @var string */
     protected $seeds_dir = '';
@@ -89,9 +93,14 @@ abstract class Blendable implements BlendableInterface
             $this->loadProperties();
         }
 
-        $this->cacheOptions = [
+        $this->seedCacheOptions = [
             \xPDO::OPT_CACHE_KEY => $this->opt_cache_key,
             \xPDO::OPT_CACHE_PATH => $this->blender->getSeedsPath()
+        ];
+
+        $this->historyCacheOptions = [
+            \xPDO::OPT_CACHE_KEY => $this->opt_cache_key,
+            \xPDO::OPT_CACHE_PATH => $this->blender->getHistoryPath()
         ];
 
         $this->setUniqueCriteria($unique_value);
@@ -128,7 +137,7 @@ abstract class Blendable implements BlendableInterface
     }
 
     /**
-     * @param string $dir ~ will be the directory name
+     * @param string $dir ~ will be the directory name for seeds and history
      *
      * @return $this
      */
@@ -136,7 +145,8 @@ abstract class Blendable implements BlendableInterface
     {
         $this->seeds_dir = (string)$dir;
         if (!empty($this->seeds_dir)) {
-            $this->cacheOptions[\xPDO::OPT_CACHE_PATH] = $this->blender->getSeedsPath().$dir.'/';
+            $this->seedCacheOptions[\xPDO::OPT_CACHE_PATH] = $this->blender->getSeedsPath().$dir.'/';
+            $this->historyCacheOptions[\xPDO::OPT_CACHE_PATH] = $this->blender->getHistoryPath().$dir.'/';
         }
         return $this;
     }
@@ -247,7 +257,7 @@ abstract class Blendable implements BlendableInterface
             $currentVersion = $this->getCurrentVersion();
             $currentVersion
                 ->setRelatedData($this->related_data)
-                ->seed('revert');
+                ->makeHistory();
         }
 
         $this->modx->invokeEvent(
@@ -288,7 +298,7 @@ abstract class Blendable implements BlendableInterface
     public function delete($make_revert_seed = true)
     {
         if ($make_revert_seed) {
-            $this->seed('revert');
+            $this->makeHistory();
         }
         $removed = false;
         if (!is_object($this->xPDOSimpleObject)) {
@@ -318,7 +328,7 @@ abstract class Blendable implements BlendableInterface
     {
         $seed_key = $this->getSeedKey('revert');
         $this->type = 'revert';
-        if (!$this->loadObjectDataFromSeed($seed_key) || !$this->blendable_xpdo_simple_object_data) {
+        if (!$this->loadObjectDataFromHistorySeed($seed_key) || !$this->blendable_xpdo_simple_object_data) {
             return $this->delete(false);
         }
 
@@ -326,23 +336,41 @@ abstract class Blendable implements BlendableInterface
     }
 
     /**
-     * @param string $type ~ seed or revert
      * @return string ~ the related seed key
      */
-    public function seed($type = 'seed')
+    public function seed()
     {
-        $data = false;
         // No IDs! must get the alias and get a seed key,
-        $seed_key = $this->getSeedKey($type);
+        $seed_key = $this->getSeedKey();
 
-        $data = $this->seedToArray($type, $seed_key);
+        $data = $this->seedToArray('seed', $seed_key);
 
         // now cache it:
         $this->modx->cacheManager->set(
             $seed_key,
             $data,
             $this->cache_life,
-            $this->cacheOptions
+            $this->seedCacheOptions
+        );
+
+        return $seed_key;
+    }
+
+    /**
+     * @return string ~ the related seed key
+     */
+    public function makeHistory()
+    {
+        $seed_key = $this->getSeedKey('revert');
+
+        $data = $this->seedToArray('revert', $seed_key);
+
+        // now cache it:
+        $this->modx->cacheManager->set(
+            $seed_key,
+            $data,
+            $this->cache_life,
+            $this->historyCacheOptions
         );
 
         return $seed_key;
@@ -565,17 +593,35 @@ abstract class Blendable implements BlendableInterface
      * @param string $seed_key
      *
      * @return bool|array
+     * @throws BlendableException
      */
     protected function loadObjectDataFromSeed($seed_key)
     {
-        $data = $this->modx->cacheManager->get($seed_key, $this->cacheOptions);
+        $data = $this->modx->cacheManager->get($seed_key, $this->seedCacheOptions);
         if ($data == false) {
             if ($this->type == 'blend') {
-                $this->blender->out('Error: Seed could not be found: '.$seed_key.' aborting', true);
-                exit();
+                $this->blender->outError('Error: Seed could not be found: '.$seed_key);
+                throw new BlendableException('Error: Seed could not be found: '.$seed_key);
             }
 
         } else {
+            $this->blendable_xpdo_simple_object_data = $data['columns'];
+            $this->unique_key_history = $data['primaryKeyHistory'];
+            $this->related_data = $data['related'];
+        }
+
+        return $data;
+    }
+
+    /**
+     * @param string $seed_key
+     * @return mixed
+     */
+    protected function loadObjectDataFromHistorySeed($seed_key)
+    {
+        $data = $this->modx->cacheManager->get($seed_key, $this->historyCacheOptions);
+
+        if (is_array($data)) {
             $this->blendable_xpdo_simple_object_data = $data['columns'];
             $this->unique_key_history = $data['primaryKeyHistory'];
             $this->related_data = $data['related'];
