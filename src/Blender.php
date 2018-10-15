@@ -679,7 +679,6 @@ class Blender
      */
     public function getSeedKeyFromName($name)
     {
-        // @TODO review
         return str_replace('/', '#', $name);
     }
 

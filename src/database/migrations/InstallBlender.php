@@ -20,7 +20,6 @@ class InstallBlender extends Migrations
         'OnBlendAfterSave',
         'OnBlendSeed',
         'OnBlendLoadRelatedData',
-        // @TODO replace:
         'OnBlendSeedSystemSettings'
     ];
 

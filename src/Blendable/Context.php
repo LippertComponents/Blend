@@ -157,7 +157,6 @@ class Context extends Blendable
      */
     public function addSetting($key, $value, $xtype = 'textfield', $area = '', $namespace = 'core')
     {
-        // @TODO how to use the SystemSetting class to make blendable context settings and IDE helpers
         $this->related_data['settings'][] = [
             'area' => $area,
             'namespace' => $namespace,
@@ -177,7 +176,6 @@ class Context extends Blendable
         $this->remove_settings[] = $key;
         return $this;
     }
-
 
     /**
      * @return Blendable
@@ -206,7 +204,6 @@ class Context extends Blendable
             $settings[] = $this->makePortableData($setting->toArray());
         }
 
-        // @TODO modContextResource or should this be on Resource
         $this->related_data = [
             'settings' => $settings
         ];
@@ -337,7 +334,5 @@ class Context extends Blendable
                 $contextSetting->remove();
             }
         }
-
-        // @TODO modContextResource or should this be on Resource
     }
 }

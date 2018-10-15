@@ -225,7 +225,7 @@ class SeedMaker
             $blendResource = new Resource($this->modx, $this->blender, $resource->get('alias'), $resource->get('context_key'));
             $seed_key = $blendResource
                 ->setSeedsDir($this->format->getMigrationName('resource', $name))
-                ->seed($resource);
+                ->seed();
             $this->blender->out("ID: ".$resource->get('id').' Key: '.$seed_key);
 
             if (!isset($keys[$resource->get('context_key')])) {

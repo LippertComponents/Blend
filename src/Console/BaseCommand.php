@@ -53,7 +53,6 @@ abstract class BaseCommand extends Command
                 $this->modx,
                 $this->consoleUserInteractionHandler,
                 [
-                    // @TODO rename:
                     'blend_modx_migration_dir' => $local_migration_path,
                 ]
             );

@@ -108,8 +108,7 @@ class MigrationsCreator
             $this->migrations_path = $path.'database/migrations/';
 
         } elseif (!file_exists($path) && !$append) {
-            // @TODO review:
-            mkdir($path, 0777, true);
+            mkdir($path, 0755, true);
         }
 
         return $this;
@@ -134,8 +133,7 @@ class MigrationsCreator
             $this->seeds_path = $path.'database/seeds/';
 
         } elseif (!file_exists($path) && !$append) {
-            // @TODO review:
-            mkdir($path, 0777, true);
+            mkdir($path, 0755, true);
         }
 
         return $this;
@@ -424,14 +422,7 @@ class MigrationsCreator
         if (file_exists($this->migrations_path.$class_name.'.php')) {
             $this->outError($this->migrations_path.$class_name.'.php migration file already exists');
 
-        }
-        /**
-         * @TODO refactor this?
-         elseif (is_object($this->xPDO->getObject($this->migrator->getMigrationClassObject(), ['name' => $class_name]))) {
-            $this->out($class_name . ' migration already has been created in the xpdo_migrations table', true);
-
-        } */
-        else {
+        } else {
             try {
                 $write = file_put_contents($this->migrations_path.$class_name.'.php', $file_contents);
                  $this->log_data = [
