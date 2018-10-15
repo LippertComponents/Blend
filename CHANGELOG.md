@@ -1,3 +1,15 @@
+## [1.0.0] - 2018=10-15
+
+- Clean up some TODOs left in the code base
+- Added a database/history directory, this moves the revert snapshot files from database/seeds/revert-*.php to separate directory in history
+- Added Tests for Helper/ElementProperty and Helpers/TemplateVariableInput
+- Added Helper/ElementProperty->addOption() + addOptions()
+- Minor fixes for Helper/TemplateVariableInput 
+
+## [1.0.0 beta18] - 2018=10-12
+
+- Add Helper/ElementProperty to use in Element, Chunks & Snippets
+
 ## [1.0.0 beta17] - 2018=10-11
 
 - Added Blendable/TemplateVariable->getInputPropertyHelper() which returns class Helpers/TemplateVariableInput
