@@ -238,6 +238,7 @@ abstract class Blendable implements BlendableInterface
      * @param bool $overwrite
      *
      * @return bool
+     * @throws BlendableException
      */
     public function blendFromSeed($seed_key, $overwrite = false)
     {
@@ -538,6 +539,12 @@ abstract class Blendable implements BlendableInterface
     protected function loadFromArray($data = [])
     {
         foreach ($data as $column => $value) {
+
+            if ($column == 'content_type' && $this->xpdo_simple_object_class == 'modResource') {
+                // modResource has both contentType and content_type, ignore the 2nd
+                continue;
+            }
+
             $method_name = 'seed'.$this->makeStudyCase($column);
 
             if (method_exists($this, $method_name) && !is_null($value)) {
@@ -601,7 +608,7 @@ abstract class Blendable implements BlendableInterface
         if ($data == false) {
             if ($this->type == 'blend') {
                 $this->blender->outError('Error: Seed could not be found: '.$seed_key);
-                throw new BlendableException('Error: Seed could not be found: '.$seed_key);
+                throw new BlendableException('Error: Seed could not be found: '.$seed_key . ' in '. print_r($this->seedCacheOptions, true));
             }
 
         } else {

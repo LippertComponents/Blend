@@ -89,7 +89,7 @@ class SiteExample extends Migrations
         /** @var \LCI\Blend\Blendable\Resource $resourceSiteExample */
         $resourceSiteExample = $this->blender->getBlendableLoader()->getBlendableResource($alias);
         $resourceSiteExample
-            ->setSeedsDir(BLEND_TEST_SEEDS_DIR)
+            ->setSeedsDir($this->getSeedsDir())
             ->setFieldTemplate('templateSiteExample')
             ->setFieldContent($content)
             ->setFieldDescription($description)
@@ -103,7 +103,7 @@ class SiteExample extends Migrations
         } else {
             //error
             $this->blender->outError($resourceSiteExample->getFieldAlias().' did not save correctly ');
-            $this->blender->outError(print_r($templateSiteExample->getErrorMessages(), true), \LCI\Blend\Blender::VERBOSITY_DEBUG);
+            $this->blender->outError(print_r($resourceSiteExample->getErrorMessages(), true), \LCI\Blend\Blender::VERBOSITY_DEBUG);
         }
 
         $alias = 'site-example-resource';
@@ -114,7 +114,7 @@ class SiteExample extends Migrations
         /** @var \LCI\Blend\Blendable\Resource $resourceSiteExample */
         $resourceSiteExample = $this->blender->getBlendableLoader()->getBlendableResource($alias);
         $resourceSiteExample
-            ->setSeedsDir(BLEND_TEST_SEEDS_DIR)
+            ->setSeedsDir($this->getSeedsDir())
             ->setFieldContent($content)
             ->setFieldDescription($description)
             ->setFieldLongtitle($long_title)
@@ -126,7 +126,7 @@ class SiteExample extends Migrations
         } else {
             //error
             $this->blender->outError($resourceSiteExample->getFieldAlias().' did not save correctly ');
-            $this->blender->outError(print_r($templateSiteExample->getErrorMessages(), true), \LCI\Blend\Blender::VERBOSITY_DEBUG);
+            $this->blender->outError(print_r($resourceSiteExample->getErrorMessages(), true), \LCI\Blend\Blender::VERBOSITY_DEBUG);
         }
 
         /** @var \LCI\Blend\Blendable\Chunk $chunk */
@@ -154,7 +154,7 @@ class SiteExample extends Migrations
         /** @var \LCI\Blend\Blendable\Plugin $pluginSiteExample */
         $pluginSiteExample = $this->blender->getBlendableLoader()->getBlendablePlugin($plugin_name);
         $pluginSiteExample
-            ->setSeedsDir(BLEND_TEST_SEEDS_DIR)
+            ->setSeedsDir($this->getSeedsDir())
             ->setFieldDescription($plugin_description)
             ->setFieldCategory('Parent Plugin Cat=>Child Plugin Cat')
             ->setFieldCode($plugin_code, true)

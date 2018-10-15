@@ -747,7 +747,7 @@ class Resource extends Blendable
     }
 
     /**
-     * @param int $value
+     * @param string|int $value ~ the template name
      * @return $this
      */
     public function setFieldTemplate($value)
@@ -1218,7 +1218,6 @@ class Resource extends Blendable
             $tvs = $this->related_data['tvs'];
             if (is_array($tvs) && count($tvs) > 0) {
                 foreach ($tvs as $tv_name => $tv_data) {
-                    //echo PHP_EOL;print_r($tv_data);echo PHP_EOL;
                     $value = $this->convertToLocalTVData($tv_data);
 
                     $this->xPDOSimpleObject->setTVValue($tv_name, $value);
