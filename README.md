@@ -229,12 +229,12 @@ should show up there.
   - [x] DONE: Convert all System Setting to have values that are name key vs int key, templates, resources, ect.
   - [x] Create a database/history directory and move all Blend backups to this directory
   - [x] Contexts!!! Similar to resources and system settings
-- v1.1
+- Future
   - [ ] Add TV convenience methods for output properties when building custom migrations 
   - [ ] Blendable Namespaces
   - [ ] Extras via Gitify/Teleport
   - [ ] List Migrations in Table, newest to oldest
-- v1.2
+- Potential 
   - Resource Groups
   - Seed ACL, user groups & permissions
   - Form customizations (via template relations?)

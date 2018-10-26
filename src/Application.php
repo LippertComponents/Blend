@@ -19,5 +19,5 @@ class Application extends ConsoleApplication
 
     protected static $name = 'Blend Console';
 
-    protected static $version = '1.0.1';
+    protected static $version = '1.1.0';
 }

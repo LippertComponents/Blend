@@ -1,7 +1,16 @@
-## [1.0.1] - 2018=10-26
+## [1.1.0] - 2018-10-26
+
+- Added helpers for MIGX and modTV->Elements better know as Input Option Values
+- Added Blendable/TemplateVariable->getMIGXInputPropertyHelper()
+returns LCI\Blend\Helpers\MIGX\Tab\MIGXTemplateVariableInput for easy setting up MIGX with IDE helpers to insure properly work
+Then use with Blendable/TemplateVariable->setFieldInputProperties(LCI\Blend\Helpers\MIGX\Tab\MIGXTemplateVariableInput->getInputProperties())
+- Added Blendable/TemplateVariable->makeInputOptionValues() 
+returns LCI\Blend\Helpers\TVInput\OptionValues to allow for easy and accurate list options
+
+## [1.0.1] - 2018-10-26
 - Fix Plugin->removeOnEvent() and then related Plugin->attachRelatedPiecesAfterSave() when doing a blend migration and test added
 
-## [1.0.0] - 2018=10-15
+## [1.0.0] - 2018-10-15
 
 - Clean up some TODOs left in the code base
 - Added a database/history directory, this moves the revert snapshot files from database/seeds/revert-*.php to separate directory in history
@@ -9,26 +18,26 @@
 - Added Helper/ElementProperty->addOption() + addOptions()
 - Minor fixes for Helper/TemplateVariableInput 
 
-## [1.0.0 beta18] - 2018=10-12
+## [1.0.0 beta18] - 2018-10-12
 
 - Add Helper/ElementProperty to use in Element, Chunks & Snippets
 
-## [1.0.0 beta17] - 2018=10-11
+## [1.0.0 beta17] - 2018-10-11
 
 - Added Blendable/TemplateVariable->getInputPropertyHelper() which returns class Helpers/TemplateVariableInput
 
-## [1.0.0 beta16] - 2018=10-09
+## [1.0.0 beta16] - 2018-10-09
 
 - Fix Blendable/Template->attachTemplateVariable() + Blendable/TemplateVariable->attachToTemplate() to first check if already attached
 - Minor code clean up on Blendable/Template added detachTemplateVariable() to replace detachTV() + clean up Blendable/TemplateVariable
 
-## [1.0.0 beta15] - 2018=10-09
+## [1.0.0 beta15] - 2018-10-09
 
 - Fix Resource->setTVValue to properly function when a string is passed
 - Add test and asserts to better check Resource setTVValue method and setFieldParentFromAlias
 - Move Blend Install/Update to src/database/migrations to match Orchestrator guidelines
 
-## [1.0.0 beta14] - 2018=10-05
+## [1.0.0 beta14] - 2018-10-05
 
 - Fix #8 update to beta13 from previous versions, delay logging until after DB table has been updated to the correct version
 - Added Blender->getResourceIDFromLocalAlias() 
@@ -38,7 +47,7 @@
 - Added Blendable/Resource->setTVValueMediaSourceIDFromName()
 - Added Blendable/Resource->setTVValueTemplateIDFromName()
 
-## [1.0.0 beta13] - 2018=10-03
+## [1.0.0 beta13] - 2018-10-03
 
 - Command option -n has changed to -N for -name
 - Fix #7 add -v for verbose, can now use $this->blender->out('Message', \LCI\Blend\Blender::VERBOSITY_DEBUG); in your migrations.
@@ -80,36 +89,36 @@ Example: $blender->getBlendableChunk() should now be $blender->getBlendableLoade
  Blender->revertBlendManySystemSettings() | Blender->getBlendableLoader()->revertBlendManySystemSettings() 
  Blender->revertBlendManyTemplates() | Blender->getBlendableLoader()->revertBlendManyTemplates() 
 
-## [1.0.0 beta12] - 2018=09-29
+## [1.0.0 beta12] - 2018-09-29
 
 - Add BLEND_COPY_TEST_MIGRATION_FILES in tests/config.php, fix to run tests on scrutinizer 
 - Fix reverting TVs to previous state on a new seeded Template Object that gets reverted
 - Fix #5 seed raw values of TVs  
 
-## [1.0.0 beta11] - 2018=09-25
+## [1.0.0 beta11] - 2018-09-25
 
 - Fix Blender to use promptConfirm method 
 
-## [1.0.0 beta10] - 2018=09-25
+## [1.0.0 beta10] - 2018-09-25
 
 - Fix for migration paths to have proper directory separator 
 - Use MODX_CORE_PATH as base path for GenerateMigrations to allow Blend to still work as standalone out of the box
 - Fix Blend ascii logo path
 
-## [1.0.0 beta9] - 2018=09-25
+## [1.0.0 beta9] - 2018-09-25
 
 - Remove unneeded dependencies from composer.json
 
-## [1.0.0 beta8] - 2018=09-15
+## [1.0.0 beta8] - 2018-09-15
 
 - Fix seedToArray remove call to seedRelated on non existing xPDO Object
 
-## [1.0.0 beta7] - 2018=09-13
+## [1.0.0 beta7] - 2018-09-13
 
 - Refactor Blender, pulled out makeSeeds Methods into SeedMaker class
 - Remove MODX install related code
 
-## [1.0.0 beta6] - 2018=09-12
+## [1.0.0 beta6] - 2018-09-12
 
 - Replace config.php files with .env
 - Refactored Blender, pulled out MigrationsCreator and Format 
