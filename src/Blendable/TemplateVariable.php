@@ -9,7 +9,9 @@
 namespace LCI\Blend\Blendable;
 
 
+use LCI\Blend\Helpers\MIGXTemplateVariableInput;
 use LCI\Blend\Helpers\TemplateVariableInput;
+use LCI\Blend\Helpers\TVInput\OptionValues;
 
 class TemplateVariable extends Element
 {
@@ -99,6 +101,16 @@ class TemplateVariable extends Element
     }
 
     /**
+     * @param string $type
+     * @return MIGXTemplateVariableInput
+     */
+    public function getMIGXInputPropertyHelper(string $type='migx')
+    {
+        $this->setFieldType($type);
+        return new MIGXTemplateVariableInput($this->getFieldType());
+    }
+
+    /**
      * @return string
      */
     public function getFieldInputProperties()
@@ -162,13 +174,24 @@ class TemplateVariable extends Element
     }
 
     /**
-     * @param string $value
+     * @param string $value ~ this is Input Option Values, this is setting it raw
+     * @deprecated use setInputOptionValues()
      * @return $this
      */
     public function setFieldElements($value)
     {
         $this->blendable_xpdo_simple_object_data['elements'] = $value;
         return $this;
+    }
+
+    /**
+     * @return OptionValues
+     */
+    public function makeInputOptionValues()
+    {
+        $this->blendable_xpdo_simple_object_data['elements'] = new OptionValues();
+
+        return $this->blendable_xpdo_simple_object_data['elements'];
     }
 
     /**

@@ -13,7 +13,7 @@ namespace LCI\Blend\Helpers;
  * Simple helper to help set up a proper input for a TV
  * @package LCI\Blend\Helpers
  */
-class TemplateVariableInput
+class TemplateVariableInput implements TemplateVariableInputInterface
 {
     /** @var string  */
     protected $type = '';
@@ -26,6 +26,7 @@ class TemplateVariableInput
      * @param string $type ~ default options:
      *      autotag, checkbox, date, listbox, listbox-multiple, email, file,
      *      hidden, image, number, option [radio], resourcelist, richtext, tag, text, textarea, url
+     *      migx - but requires that MIGX is install to actually render in the manager
      * @see https://docs.modx.com/revolution/2.x/making-sites-with-modx/customizing-content/template-variables/template-variable-input-types
      * See manager/templates/default/element/tv/renders/input/ files for related code
      */
@@ -97,7 +98,10 @@ class TemplateVariableInput
 
     }
 
-    public function getInputProperties()
+    /**
+     * @return array
+     */
+    public function getInputProperties(): array
     {
         return $this->input_properties;
     }
