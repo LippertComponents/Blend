@@ -9,6 +9,8 @@
 namespace LCI\Blend\Blendable;
 
 
+use SebastianBergmann\CodeCoverage\Report\PHP;
+
 class Plugin extends Element
 {
     /** @var string  */
@@ -87,14 +89,22 @@ class Plugin extends Element
     protected function attachRelatedPiecesAfterSave()
     {
         // remove any:
-        $removePluginEvents = $this->xPDOSimpleObject->getMany('PluginEvents', ['events:IN' => $this->remove_on_event_names]);
-        foreach ($removePluginEvents as $event) {
-            //$event->remove();
+        if (count($this->remove_on_event_names) > 0) {
+            $removePluginEvents = $this->xPDOSimpleObject->getMany('PluginEvents', ['event:IN' => $this->remove_on_event_names]);
+            foreach ($removePluginEvents as $event) {
+                if (!$event->remove()) {
+                    $this->blender->out('Plugin did not detach the event: '.$event->get('event'));
+                }
+            }
+            $this->xPDOSimpleObject->save();
         }
 
         if (count($this->related_data) > 0) {
             $events = [];
             foreach ($this->related_data as $event_data) {
+                if (in_array($event_data['event'], $this->remove_on_event_names)) {
+                    continue;
+                }
 
                 $pluginEvent = $this->modx->newObject('modPluginEvent');
                 $pluginEvent->set('event', $event_data['event']);

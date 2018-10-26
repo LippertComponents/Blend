@@ -12,6 +12,7 @@ final class PluginTest extends BaseBlend
         $plugin_description = 'This is my first test  plugin, note this is limited to 255 or something and no HTML';
         $plugin_code = '<?php $eventName = $modx->event->name; ';
         $plugin_event = 'OnUserActivate';
+        $plugin_event2 = 'OnPageNotFound';
 
         /** @var \LCI\Blend\Blendable\Plugin $testPlugin1 */
         $testPlugin1 = $this->blender->getBlendableLoader()->getBlendablePlugin($plugin_name);
@@ -21,9 +22,8 @@ final class PluginTest extends BaseBlend
             ->setFieldCategory('Parent Plugin Cat=>Child Plugin Cat')
             ->setFieldCode($plugin_code, true)
             ->setAsStatic('core/components/mysite/elements/plugins/myPlugin.tpl')
-            ->attachOnEvent($plugin_event);
-
-        $related = $testPlugin1->getRelatedData();
+            ->attachOnEvent($plugin_event)
+            ->attachOnEvent($plugin_event2);
 
         $blended = $testPlugin1->blend(true);
         $this->assertEquals(
@@ -70,25 +70,72 @@ final class PluginTest extends BaseBlend
                     'Compare plugin code'
                 );
 
-                // @TODO Broke??
-                /* */
                 $related = $blendPlugin->getRelatedData();
 
                 $this->assertEquals(
-                    $plugin_event,
-                    $related[0]['event'],
+                    true,
+                    in_array($related[0]['event'], [$plugin_event, $plugin_event2]),
                     'Compare plugin event'
                 );
-                /* */
-
-                $this->assertEquals(
-                    true,
-                    $blendPlugin->revertBlend(),
-                    'Revert blend'
-                );
-
             }
         }
+    }
+
+    /**
+     * @depends testGetBlendablePlugin
+     */
+    public function testRemoveOnEvent()
+    {
+        $plugin_name = 'testPlugin1';
+        $plugin_event = 'OnPageNotFound';
+
+        /** @var \LCI\Blend\Blendable\Plugin $testPlugin1 */
+        $testPlugin1 = $this->blender->getBlendableLoader()->getBlendablePlugin($plugin_name);
+        $testPlugin1
+            ->setSeedsDir($plugin_name.'-remove')
+            ->removeOnEvent($plugin_event);
+
+        $this->assertEquals(
+            true,
+            $testPlugin1->blend(true),
+            $plugin_name.' removeOnEvent plugin blend attempted'
+        );
+
+        /** @var \LCI\Blend\Blendable\Plugin $blendPlugin */
+        $blendPlugin = $testPlugin1->getCurrentVersion();
+        $related = $blendPlugin->getRelatedData();
+
+        $this->assertEquals(
+            1,
+            count($related),
+            'There should only be one plugin event'
+        );
+
+        $this->assertEquals(
+            false,
+            in_array($related[0]['event'], [$plugin_event]),
+            'Compare plugin event name, should not be '.$plugin_event
+        );
+    }
+
+    /**
+     * @depends testRemoveOnEvent
+     *
+     * testGetBlendablePlugin
+     */
+    public function testRevertPlugin()
+    {
+        $plugin_name = 'testPlugin1';
+
+        /** @var \LCI\Blend\Blendable\Plugin $testPlugin1 */
+        $testPlugin1 = $this->blender->getBlendableLoader()->getBlendablePlugin($plugin_name);
+        $testPlugin1->setSeedsDir($plugin_name);
+
+        $this->assertEquals(
+            true,
+            $testPlugin1->revertBlend(),
+            'Revert blend'
+        );
     }
 
     public function testMakePluginSeeds()
