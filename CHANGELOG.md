@@ -1,3 +1,6 @@
+## [1.0.1] - 2018=10-26
+- Fix Plugin->removeOnEvent() and then related Plugin->attachRelatedPiecesAfterSave() when doing a blend migration and test added
+
 ## [1.0.0] - 2018=10-15
 
 - Clean up some TODOs left in the code base
