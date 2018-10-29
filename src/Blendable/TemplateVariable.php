@@ -215,6 +215,17 @@ class TemplateVariable extends Element
     }
 
     /**
+     * @param string $name ~ name of the media source
+     *
+     * @return $this
+     */
+    public function setMediaSource($name = 'Filesystem')
+    {
+        $this->blendable_xpdo_simple_object_data['source'] = $name;
+        return $this;
+    }
+
+    /**
      * @param int $value
      * @return $this
      */

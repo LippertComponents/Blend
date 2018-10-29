@@ -260,6 +260,10 @@ class Field
 
     /**
      * @param string $grid_renderer
+     *  this.renderImage, this.renderImageFromHtml, this.renderPlaceholder, this.renderFirst, this.renderLimited,
+     *  this.renderCrossTick, this.renderClickCrossTick, this.renderSwitchStatusOptions, this.renderPositionSelector,
+     *  this.renderRowActions, this.renderChunk, ImagePlus.MIGX_Renderer, this.renderDate, this.renderOptionSelector
+     * @see MIGX file: core/components/migx/configs/grid/grid.renderer.inc.php
      * @return Field
      */
     public function setGridRenderer(string $grid_renderer): self
@@ -269,7 +273,8 @@ class Field
     }
 
     /**
-     * @param string $grid_editor
+     * @param string $grid_editor  this.textEditor & this.listboxEditor
+     * @see MIGX file: core/components/migx/configs/grid/grid.editors.inc.php
      * @return Field
      */
     public function setGridEditor(string $grid_editor): self
