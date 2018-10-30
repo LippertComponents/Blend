@@ -1,3 +1,6 @@
+## [1.1.1] - 2018-10-29
+- Add missing Blendable/TemplateVariable->setMediaSource() and help for php docs in MIGX/Field
+
 ## [1.1.0] - 2018-10-26
 
 - Added helpers for MIGX and modTV->Elements better know as Input Option Values
