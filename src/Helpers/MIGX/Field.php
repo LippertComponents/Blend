@@ -140,6 +140,11 @@ class Field
     public function setCaption(string $caption): self
     {
         $this->caption = $caption;
+
+        if ($this->grid_header === '') {
+            $this->grid_header = $this->caption;
+        }
+
         return $this;
     }
 

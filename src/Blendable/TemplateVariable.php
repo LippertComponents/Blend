@@ -175,7 +175,7 @@ class TemplateVariable extends Element
 
     /**
      * @param string $value ~ this is Input Option Values, this is setting it raw
-     * @deprecated use setInputOptionValues()
+     * @deprecated use makeInputOptionValues()
      * @return $this
      */
     public function setFieldElements($value)
