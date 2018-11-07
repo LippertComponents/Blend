@@ -1,3 +1,8 @@
+## [1.1.2] - 2018-11-07
+
+- Fix phpdoc in TemplateVariable to recommend the correct method: makeInputOptionValues()
+- Fix MIGX\Field->setCaption() to set the grid_header if it has not been set.
+
 ## [1.1.1] - 2018-10-29
 - Add missing Blendable/TemplateVariable->setMediaSource() and help for php docs in MIGX/Field
 
