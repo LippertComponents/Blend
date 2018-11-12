@@ -1,3 +1,6 @@
+## [1.1.3] - 2018-11-12
+-  Fix Blendable/TemplateVariable->setMediaSource() plus allow to set by context
+
 ## [1.1.2] - 2018-11-07
 
 - Fix phpdoc in TemplateVariable to recommend the correct method: makeInputOptionValues()
