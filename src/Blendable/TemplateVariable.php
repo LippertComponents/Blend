@@ -326,7 +326,7 @@ class TemplateVariable extends Element
             if (!is_object($modMediaSourceElement)) {
                 $modMediaSourceElement = $this->modx->newObject('modMediaSourceElement');
 
-                $modMediaSourceElement->setFromArray([
+                $modMediaSourceElement->fromArray([
                         'object_class' => 'modTemplateVar',
                         'object' => $this->xPDOSimpleObject->get('id'),
                         'context_key' => $context
