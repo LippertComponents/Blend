@@ -1,3 +1,6 @@
+## [1.1.4] - 2018-11-13
+-  Fix Blendable/TemplateVariable->attachRelatedPiecesAfterSave() to use correct xPDO fromArray() method
+
 ## [1.1.3] - 2018-11-12
 -  Fix Blendable/TemplateVariable->setMediaSource() plus allow to set by context
 
