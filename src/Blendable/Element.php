@@ -276,7 +276,7 @@ abstract class Element extends Blendable
     }
 
     /**
-     * @param array $media_source
+     * @param string $media_source
      * @return int
      */
     protected function convertSource($media_source)

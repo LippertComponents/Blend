@@ -19,6 +19,9 @@ class TemplateVariable extends Element
 
     protected $detach_template_names = [];
 
+    /** @var array - [name => context, ...] */
+    protected $media_sources = [];
+
     /** @var string  */
     protected $opt_cache_key = 'elements/template-variables';
 
@@ -216,12 +219,17 @@ class TemplateVariable extends Element
 
     /**
      * @param string $name ~ name of the media source
-     *
+     * @param string $context - default is web
      * @return $this
      */
-    public function setMediaSource($name = 'Filesystem')
+    public function setMediaSource($name = 'Filesystem', $context='web')
     {
-        $this->blendable_xpdo_simple_object_data['source'] = $name;
+        $this->media_sources[$name] = $context;
+        if ($context == 'web') {
+            // This probably is not needed any longer
+            $this->blendable_xpdo_simple_object_data['source'] = $name;
+        }
+
         return $this;
     }
 
@@ -295,6 +303,41 @@ class TemplateVariable extends Element
                 } else {
                     $this->error = true;
                 }
+            }
+        }
+    }
+
+    /**
+     * This method is called just after a successful blend/save()
+     */
+    protected function attachRelatedPiecesAfterSave()
+    {
+        foreach ($this->media_sources as $name => $context) {
+            /** @var /modMediaSourceElement $modMediaSourceElement */
+            $modMediaSourceElement = $this->modx->getObject(
+                'modMediaSourceElement',
+                [
+                    'object_class' => 'modTemplateVar',
+                    'object' => $this->xPDOSimpleObject->get('id'),
+                    'context_key' => $context
+                ]
+            );
+
+            if (!is_object($modMediaSourceElement)) {
+                $modMediaSourceElement = $this->modx->newObject('modMediaSourceElement');
+
+                $modMediaSourceElement->setFromArray([
+                        'object_class' => 'modTemplateVar',
+                        'object' => $this->xPDOSimpleObject->get('id'),
+                        'context_key' => $context
+                    ]);
+            }
+
+            $modMediaSourceElement->set('source', $this->convertSource($name));
+
+            if (!$modMediaSourceElement->save()) {
+                $this->blender->out('Template variable ' .$this->xPDOSimpleObject->get('name').
+                    'did not attached the media source: '.$name);
             }
         }
     }
