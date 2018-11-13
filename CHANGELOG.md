@@ -1,3 +1,6 @@
+## [1.1.5] - 2018-11-13
+-  Fix Blendable/TemplateVariable->attachRelatedPiecesAfterSave() to use xPDO set rather than fromArray() method and use sources.modMediaSourceElement
+
 ## [1.1.4] - 2018-11-13
 -  Fix Blendable/TemplateVariable->attachRelatedPiecesAfterSave() to use correct xPDO fromArray() method
 

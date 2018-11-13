@@ -315,7 +315,7 @@ class TemplateVariable extends Element
         foreach ($this->media_sources as $name => $context) {
             /** @var /modMediaSourceElement $modMediaSourceElement */
             $modMediaSourceElement = $this->modx->getObject(
-                'modMediaSourceElement',
+                'sources.modMediaSourceElement',
                 [
                     'object_class' => 'modTemplateVar',
                     'object' => $this->xPDOSimpleObject->get('id'),
@@ -324,13 +324,11 @@ class TemplateVariable extends Element
             );
 
             if (!is_object($modMediaSourceElement)) {
-                $modMediaSourceElement = $this->modx->newObject('modMediaSourceElement');
+                $modMediaSourceElement = $this->modx->newObject('sources.modMediaSourceElement');
 
-                $modMediaSourceElement->fromArray([
-                        'object_class' => 'modTemplateVar',
-                        'object' => $this->xPDOSimpleObject->get('id'),
-                        'context_key' => $context
-                    ]);
+                $modMediaSourceElement->set('object_class', 'modTemplateVar');
+                $modMediaSourceElement->set('object', $this->xPDOSimpleObject->get('id'));
+                $modMediaSourceElement->set('context_key', $context);
             }
 
             $modMediaSourceElement->set('source', $this->convertSource($name));
