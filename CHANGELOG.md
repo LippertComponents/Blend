@@ -1,3 +1,7 @@
+## [1.1.6] - 2018-11-26
+-  Fix removed unneeded SQL query from Migrator->getBlendMigrationCollection() which caused Blend to add already tracked 
+migrations to the db a if a name option was passed as a parameter 
+
 ## [1.1.5] - 2018-11-13
 -  Fix Blendable/TemplateVariable->attachRelatedPiecesAfterSave() to use xPDO set rather than fromArray() method and use sources.modMediaSourceElement
 
