@@ -412,14 +412,6 @@ class Migrator
             $query = $this->modx->newQuery($this->blender->getBlendClassObject());
             $query->where(['project' => $this->project]);
 
-            if ($this->migration_id > 0) {
-                $query->where(['id' => $this->migration_id]);
-
-            } elseif (!empty($this->migration_name)) {
-                $query->where(['name' => $this->migration_name]);
-
-            }
-
             $query
                 ->sortby('ran_sequence', $dir)
                 ->sortBy('name', $dir);
