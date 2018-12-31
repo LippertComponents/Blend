@@ -1,3 +1,6 @@
+## [1.1.7] - 2018-12-31
+- Fix LCI\Blend\Blendable\TemplateVariable attachToTemplate and detachFromTemplate methods 
+
 ## [1.1.6] - 2018-11-26
 -  Fix removed unneeded SQL query from Migrator->getBlendMigrationCollection() which caused Blend to add already tracked 
 migrations to the db a if a name option was passed as a parameter 
