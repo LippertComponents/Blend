@@ -261,8 +261,8 @@ class TemplateVariable extends Element
         if (count($this->template_names) > 0) {
             $tvs = [];
             foreach ($this->template_names as $template_name_data) {
-                // get the TV:
-                $template = $this->modx->getObject('modTemplateVar', ['templatename' => $template_name_data['name']]);
+                // get the Template:
+                $template = $this->modx->getObject('modTemplate', ['templatename' => $template_name_data['name']]);
                 if ($template) {
                     $tvt = $this->modx->getObject('modTemplateVarTemplate', ['tmplvarid' => $this->xPDOSimpleObject->getPrimaryKey(), 'templateid' => $template->getPrimaryKey()]);
 
@@ -282,12 +282,11 @@ class TemplateVariable extends Element
             $this->xPDOSimpleObject->addMany($tvs, 'TemplateVarTemplates');
         }
 
-
         if (count($this->detach_template_names) > 0) {
             $tvs = [];
             foreach ($this->detach_template_names as $template_name) {
-                // get the TV:
-                $template = $this->modx->getObject('modTemplateVar', ['templatename' => $template_name]);
+                // get the Template:
+                $template = $this->modx->getObject('modTemplate', ['templatename' => $template_name]);
                 if ($template) {
                     $tvt = $this->modx->getObject(
                         'modTemplateVarTemplate',
