@@ -23,6 +23,9 @@ abstract class Element extends Blendable
     /** @var string  */
     protected $unique_key_column = 'name';
 
+    /** @var int  */
+    protected $unique_key_length_limit = 50;
+
     /** @var array ~ this should match data to be inserted via xPDO, ex [column_name => value, ...] */
     protected $blendable_xpdo_simple_object_data = [
         'category' => '',
@@ -153,10 +156,11 @@ abstract class Element extends Blendable
     /**
      * @param string $name
      * @return $this
+     * @throws \LCI\Blend\Exception\BlendableKeyLengthException
      */
     public function setFieldName($name)
     {
-        $this->blendable_xpdo_simple_object_data['name'] = $name;
+        $this->setUniqueCriteria($name);
         return $this;
     }
 

@@ -85,6 +85,7 @@ class Template extends Element
     /**
      * @param string $name
      * @return $this
+     * @throws \LCI\Blend\Exception\BlendableKeyLengthException
      */
     public function setFieldName($name)
     {
@@ -94,10 +95,11 @@ class Template extends Element
     /**
      * @param string $name
      * @return $this
+     * @throws \LCI\Blend\Exception\BlendableKeyLengthException
      */
     public function setFieldTemplateName($name)
     {
-        $this->blendable_xpdo_simple_object_data['templatename'] = $name;
+        $this->setUniqueCriteria($name);
         return $this;
     }
 

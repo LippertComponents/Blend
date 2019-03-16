@@ -10,6 +10,7 @@ namespace LCI\Blend\Blendable;
 
 use LCI\Blend\Blender;
 use LCI\Blend\Exception\BlendableException;
+use LCI\Blend\Exception\BlendableKeyLengthException;
 
 abstract class Blendable implements BlendableInterface
 {
@@ -55,6 +56,9 @@ abstract class Blendable implements BlendableInterface
     /** @var array set when a change of name/alias has been done */
     protected $unique_key_history = [];
 
+    /** @var int if there is a DB char length define it */
+    protected $unique_key_length_limit = 0;
+
     /** @var array ~ this should match data to be inserted via xPDO, ex [column_name => value, ...] */
     protected $blendable_xpdo_simple_object_data = [
         'name' => ''
@@ -84,6 +88,7 @@ abstract class Blendable implements BlendableInterface
      * @param \modx $modx
      * @param Blender $blender
      * @param string|array $unique_value
+     * @throws BlendableKeyLengthException
      */
     public function __construct(\modx $modx, Blender $blender, $unique_value = '')
     {
@@ -506,9 +511,17 @@ abstract class Blendable implements BlendableInterface
 
     /**
      * @param string|array $criteria
+     * @throws BlendableKeyLengthException
      */
     protected function setUniqueCriteria($criteria)
     {
+        if ($this->unique_key_length_limit > 0 && is_string($criteria) && strlen($criteria) > $this->unique_key_length_limit) {
+            throw new BlendableKeyLengthException(
+                'Error: '.$this->unique_key_column . ' is limited to '.
+                $this->unique_key_length_limit .' and '.$criteria.' is '. strlen($criteria) . ' characters'
+            );
+        }
+
         $this->blendable_xpdo_simple_object_data[$this->unique_key_column] = $criteria;
     }
 
