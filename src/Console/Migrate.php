@@ -33,7 +33,7 @@ class Migrate extends BaseCommand
                 'method',
                 'm',
                 InputOption::VALUE_OPTIONAL,
-                'Up or down(rollback), default is up',
+                'Up or down(rollback)',
                 'up'
             )
             ->addOption(
@@ -52,7 +52,7 @@ class Migrate extends BaseCommand
                 'type',
                 't',
                 InputOption::VALUE_OPTIONAL,
-                'Server type to run migrations as, default is master. Possible master, staging, dev and local',
+                'Server type to run migrations. Possible master, staging, dev and local',
                 'master'
             )
             ->addOption(
