@@ -191,8 +191,17 @@ class Migrator
 
         $loaded_migrations = [];
         $reload = false;
-        /** @var \DirectoryIterator $file */
-        foreach (new \DirectoryIterator($this->blender->getMigrationPath()) as $file) {
+
+        try {
+            /** @var \DirectoryIterator $file */
+            $directoryIterator = new \DirectoryIterator($this->blender->getMigrationPath());
+        } catch (\UnexpectedValueException $exception) {
+
+            $this->outError($exception->getMessage());
+            return $loaded_migrations;
+        }
+
+        foreach ($directoryIterator as $file) {
             if ($file->isFile() && $file->getExtension() == 'php') {
 
                 $name = $file->getBasename('.php');
