@@ -46,7 +46,7 @@ class Migrate extends BaseCommand
                 'count',
                 'c',
                 InputOption::VALUE_OPTIONAL,
-                'How many to rollback when using the [--method down] option, default is 1'
+                'How many to rollback when using the [--method down] option'
             )
             ->addOption(
                 'type',
