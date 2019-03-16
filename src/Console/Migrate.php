@@ -54,6 +54,13 @@ class Migrate extends BaseCommand
                 InputOption::VALUE_OPTIONAL,
                 'Server type to run migrations as, default is master. Possible master, staging, dev and local',
                 'master'
+            )
+            ->addOption(
+                'package',
+                'p',
+                InputOption::VALUE_OPTIONAL,
+                'Enter a valid package name, like lci/stockpile',
+                ''
             );
     }
 
@@ -71,6 +78,11 @@ class Migrate extends BaseCommand
         $count = $input->getOption('count');
 
         $method = $input->getOption('method');
+        $package = $input->getOption('package');
+        if (!empty($package)) {
+            $this->blender->setProject($package);
+        }
+
         $this->blender->runMigration($method, $type, $count, $id, $name);
     }
 }
