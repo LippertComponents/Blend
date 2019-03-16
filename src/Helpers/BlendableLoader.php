@@ -155,7 +155,7 @@ class BlendableLoader
         // will update if element does exist or create new
         foreach ($media_sources as $seed_key) {
             /** @var \LCI\Blend\Blendable\MediaSource $blendMediaSource */
-            $blendMediaSource = new MediaSource($this->modx, $this->blender);
+            $blendMediaSource = new MediaSource($this->modx, $this->blender, $this->blender->getNameFromSeedKey($seed_key));
 
             $this->blendOneFromMany($blendMediaSource, $seed_key, 'MediaSource', $seeds_dir);
         }
