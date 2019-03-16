@@ -19,7 +19,7 @@
   "require": {
     "php" : ">=7.0.0",
     "symfony/console": ">=3.4",
-    "lci/console": ">=1.0.7"
+    "lci/console": ">=1.1.3"
   },
   "bin": [
     "bin/blend"
