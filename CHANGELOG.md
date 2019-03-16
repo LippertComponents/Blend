@@ -1,3 +1,13 @@
+## [1.2.0] - 2019-03-16
+
+- Added package option to blend:migrate
+
+- Fix #11 remove copy about default for c/count option, must set a value
+- Fix unhandled exception by retrieveMigrationFiles/new DirectoryIterator to now continue but output the message
+This prevented some packages via Orchestrator to complete composer update
+- Fix #14 will now throw an exception and stop migration for all Element names that are greater than 50 char
+- Fix blendManyMediaSources to have the seed key to load existing mediasource if any
+
 ## [1.1.7] - 2018-12-31
 - Fix LCI\Blend\Blendable\TemplateVariable attachToTemplate and detachFromTemplate methods 
 
