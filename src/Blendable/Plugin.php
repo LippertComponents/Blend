@@ -9,8 +9,6 @@
 namespace LCI\Blend\Blendable;
 
 
-use SebastianBergmann\CodeCoverage\Report\PHP;
-
 class Plugin extends Element
 {
     /** @var string  */
@@ -91,6 +89,7 @@ class Plugin extends Element
         // remove any:
         if (count($this->remove_on_event_names) > 0) {
             $removePluginEvents = $this->xPDOSimpleObject->getMany('PluginEvents', ['event:IN' => $this->remove_on_event_names]);
+            /** @var \modPluginEvent $event */
             foreach ($removePluginEvents as $event) {
                 if (!$event->remove()) {
                     $this->blender->out('Plugin did not detach the event: '.$event->get('event'));
@@ -100,15 +99,23 @@ class Plugin extends Element
         }
 
         if (count($this->related_data) > 0) {
-            $events = [];
             foreach ($this->related_data as $event_data) {
                 if (in_array($event_data['event'], $this->remove_on_event_names)) {
                     continue;
                 }
 
-                $pluginEvent = $this->modx->newObject('modPluginEvent');
-                $pluginEvent->set('event', $event_data['event']);
-                $pluginEvent->set('pluginid', $this->xPDOSimpleObject->get('id'));
+                // Does it already exist?
+                $pluginEvent = $this->modx->getObject('modPluginEvent', [
+                    'event' => $event_data['event'],
+                    'pluginid' => $this->xPDOSimpleObject->get('id')
+                ]);
+
+                if (!$pluginEvent) {
+                    $pluginEvent = $this->modx->newObject('modPluginEvent');
+                    $pluginEvent->set('event', $event_data['event']);
+                    $pluginEvent->set('pluginid', $this->xPDOSimpleObject->get('id'));
+                }
+
                 $priority = (!empty($event_data['priority']) ? $event_data['priority'] : 0);
                 $pluginEvent->set('priority', (int)$priority);
                 $pluginEvent->set('propertyset', (int)(!empty($event_data['propertyset']) ? $event_data['propertyset'] : 0));
@@ -117,7 +124,6 @@ class Plugin extends Element
                     $this->blender->out('Plugin did not attached the event: '.$event_data['event']);
                 }
             }
-            $this->xPDOSimpleObject->addMany($events, 'PluginEvents');
         }
     }
 
