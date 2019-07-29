@@ -130,38 +130,6 @@ class MODXPackages
     }
 
     /**
-     * @param string $signature
-     * @param int $preexisting_mode, see xPDOTransport
-     *  xPDOTransport::PRESERVE_PREEXISTING = 0;
-    xPDOTransport::REMOVE_PREEXISTING = 1;
-    xPDOTransport::RESTORE_PREEXISTING = 2;
-     * @return bool
-     * @throws TransportException
-     */
-    public function unInstallPackage($signature, $preexisting_mode=xPDOTransport::REMOVE_PREEXISTING)
-    {
-        $package = $this->modx->getObject('transport.modTransportPackage', [
-            'signature' => $signature,
-        ]);
-
-        if ($package instanceof \modTransportPackage) {
-            /* uninstall package */
-            $options = array(
-                xPDOTransport::PREEXISTING_MODE => $preexisting_mode,
-            );
-
-            if (!$success = $package->uninstall($options)) {
-                throw new TransportException('Error Package did not uninstall.');
-            }
-
-        } else {
-            throw new TransportException('Package does not seem to be installed; can only remove packages that are installed.');
-        }
-
-        return $success;
-    }
-
-    /**
      * @param string $signature - ex: ace-1.8.0-pl
      * @param bool $latest_version
      * @param string $provider_name
@@ -212,13 +180,16 @@ class MODXPackages
             $signature = $opt['signature'];
             $transfer_options['location'] = $opt['location'];
 
-        } elseif ($type == 'update') {
+        } elseif ($type == 'update' && $package instanceof modTransportPackage && !empty($package->get('installed'))) {
             MODXPackagesConfig::addPackageConfig($signature, $latest_version, $provider_name);
             $this->userInteractionHandler->tellUser('Extra '.$signature.' is already installed, skipping!', userInteractionHandler::MASSAGE_ERROR);
             return true;
         }
 
-        $package = $this->downloadPackageFiles($signature, $provider, $latest_version);
+        if (!$package instanceof modTransportPackage || ($package instanceof modTransportPackage && $package->get('signature') != $signature)) {
+            $package = $this->downloadPackageFiles($signature, $provider, $latest_version);
+        }
+
         if (!$package instanceof \modTransportPackage) {
             $this->userInteractionHandler->tellUser('Extra '.$signature.' not found', userInteractionHandler::MASSAGE_ERROR);
             return false;
@@ -226,6 +197,83 @@ class MODXPackages
 
         if ($success = $this->runPackageInstallUpdate($package)) {
             MODXPackagesConfig::addPackageConfig($signature, $latest_version, $provider_name);
+        }
+
+        return $success;
+    }
+
+    /**
+     * @param string $signature - ex: ace-1.8.0-pl
+     * @param bool $force
+     * @return bool
+     * @throws TransportException
+     */
+    public function removePackage($signature, $force=true)
+    {
+        /** @var modTransportPackage $package */
+        $package = $this->modx->getObject('transport.modTransportPackage', [
+            'signature' => $signature,
+        ]);
+
+        if ($package instanceof \modTransportPackage) {
+            $package->getTransport();
+
+            if (!$success = $package->removePackage($force)) {
+                throw new TransportException('Error Package did not uninstall.');
+            }
+
+            $this->userInteractionHandler->tellUser('Extra '.$signature.' has been removed', userInteractionHandler::MASSAGE_SUCCESS);
+
+            $this->modx->cacheManager->refresh([
+                $this->modx->getOption('cache_packages_key', null, 'packages') => []
+            ]);
+            $this->modx->cacheManager->refresh();
+
+        } else {
+            throw new TransportException('Package with the signature: '.$signature.' does not seem to be installed. '.
+                'Run the extra command to see list of installed extras with proper signatures. You can only remove packages that are installed.');
+        }
+
+        return $success;
+    }
+
+    /**
+     * @param string $signature - ex: ace-1.8.0-pl
+     * @param int $preexisting_mode, see xPDOTransport
+     *  xPDOTransport::PRESERVE_PREEXISTING = 0;
+    xPDOTransport::REMOVE_PREEXISTING = 1;
+    xPDOTransport::RESTORE_PREEXISTING = 2;
+     * @return bool
+     * @throws TransportException
+     */
+    public function unInstallPackage($signature, $preexisting_mode=null)
+    {
+        /** @var modTransportPackage $package */
+        $package = $this->modx->getObject('transport.modTransportPackage', [
+            'signature' => $signature,
+        ]);
+
+        if ($package instanceof \modTransportPackage) {
+            $package->getTransport();
+            /* uninstall package */
+            $options = array(
+                xPDOTransport::PREEXISTING_MODE => is_null($preexisting_mode) ? xPDOTransport::REMOVE_PREEXISTING : $preexisting_mode,
+            );
+
+            if (!$success = $package->uninstall($options)) {
+                throw new TransportException('Error Package did not uninstall.');
+            }
+
+            $this->userInteractionHandler->tellUser('Extra '.$signature.' has been uninstalled', userInteractionHandler::MASSAGE_SUCCESS);
+
+            $this->modx->cacheManager->refresh([
+                $this->modx->getOption('cache_packages_key', null, 'packages') => []
+            ]);
+            $this->modx->cacheManager->refresh();
+
+        } else {
+            throw new TransportException('Package with the signature: '.$signature.' does not seem to be installed. '.
+                'Run the extra command to see list of installed extras with proper signatures. You can only remove packages that are installed.');
         }
 
         return $success;
@@ -280,14 +328,16 @@ class MODXPackages
     protected function runPackageInstallUpdate(modTransportPackage $package)
     {
         $installed = $package->install([]);
-        $this->modx->cacheManager->refresh(array($this->modx->getOption('cache_packages_key', null, 'packages') => []));
+        $this->modx->cacheManager->refresh([
+            $this->modx->getOption('cache_packages_key', null, 'packages') => []
+        ]);
         $this->modx->cacheManager->refresh();
 
         if (!$installed) {
             throw new TransportException('Failed to install package ' . $package->signature);
         }
 
-        $this->userInteractionHandler->tellUser('Extra '.$package->get('signature').' has been installed!', userInteractionHandler::MASSAGE_ERROR);
+        $this->userInteractionHandler->tellUser('Extra '.$package->get('signature').' has been installed!', userInteractionHandler::MASSAGE_SUCCESS);
 
         $this->modx->invokeEvent('OnPackageInstall', array(
             'package' => $package,
