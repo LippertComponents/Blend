@@ -21,7 +21,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 class Blender
 {
     /** @var string ~ version number of the project */
-    const VERSION = '1.3.0';
+    const VERSION = '1.3.1';
 
     /** @var  \modx */
     protected $modx;

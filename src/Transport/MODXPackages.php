@@ -222,6 +222,8 @@ class MODXPackages
                 throw new TransportException('Error Package did not uninstall.');
             }
 
+            MODXPackagesConfig::removePackageConfig($signature);
+
             $this->userInteractionHandler->tellUser('Extra '.$signature.' has been removed', userInteractionHandler::MASSAGE_SUCCESS);
 
             $this->modx->cacheManager->refresh([
@@ -263,6 +265,8 @@ class MODXPackages
             if (!$success = $package->uninstall($options)) {
                 throw new TransportException('Error Package did not uninstall.');
             }
+
+            MODXPackagesConfig::removePackageConfig($signature);
 
             $this->userInteractionHandler->tellUser('Extra '.$signature.' has been uninstalled', userInteractionHandler::MASSAGE_SUCCESS);
 
