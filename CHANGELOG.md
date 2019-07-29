@@ -1,39 +1,72 @@
-## [1.2.0] - 2019-03-16
+# Changelog
+All notable changes to this project will be documented in this file.
 
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [1.3.0](https://github.com/LippertComponents/Blend/compare/v1.2.0...v1.3.0) - 2019-07-29
+### Added
+
+New feature, now you can require MODX Extras (Transport Packages) in a migration 
+ - Added MODXPackages class that has a getList, requirePackage, removePackage and unInstallPackage methods.  
+ - Example usage:  
+```php 
+$modxPackages = new LCI\Blend\Transport\MODXPackages($this->modx, $this->blender->getUserInteractionHandler());
+$modxPackages->requirePackage('ace-1.8.0-pl');
+
+// Just uninstall from MODX, best option for git workflows from dev to staging if you have all files in git.
+$modxPackages->unInstallPackage('ace-1.8.0-pl);
+
+// remove package, uninstall and delete files:
+$modxPackages->removePackage('ace-1.8.0-pl');
+```
+
+### Changed
+- Fix #16 check if the plugin event is already attached before creating attempting to attach
+ 
+## [1.2.0](https://github.com/LippertComponents/Blend/compare/v1.1.7...v1.2.0) - 2019-03-16
+### Added
 - Added package option to blend:migrate
 
+### Changed
 - Fix #11 remove copy about default for c/count option, must set a value
 - Fix unhandled exception by retrieveMigrationFiles/new DirectoryIterator to now continue but output the message
 This prevented some packages via Orchestrator to complete composer update
 - Fix #14 will now throw an exception and stop migration for all Element names that are greater than 50 char
 - Fix blendManyMediaSources to have the seed key to load existing mediasource if any
 
-## [1.1.7] - 2018-12-31
+## [1.1.7](https://github.com/LippertComponents/Blend/compare/v1.1.6...v1.1.7) - 2018-12-31
+### Changed
 - Fix LCI\Blend\Blendable\TemplateVariable attachToTemplate and detachFromTemplate methods 
 
-## [1.1.6] - 2018-11-26
+## [1.1.6](https://github.com/LippertComponents/Blend/compare/v1.1.5...v1.1.6) - 2018-11-26
+### Changed
 -  Fix removed unneeded SQL query from Migrator->getBlendMigrationCollection() which caused Blend to add already tracked 
 migrations to the db a if a name option was passed as a parameter 
 
-## [1.1.5] - 2018-11-13
+## [1.1.5](https://github.com/LippertComponents/Blend/compare/v1.1.4...v1.1.5) - 2018-11-13
+### Changed
 -  Fix Blendable/TemplateVariable->attachRelatedPiecesAfterSave() to use xPDO set rather than fromArray() method and use sources.modMediaSourceElement
 
-## [1.1.4] - 2018-11-13
+## [1.1.4](https://github.com/LippertComponents/Blend/compare/v1.1.3...v1.1.4) - 2018-11-13
+### Changed
 -  Fix Blendable/TemplateVariable->attachRelatedPiecesAfterSave() to use correct xPDO fromArray() method
 
-## [1.1.3] - 2018-11-12
+## [1.1.3](https://github.com/LippertComponents/Blend/compare/v1.1.2...v1.1.3) - 2018-11-12
+### Changed
 -  Fix Blendable/TemplateVariable->setMediaSource() plus allow to set by context
 
-## [1.1.2] - 2018-11-07
-
+## [1.1.2](https://github.com/LippertComponents/Blend/compare/v1.1.1...v1.1.2) - 2018-11-07
+### Changed
 - Fix phpdoc in TemplateVariable to recommend the correct method: makeInputOptionValues()
 - Fix MIGX\Field->setCaption() to set the grid_header if it has not been set.
 
-## [1.1.1] - 2018-10-29
+## [1.1.1](https://github.com/LippertComponents/Blend/compare/v1.1.0...v1.1.1) - 2018-10-29
+### Changed
 - Add missing Blendable/TemplateVariable->setMediaSource() and help for php docs in MIGX/Field
 
-## [1.1.0] - 2018-10-26
-
+## [1.1.0](https://github.com/LippertComponents/Blend/compare/v1.0.1...v1.1.0) - 2018-10-26
+### Added
 - Added helpers for MIGX and modTV->Elements better know as Input Option Values
 - Added Blendable/TemplateVariable->getMIGXInputPropertyHelper()
 returns LCI\Blend\Helpers\MIGX\Tab\MIGXTemplateVariableInput for easy setting up MIGX with IDE helpers to insure properly work

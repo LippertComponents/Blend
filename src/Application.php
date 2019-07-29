@@ -19,5 +19,5 @@ class Application extends ConsoleApplication
 
     protected static $name = 'Blend Console';
 
-    protected static $version = '1.2.0';
+    protected static $version = Blender::VERSION;
 }
