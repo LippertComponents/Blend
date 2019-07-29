@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.3.1](https://github.com/LippertComponents/Blend/compare/v1.3.0...v1.3.1) - 2019-07-29
 ### Changed
-- Add missing update the related config file on remove/unistall
+- Add missing method call to update the related config file on remove/uninstall
 
 ## [1.3.0](https://github.com/LippertComponents/Blend/compare/v1.2.0...v1.3.0) - 2019-07-29
 ### Added
