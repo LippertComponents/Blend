@@ -51,6 +51,22 @@ class MODXPackages
     // https://github.com/modmore/SiteDashClient/blob/master/core/components/sitedashclient/src/Package/Update.php
 
     /**
+     * Get basic version information about the package
+     *
+     * @param string $signature
+     * @return array
+     */
+    public static function getVersionInfo($signature)
+    {
+        $parts = explode('-', $signature);
+        return [
+            'base' => $parts[0],
+            'version' => $parts[1],
+            'release' => (isset($parts[2]) ? $parts[2] : '')
+        ];
+    }
+
+    /**
      * @param int $limit
      * @param int $start
      * @param string $search
@@ -89,7 +105,7 @@ class MODXPackages
 
                 $package_array['name'] = $package_array['package_name'];
 
-                $version_info = $this->getVersionInfo($package_array['signature']);
+                $version_info = self::getVersionInfo($package_array['signature']);
                 $package_array['version'] = $version_info['version'];
                 $package_array['release'] = $version_info['release'];
 
@@ -155,27 +171,25 @@ class MODXPackages
      */
     public function requirePackage($signature, $latest_version=true, $provider_name='modx.com')
     {
-        $package = $this->modx->getObject('transport.modTransportPackage', [
-            'signature' => $signature,
-        ]);
+        // partial signature like fred sent, so is this package installed?
+        $package_info = static::getVersionInfo($signature);
+
+        // get the latest installed, might sort for the release column
+        $query = $this->modx->newQuery('transport.modTransportPackage');
+        $query->where(['signature:LIKE' => $package_info['base'].'-%']);
+        $query->sortby('version_major', 'DESC');
+        $query->sortby('version_minor', 'DESC');
+        $query->sortby('version_patch', 'DESC');
+        $query->sortby('release_index', 'ASC');
+        $query->limit(1);
+
+        /** @var modTransportPackage $package */
+        $package = $this->modx->getObject('transport.modTransportPackage', $query);
 
         $type = 'install';
 
         if ($package instanceof \modTransportPackage) {
-            // get the latest installed
-            $query = $this->modx->newQuery('transport.modTransportPackage');
-            $query->where(['package_name' => $package->get('package_name')]);
-            $query->sortby('version_major', 'DESC');
-            $query->sortby('version_minor', 'DESC');
-            $query->sortby('version_patch', 'DESC');
-            $query->sortby('release_index', 'ASC');
-            $query->limit(1);
-
-            /** @var modTransportPackage $package */
-            $package = $this->modx->getObject('transport.modTransportPackage', $query);
-
             $signature = $package->get('signature');
-            //return true;
             $provider = $this->getPackageProvider($package);
             $type = 'update';
 
@@ -199,13 +213,22 @@ class MODXPackages
             $transfer_options['location'] = $opt['location'];
 
         } elseif ($type == 'update') {
+            MODXPackagesConfig::addPackageConfig($signature, $latest_version, $provider_name);
             $this->userInteractionHandler->tellUser('Extra '.$signature.' is already installed, skipping!', userInteractionHandler::MASSAGE_ERROR);
             return true;
         }
 
         $package = $this->downloadPackageFiles($signature, $provider, $latest_version);
+        if (!$package instanceof \modTransportPackage) {
+            $this->userInteractionHandler->tellUser('Extra '.$signature.' not found', userInteractionHandler::MASSAGE_ERROR);
+            return false;
+        }
 
-        return $this->runPackageInstallUpdate($package);
+        if ($success = $this->runPackageInstallUpdate($package)) {
+            MODXPackagesConfig::addPackageConfig($signature, $latest_version, $provider_name);
+        }
+
+        return $success;
     }
 
     // @TODO local packages
@@ -238,7 +261,7 @@ class MODXPackages
         /** @var modTransportPackage|bool $package */
         $package = $provider->transfer($signature, null, $transfer_options);
         if (!$package) {
-            $parts = $this->getVersionInfo($signature);
+            $parts = self::getVersionInfo($signature);
 
             $this->possible_package_signatures = $provider->find(['query' => $parts['base']]);
 
@@ -272,22 +295,6 @@ class MODXPackages
         ));
 
         return $installed;
-    }
-
-    /**
-     * Get basic version information about the package
-     *
-     * @param string $signature
-     * @return array
-     */
-    protected function getVersionInfo($signature)
-    {
-        $parts = explode('-', $signature);
-        return [
-            'base' => $parts[0],
-            'version' => $parts[1],
-            'release' => (isset($parts[2]) ? $parts[2] : '')
-        ];
     }
 
     /**
@@ -369,7 +376,7 @@ class MODXPackages
                 'release' => '',
                 'version' => ''
             ],
-                $this->getVersionInfo((string)$package_version['signature'])
+                self::getVersionInfo((string)$package_version['signature'])
             );
 
             $options[$version_info['signature']] = $version_info;
@@ -380,16 +387,17 @@ class MODXPackages
 
     /**
      * @param modTransportPackage $package
-     * @return modTransportProvider|false
+     * @return modTransportProvider|bool
      */
     protected function getPackageProvider(modTransportPackage $package)
     {
         /* cache providers to speed up load time */
-        /** @var modTransportProvider $provider */
+        /** @var modTransportProvider|bool $provider */
         if (!empty($this->providerCache[$package->get('provider')])) {
             return $this->providerCache[$package->get('provider')];
         }
 
+        /** @var modTransportProvider|bool $provider */
         if ($provider = $package->getOne('Provider')) {
             $this->providerCache[$provider->get('id')] = $provider;
         }
